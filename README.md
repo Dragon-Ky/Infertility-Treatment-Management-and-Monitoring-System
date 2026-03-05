@@ -239,6 +239,7 @@ Daily Meeting
 Sprint Review
 
 10. 📁 Cấu trúc Repository (Gợi ý)
+```   
 infertility-system/
 │
 ├── auth-service/
@@ -252,9 +253,9 @@ infertility-system/
 ├── api-gateway/
 ├── docker-compose.yml
 └── README.md
-
+```
 11. 📌 Yêu cầu bắt buộc
-
+```
 ✅ Kiến trúc Microservices
 ✅ Docker hóa toàn bộ hệ thống
 ✅ Sử dụng Redis cache
@@ -262,7 +263,7 @@ infertility-system/
 ✅ Đồng bộ dữ liệu bằng Apache NiFi
 ✅ Quản lý dự án bằng Jira
 ✅ Mỗi thành viên đảm nhiệm 01 microservice
-
+```
 12. 📈 Hướng phát triển tương lai
 
 Tích hợp AI tư vấn điều trị
