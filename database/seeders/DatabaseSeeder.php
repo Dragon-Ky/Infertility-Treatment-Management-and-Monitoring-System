@@ -10,16 +10,22 @@ class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /**
-     * Seed the application's database.
-     */
-    public function run(): void
-    {
-        // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
-    }
+  public function run(): void
+{
+
+    \Spatie\Permission\Models\Role::create(['name' => 'Admin']);
+    \Spatie\Permission\Models\Role::create(['name' => 'Doctor']);
+    \Spatie\Permission\Models\Role::create(['name' => 'Customer']);
+    \Spatie\Permission\Models\Role::create(['name' => 'Guest']);
+
+
+    $admin = \App\Models\User::create([
+        'name' => 'Quản Trị Viên',
+        'email' => 'admin@gmail.com',
+        'password' => bcrypt('12345678'),
+    ]);
+
+    $admin->assignRole('Admin');
+}
 }
