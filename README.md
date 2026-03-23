@@ -228,13 +228,11 @@ Azure
 
 9. 📊 Quản lý dự án
 
-Agile / Scrum
-
 Quản lý công việc bằng Jira
 
-Sprint Planning
-
 Daily Meeting
+
+Thống nhất dữ liệu Confluence 
 
 Sprint Review
 
