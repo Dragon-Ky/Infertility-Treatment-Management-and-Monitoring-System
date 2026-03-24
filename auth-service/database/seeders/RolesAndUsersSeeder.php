@@ -14,6 +14,7 @@ class RolesAndUsersSeeder extends Seeder
         // 1. Tạo Role (nếu chưa có)
         $adminRole = Role::updateOrCreate(['name' => 'Admin']);
         $doctorRole = Role::updateOrCreate(['name' => 'Doctor']);
+        $patientRole = Role::updateOrCreate(['name' => 'Patient']);
 
         // 2. Tạo tài khoản Admin
         $admin = User::updateOrCreate(
@@ -28,5 +29,12 @@ class RolesAndUsersSeeder extends Seeder
             ['name' => 'Bác sĩ chuyên khoa', 'password' => Hash::make('password')]
         );
         $doctor->assignRole($doctorRole);
+
+        // 4. Tạo tài khoản Khách/Bệnh nhân
+        $patient = User::updateOrCreate(
+            ['email' => 'patient@gmail.com'],
+            ['name' => 'Nguyễn Văn Khách', 'password' => Hash::make('password')]
+        );
+        $patient->assignRole($patientRole);
     }
 }
