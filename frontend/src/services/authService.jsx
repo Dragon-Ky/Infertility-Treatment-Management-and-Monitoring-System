@@ -12,3 +12,10 @@ export const getProfile = async () => {
   const response = await api.get("me"); // Endpoint lấy thông tin cá nhân
   return response.data;
 };
+
+// Register
+export const registerApi = async (userData) => {
+  // userData là object chứa: name, email, phone, password
+  const response = await api.post("register", userData);
+  return response.data;
+};

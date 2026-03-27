@@ -2,6 +2,7 @@ import PrivateRoutes from "../components/PrivateRoutes";
 import LayoutDefault from "../layout/LayoutDefault";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
+import Register from "../pages/Register";
 import AdminDashboard from "../pages/Admin/Dashboard";
 // import DoctorDashboard from "../pages/Doctor/Dashboard";
 
@@ -25,6 +26,11 @@ export const routes = [
   {
     path: "/login",
     element: <Login />,
+  },
+
+  {
+    path: "/register",
+    element: <Register />,
   },
 
   // Protect Admin
