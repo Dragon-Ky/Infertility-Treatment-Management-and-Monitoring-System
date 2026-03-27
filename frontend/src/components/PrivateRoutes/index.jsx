@@ -10,11 +10,12 @@ function PrivateRoutes({ allowRoles }) {
   if (!token || !user) return <Navigate to="/login" replace />;
 
   // Get Role of User
-  const userRole = user.roles?.[0]?.name;
+  const hasPermission = user.roles?.some((role) =>
+    allowRoles.includes(role.name),
+  );
 
   // Check access (quyền truy cập) of role
-  if (allowRoles && allowRoles.includes(userRole))
-    return <Navigate to="/403" replace />;
+  if (allowRoles && !hasPermission) return <Navigate to="/403" replace />;
 
   //After everything
   return <Outlet />;

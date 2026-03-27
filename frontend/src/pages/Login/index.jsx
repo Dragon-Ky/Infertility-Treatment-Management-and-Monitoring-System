@@ -41,14 +41,12 @@ function Login() {
         navigate("/");
       }
     } catch (err) {
-      // console.error("Login Error:", err);
-
       if (err.response?.status === 401) {
-        setError("Email hoặc mật khẩu không chính xác. Vui lòng kiểm tra lại!");
+        setError("Email hoặc mật khẩu không chính xác!");
       } else if (err.response?.status === 422) {
         setError("Dữ liệu nhập vào không hợp lệ!");
       } else {
-        setError("Hệ thống đang bảo trì hoặc lỗi kết nối. Thử lại sau!");
+        setError("Hệ thống đang bảo trì. Thử lại sau!");
       }
     } finally {
       setLoading(false);
@@ -63,11 +61,9 @@ function Login() {
 
         <div className="relative z-10 flex flex-col items-center px-12 text-center">
           <img src={medicen} alt="Medicen" className="mb-12 w-48 opacity-90" />
-
           <div className="mb-8 flex h-24 w-24 items-center justify-center rounded-[32px] bg-white shadow-2xl shadow-blue-200/50 transition-transform duration-500 hover:scale-105">
             <TbActivityHeartbeat className="h-14 w-14 animate-pulse text-(--primaryCustom)" />
           </div>
-
           <h2 className="text-5xl leading-tight font-black tracking-tighter text-slate-800">
             Đồng hành cùng <br />
             <span className="text-(--primaryCustom)">ước mơ</span> làm mẹ
@@ -77,7 +73,6 @@ function Login() {
             thần nhỏ."
           </p>
         </div>
-
         <div className="absolute bottom-8 text-xs font-bold tracking-widest text-slate-400 uppercase">
           © 2026 Medicen Clinic • International Standard
         </div>
@@ -94,7 +89,7 @@ function Login() {
             </p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-7">
+          <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-3">
               <Label
                 htmlFor="email"
@@ -116,7 +111,6 @@ function Login() {
                 />
               </div>
             </div>
-
             <div className="space-y-3">
               <Label
                 htmlFor="password"
@@ -149,8 +143,7 @@ function Login() {
                 </button>
               </div>
             </div>
-
-            <div className="flex items-center justify-between px-1">
+            <div className="flex items-center justify-between px-1 pt-2">
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="remember"
@@ -171,12 +164,13 @@ function Login() {
               </Link>
             </div>
 
-            {error && (
-              <div className="animate-in fade-in slide-in-from-top-1 rounded-xl border border-red-100 bg-red-50 p-4 text-sm font-bold text-red-600">
-                {error}
-              </div>
-            )}
-
+            <div className="flex min-h-15 items-center transition-all duration-300">
+              {error && (
+                <div className="animate-in fade-in zoom-in w-full rounded-xl border border-red-100 bg-red-50 p-3 text-sm font-bold text-red-600 duration-300">
+                  {error}
+                </div>
+              )}
+            </div>
             <Button
               type="submit"
               disabled={loading}
@@ -193,7 +187,7 @@ function Login() {
             </Button>
           </form>
 
-          <div className="mt-16 border-t border-slate-50 pt-10 text-center">
+          <div className="mt-12 border-t border-slate-50 pt-10 text-center">
             <p className="font-medium text-slate-500 italic">
               Bạn chưa có hồ sơ bệnh nhân?
               <Link

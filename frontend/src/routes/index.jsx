@@ -7,6 +7,7 @@ import AdminDashboard from "../pages/Admin/Dashboard";
 // import DoctorDashboard from "../pages/Doctor/Dashboard";
 
 export const routes = [
+  //Public routes
   {
     path: "/",
     element: <LayoutDefault />,
