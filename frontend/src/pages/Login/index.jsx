@@ -38,7 +38,15 @@ function Login() {
       if (data && data.access_token) {
         localStorage.setItem("access_token", data.access_token);
         localStorage.setItem("user", JSON.stringify(data.user));
-        navigate("/");
+        const userRole = data.user.roles?.[0]?.name;
+
+        if (userRole === "Admin") {
+          navigate("/admin/dashboard");
+        } else if (userRole === "Doctor") {
+          navigate("/doctor/dashboard");
+        } else {
+          navigate("/");
+        }
       }
     } catch (err) {
       if (err.response?.status === 401) {

@@ -4,7 +4,7 @@ import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import AdminDashboard from "../pages/Admin/Dashboard";
-// import DoctorDashboard from "../pages/Doctor/Dashboard";
+import DoctorDashboard from "../pages/Doctor/Dashboard";
 
 export const routes = [
   //Public routes
@@ -47,14 +47,14 @@ export const routes = [
   },
 
   // Protect Doctor
-  // {
-  //   element: <PrivateRoutes allowRoles={["Doctor"]} />,
-  //   children: [
-  //     {
-  //       path: "/doctor",
-  //       element: <LayoutDefault />,
-  //       children: [{ path: "dashboard", element: <DoctorDashboard /> }],
-  //     },
-  //   ],
-  // },
+  {
+    element: <PrivateRoutes allowRoles={["Doctor"]} />,
+    children: [
+      {
+        path: "/doctor",
+        element: <LayoutDefault />,
+        children: [{ path: "dashboard", element: <DoctorDashboard /> }],
+      },
+    ],
+  },
 ];
