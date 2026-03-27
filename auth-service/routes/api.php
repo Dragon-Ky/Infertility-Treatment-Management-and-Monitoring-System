@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Route;
 
 // --- NHÓM CÔNG KHAI (Public) ---
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
 
 // --- NHÓM BẢO MẬT (Protected by JWT) ---
 Route::middleware('auth:api')->group(function () {
