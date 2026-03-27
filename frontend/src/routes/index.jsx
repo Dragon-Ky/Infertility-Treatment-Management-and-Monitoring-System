@@ -14,15 +14,17 @@ export const routes = [
         path: "/",
         element: <Home />,
       },
-      {
-        path: "/login",
-        element: <Login />,
-      },
+
       {
         path: "/403",
         element: <div>Bạn không có quyền truy cập trang này!</div>,
       },
     ],
+  },
+
+  {
+    path: "/login",
+    element: <Login />,
   },
 
   // Protect Admin

@@ -1,141 +1,213 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { loginApi } from "../../services/authService";
-import { CiLock } from "react-icons/ci";
-import { TbBrandGmail, TbActivityHeartbeat } from "react-icons/tb";
-import { MdCrisisAlert } from "react-icons/md";
-import { RiLoader2Line } from "react-icons/ri";
 
-const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+
+import { TbActivityHeartbeat } from "react-icons/tb";
+import {
+  HiOutlineMail,
+  HiOutlineLockClosed,
+  HiOutlineEye,
+  HiOutlineEyeOff,
+} from "react-icons/hi";
+
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import medicen from "../../assets/Images/logo.webp";
+
+function Login() {
+  const [isVisible, setIsVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
+    const formData = new FormData(e.currentTarget);
+    const dataForm = Object.fromEntries(formData);
+
     try {
-      // 1. Gọi API login
-      const data = await loginApi(email, password);
+      const data = await loginApi(dataForm.email, dataForm.password);
 
-      // console.log(data);
-
-      // 2. LƯU VÀO LOCAL STORAGE
-      if (data.access_token) {
+      if (data && data.access_token) {
         localStorage.setItem("access_token", data.access_token);
-        // Lưu object user dưới dạng string
         localStorage.setItem("user", JSON.stringify(data.user));
-
-        // 3. Lấy role để điều hướng
-        const userRole = data.user.roles?.[0]?.name;
-
-        if (userRole === "Admin") {
-          navigate("/admin/dashboard");
-        } else if (userRole === "Doctor") {
-          navigate("/doctor/dashboard");
-        } else {
-          navigate("/");
-        }
+        navigate("/");
       }
     } catch (err) {
-      console.error(err);
-      setError(
-        err.response?.data?.message || "Email hoặc mật khẩu không chính xác!",
-      );
+      // console.error("Login Error:", err);
+
+      if (err.response?.status === 401) {
+        setError("Email hoặc mật khẩu không chính xác. Vui lòng kiểm tra lại!");
+      } else if (err.response?.status === 422) {
+        setError("Dữ liệu nhập vào không hợp lệ!");
+      } else {
+        setError("Hệ thống đang bảo trì hoặc lỗi kết nối. Thử lại sau!");
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
-      <div className="w-full max-w-md rounded-2xl border border-slate-100 bg-white p-8 shadow-xl">
-        <div className="mb-8 text-center">
-          <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 shadow-inner">
-            <TbActivityHeartbeat className="h-8 w-8 text-blue-600" />
+    <div className="flex min-h-screen bg-white">
+      <div className="relative hidden w-1/2 flex-col items-center justify-center overflow-hidden bg-(--bg-section) lg:flex">
+        <div className="absolute top-0 right-0 h-96 w-96 rounded-full bg-blue-200/20 blur-[100px]" />
+        <div className="absolute bottom-0 left-0 h-96 w-96 rounded-full bg-blue-300/10 blur-[100px]" />
+
+        <div className="relative z-10 flex flex-col items-center px-12 text-center">
+          <img src={medicen} alt="Medicen" className="mb-12 w-48 opacity-90" />
+
+          <div className="mb-8 flex h-24 w-24 items-center justify-center rounded-[32px] bg-white shadow-2xl shadow-blue-200/50 transition-transform duration-500 hover:scale-105">
+            <TbActivityHeartbeat className="h-14 w-14 animate-pulse text-(--primaryCustom)" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-800">
-            Clinic Management
-          </h1>
-          <p className="mt-2 text-sm tracking-wider text-slate-500 uppercase">
-            Hệ thống Quản lý Hiếm muộn
+
+          <h2 className="text-5xl leading-tight font-black tracking-tighter text-slate-800">
+            Đồng hành cùng <br />
+            <span className="text-(--primaryCustom)">ước mơ</span> làm mẹ
+          </h2>
+          <p className="mt-6 max-w-sm text-lg leading-relaxed font-medium text-slate-500 italic">
+            "Hệ thống quản lý y tế chuyên biệt cho hành trình tìm kiếm thiên
+            thần nhỏ."
           </p>
         </div>
 
-        {error && (
-          <div className="mb-6 flex animate-pulse items-center border-l-4 border-red-500 bg-red-50 p-4 text-red-700">
-            <MdCrisisAlert className="mr-2 h-5 w-5" />
-            <span className="text-sm font-medium">{error}</span>
-          </div>
-        )}
+        <div className="absolute bottom-8 text-xs font-bold tracking-widest text-slate-400 uppercase">
+          © 2026 Medicen Clinic • International Standard
+        </div>
+      </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-slate-700">
-              Email Tài khoản
-            </label>
-            <div className="group relative">
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                <TbBrandGmail className="h-5 w-5 text-slate-400 transition-colors group-focus-within:text-blue-500" />
+      <div className="flex w-full items-center justify-center p-8 lg:w-1/2">
+        <div className="animate-in fade-in slide-in-from-right-8 w-full max-w-105 duration-700">
+          <div className="mb-12">
+            <h1 className="mb-3 text-4xl font-black tracking-tight text-slate-900">
+              Đăng nhập
+            </h1>
+            <p className="font-medium text-slate-500">
+              Vui lòng nhập thông tin để truy cập hệ thống
+            </p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-7">
+            <div className="space-y-3">
+              <Label
+                htmlFor="email"
+                className="ml-1 text-xs font-black tracking-[0.2em] text-slate-400 uppercase"
+              >
+                Địa chỉ Email
+              </Label>
+              <div className="group relative">
+                <div className="absolute top-1/2 left-0 -translate-y-1/2 text-slate-300 transition-colors group-focus-within:text-(--primaryCustom)">
+                  <HiOutlineMail size={24} />
+                </div>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="name@medicen.vn"
+                  required
+                  className="h-14 rounded-none border-0 border-b-2 border-slate-100 bg-transparent px-0 pl-10 text-lg shadow-none transition-all focus-visible:border-(--primaryCustom) focus-visible:ring-0"
+                />
               </div>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="block w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pr-3 pl-10 transition-all outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500"
-                placeholder="doctor@gmail.com"
-              />
             </div>
-          </div>
 
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-slate-700">
-              Mật khẩu
-            </label>
-            <div className="group relative">
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                <CiLock className="h-5 w-5 text-slate-400 transition-colors group-focus-within:text-blue-500" />
+            <div className="space-y-3">
+              <Label
+                htmlFor="password"
+                className="ml-1 text-xs font-black tracking-[0.2em] text-slate-400 uppercase"
+              >
+                Mật khẩu
+              </Label>
+              <div className="group relative">
+                <div className="absolute top-1/2 left-0 -translate-y-1/2 text-slate-300 transition-colors group-focus-within:text-(--primaryCustom)">
+                  <HiOutlineLockClosed size={24} />
+                </div>
+                <Input
+                  id="password"
+                  name="password"
+                  type={isVisible ? "text" : "password"}
+                  placeholder="••••••••"
+                  required
+                  className="h-14 rounded-none border-0 border-b-2 border-slate-100 bg-transparent px-0 pr-10 pl-10 text-lg shadow-none transition-all focus-visible:border-(--primaryCustom) focus-visible:ring-0"
+                />
+                <button
+                  type="button"
+                  onClick={() => setIsVisible(!isVisible)}
+                  className="absolute top-1/2 right-0 -translate-y-1/2 text-slate-300 transition-colors hover:text-slate-600 focus:outline-none"
+                >
+                  {isVisible ? (
+                    <HiOutlineEyeOff size={22} />
+                  ) : (
+                    <HiOutlineEye size={22} />
+                  )}
+                </button>
               </div>
-              <input
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="block w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pr-3 pl-10 transition-all outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500"
-                placeholder="••••••••"
-              />
             </div>
-          </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="flex w-full items-center justify-center rounded-xl bg-blue-600 py-3 font-bold text-white shadow-lg shadow-blue-200 transition-all hover:bg-blue-700 active:scale-95 disabled:bg-blue-300"
-          >
-            {loading ? (
-              <>
-                <RiLoader2Line className="mr-2 h-5 w-5 animate-spin" />
-                Đang xác thực...
-              </>
-            ) : (
-              "Đăng nhập ngay"
+            <div className="flex items-center justify-between px-1">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="remember"
+                  className="h-5 w-5 rounded-md border-slate-200 data-[state=checked]:border-(--primaryCustom) data-[state=checked]:bg-(--primaryCustom)"
+                />
+                <Label
+                  htmlFor="remember"
+                  className="cursor-pointer text-sm font-bold text-slate-500"
+                >
+                  Ghi nhớ tôi
+                </Label>
+              </div>
+              <Link
+                to="#"
+                className="text-sm font-black text-(--primaryCustom) transition-opacity hover:opacity-70"
+              >
+                Quên mật khẩu?
+              </Link>
+            </div>
+
+            {error && (
+              <div className="animate-in fade-in slide-in-from-top-1 rounded-xl border border-red-100 bg-red-50 p-4 text-sm font-bold text-red-600">
+                {error}
+              </div>
             )}
-          </button>
-        </form>
 
-        <div className="mt-8 border-t border-slate-100 pt-6 text-center">
-          <p className="text-sm text-slate-400 italic">
-            Dành riêng cho Bác sĩ và Nhân viên y tế
-          </p>
+            <Button
+              type="submit"
+              disabled={loading}
+              className="h-16 w-full rounded-2xl bg-(--primaryCustom) text-lg font-black text-white shadow-2xl shadow-blue-100 transition-all hover:bg-(--primaryCustom) hover:shadow-blue-200 active:scale-[0.98]"
+            >
+              {loading ? (
+                <div className="flex items-center gap-3">
+                  <AiOutlineLoading3Quarters className="animate-spin text-xl" />
+                  <span className="tracking-widest">ĐANG XÁC THỰC...</span>
+                </div>
+              ) : (
+                "ĐĂNG NHẬP"
+              )}
+            </Button>
+          </form>
+
+          <div className="mt-16 border-t border-slate-50 pt-10 text-center">
+            <p className="font-medium text-slate-500 italic">
+              Bạn chưa có hồ sơ bệnh nhân?
+              <Link
+                to="/register"
+                className="ml-2 border-b-2 border-(--primaryCustom) pb-1 font-black text-(--primaryCustom) not-italic transition-all hover:bg-blue-50"
+              >
+                ĐĂNG KÝ NGAY
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>
   );
-};
+}
 
 export default Login;
