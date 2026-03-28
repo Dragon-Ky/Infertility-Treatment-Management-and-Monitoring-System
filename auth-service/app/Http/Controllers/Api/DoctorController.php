@@ -5,9 +5,13 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Exception; 
 
 class DoctorController extends Controller
 {
+    /**
+     * Lấy danh sách tất cả bệnh nhân (Dành cho Dashboard Bác sĩ)
+     */
     public function index()
     {
         try {
@@ -18,34 +22,45 @@ class DoctorController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'data' => $patients
+                'count'  => $patients->count(),
+                'data'   => $patients
             ], 200);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Không thể lấy danh sách bệnh nhân',
+                'message' => 'Lỗi hệ thống khi lấy danh sách bệnh nhân',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
-
+    /**
+     * Xem chi tiết hồ sơ một bệnh nhân
+     */
     public function show($id)
     {
+        try {
+            $patient = User::role('Patient')->find($id);
 
-        $patient = User::role('Patient')->find($id);
+            if (!$patient) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Không tìm thấy bệnh nhân hoặc người dùng không có quyền bệnh nhân'
+                ], 404);
+            }
 
-        if (!$patient) {
+            return response()->json([
+                'status' => 'success',
+                'data' => $patient
+            ], 200);
+
+        } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Không tìm thấy bệnh nhân'
-            ], 404);
+                'message' => 'Lỗi khi truy xuất thông tin bệnh nhân',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $patient
-        ], 200);
     }
 }
