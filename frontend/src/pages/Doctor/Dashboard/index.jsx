@@ -41,7 +41,6 @@ function DoctorDashboard() {
 
   return (
     <div className="min-h-screen space-y-8 bg-slate-50/50 p-8">
-      {/* Header & Stats */}
       <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
         <div>
           <h1 className="text-3xl font-black tracking-tight text-slate-900">
@@ -56,7 +55,6 @@ function DoctorDashboard() {
         </Button>
       </div>
 
-      {/* Quick Stats Cards */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         <Card className="rounded-2xl border-none bg-white shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -106,7 +104,6 @@ function DoctorDashboard() {
         </Card>
       </div>
 
-      {/* Patients Table */}
       <Card className="overflow-hidden rounded-2xl border-none bg-white shadow-sm">
         <CardHeader className="border-b border-slate-50 p-6">
           <CardTitle className="text-xl font-black text-slate-800">
