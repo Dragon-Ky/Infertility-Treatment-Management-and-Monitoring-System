@@ -4,6 +4,8 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserApiController;
 use App\Http\Controllers\Api\DoctorController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\PostController;
+use App\Http\Controllers\Api\TreatmentController;
 
 // API Routes
 
