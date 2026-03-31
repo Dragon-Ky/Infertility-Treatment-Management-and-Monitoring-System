@@ -17,12 +17,14 @@ import {
   HiOutlineCog,
 } from "react-icons/hi";
 
+import { menuHeader } from "@/constant/menuHeader.constant";
+
 function Header() {
-  const menu = ["Giới thiệu", "Dịch vụ", "Bác sĩ", "Blog", "Liên hệ"];
   const navigate = useNavigate();
 
   const userJson = localStorage.getItem("user");
   const user = userJson ? JSON.parse(userJson) : null;
+  const userRole = user?.roles?.[0]?.name;
 
   const handleLogout = () => {
     localStorage.clear();
@@ -34,19 +36,20 @@ function Header() {
     <header className="sticky top-0 left-0 z-900 w-full bg-white/80 shadow-[0px_3px_8px_rgba(0,0,0,0.12)] backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-[1vw] text-[1.1vw]">
         <Link
-          to="/"
+          to={`${userRole === "Doctor" ? "/doctor/dashboard" : "/"}`}
           className="shrink-0 transition-transform hover:scale-105 active:scale-95"
         >
           <img src={medicen} alt="Logo" className="w-[12vw] object-cover" />
         </Link>
 
         <div className="flex items-center gap-[0.5vw] font-semibold text-slate-700">
-          {menu.map((item, index) => (
+          {menuHeader.map((item) => (
             <Link
-              key={index}
+              to={`/${item.path}`}
+              key={item.id}
               className="relative z-1 cursor-pointer overflow-hidden rounded-[20px] px-[1.2vw] py-[0.8vw] transition-colors duration-300 after:absolute after:inset-0 after:z-[-1] after:origin-center after:scale-x-0 after:bg-(--primaryCustom) after:transition-transform after:duration-300 after:content-[''] hover:text-white hover:after:scale-x-100"
             >
-              {item}
+              {item.name}
             </Link>
           ))}
         </div>
