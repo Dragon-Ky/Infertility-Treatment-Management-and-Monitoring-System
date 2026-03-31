@@ -4,7 +4,7 @@ import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Error403 from "@/pages/Error403";
-import Profile from "../pages/Patient/Profile";
+import Profile from "../pages/Profile";
 import AdminDashboard from "../pages/Admin/Dashboard";
 import DoctorDashboard from "../pages/Doctor/Dashboard";
 import Error404 from "@/pages/Error404";
