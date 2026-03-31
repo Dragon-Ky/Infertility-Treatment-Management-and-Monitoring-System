@@ -5,15 +5,15 @@ use App\Http\Controllers\Api\UserApiController;
 use App\Http\Controllers\Api\DoctorController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-*/
+// API Routes
 
 // --- NHÓM CÔNG KHAI (Public) ---
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/register', [AuthController::class, 'register']);
+
+// API Blog công khai (Sẽ áp dụng Redis Cache ở đây để tăng tốc độ tải tin tức)
+Route::get('/posts', [PostController::class, 'index']);
+Route::get('/posts/{id}', [PostController::class, 'show']);
 
 // --- NHÓM BẢO MẬT (Protected by JWT) ---
 Route::middleware('auth:api')->group(function () {
@@ -24,10 +24,16 @@ Route::middleware('auth:api')->group(function () {
     // Đăng xuất
     Route::post('/logout', [AuthController::class, 'logout']);
 
+    // Cập nhật Profile
+    Route::post('/update-profile', [AuthController::class, 'updateProfile']);
+
+    // Đổi mật khẩu
+    Route::post('/change-password', [AuthController::class, 'changePassword']);
+
     // Lấy danh sách bác sĩ (Có Redis Cache)
     Route::get('/doctors', [UserApiController::class, 'getDoctors']);
 
-    // --- NHÓM DÀNH RIÊNG CHO BÁC SĨ (Doctor Roles) ---
+    // --- NHÓM DÀNH RIÊNG CHO BÁC SĨ (Doctor Roles & Admin) ---
     // Chỉ những User có role 'Doctor' hoặc 'Admin' mới được gọi API này
     Route::middleware('role:Doctor|Admin')->group(function () {
 
@@ -39,6 +45,11 @@ Route::middleware('auth:api')->group(function () {
 
         // Cập nhật chỉ số xét nghiệm/phác đồ điều trị
         Route::post('/doctor/update-treatment', [DoctorController::class, 'updateTreatment']);
+
+        // Quản lý Blog (Chỉ bác sĩ/admin mới được đăng bài)
+        Route::post('/posts', [PostController::class, 'store']);
+        Route::put('/posts/{id}', [PostController::class, 'update']);
+        Route::delete('/posts/{id}', [PostController::class, 'destroy']);
     });
 
 
