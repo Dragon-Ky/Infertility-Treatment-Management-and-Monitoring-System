@@ -84,9 +84,11 @@ function Header() {
 
                 <DropdownMenuItem className="group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 transition-all focus:bg-(--primaryCustom)">
                   <HiOutlineUser className="text-xl opacity-70 group-focus:opacity-100" />
-                  <span className="text-[0.9vw] font-semibold">
-                    Hồ sơ cá nhân
-                  </span>
+                  <Link to="/profile">
+                    <span className="text-[0.9vw] font-semibold">
+                      Hồ sơ cá nhân
+                    </span>
+                  </Link>
                 </DropdownMenuItem>
 
                 <DropdownMenuItem className="group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 transition-all focus:bg-(--primaryCustom)">
