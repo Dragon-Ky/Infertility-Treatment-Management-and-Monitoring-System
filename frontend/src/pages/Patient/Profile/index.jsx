@@ -10,7 +10,7 @@ import {
 } from "react-icons/fa";
 import { toast } from "react-hot-toast";
 
-const PatientProfile = () => {
+function Profile() {
   const [user, setUser] = useState({
     name: "",
     phone: "",
@@ -219,6 +219,6 @@ const PatientProfile = () => {
       </div>
     </div>
   );
-};
+}
 
-export default PatientProfile;
+export default Profile;

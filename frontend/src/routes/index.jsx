@@ -3,9 +3,11 @@ import LayoutDefault from "../layout/LayoutDefault";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
+import Error403 from "@/pages/Error403";
 import Profile from "../pages/Patient/Profile";
 import AdminDashboard from "../pages/Admin/Dashboard";
 import DoctorDashboard from "../pages/Doctor/Dashboard";
+import Error404 from "@/pages/Error404";
 
 export const routes = [
   //Public routes
@@ -20,7 +22,7 @@ export const routes = [
 
       {
         path: "/403",
-        element: <div>Bạn không có quyền truy cập trang này!</div>,
+        element: <Error403 />,
       },
     ],
   },
@@ -82,5 +84,11 @@ export const routes = [
         children: [{ path: "", element: <Profile /> }],
       },
     ],
+  },
+
+  // 404
+  {
+    path: "*",
+    element: <Error404 />,
   },
 ];
