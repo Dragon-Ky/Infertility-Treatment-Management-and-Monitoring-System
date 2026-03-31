@@ -5,9 +5,11 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Error403 from "@/pages/Error403";
 import Profile from "../pages/Profile";
+import BlogDetail from "@/pages/BlogDetail";
 import AdminDashboard from "../pages/Admin/Dashboard";
 import DoctorDashboard from "../pages/Doctor/Dashboard";
 import Error404 from "@/pages/Error404";
+import BlogList from "@/pages/BlogList";
 
 export const routes = [
   //Public routes
@@ -19,6 +21,13 @@ export const routes = [
         path: "/",
         element: <Home />,
       },
+
+      {
+        path: "/blog",
+        element: <BlogList />,
+      },
+
+      { path: "/blog/:id", element: <BlogDetail /> },
 
       {
         path: "/403",

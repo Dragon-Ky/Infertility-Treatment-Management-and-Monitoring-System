@@ -22,7 +22,7 @@ export const menuHeader = [
   {
     id: 5,
     name: "Blog",
-    path: "/",
+    path: "/blog",
   },
   {
     id: 6,

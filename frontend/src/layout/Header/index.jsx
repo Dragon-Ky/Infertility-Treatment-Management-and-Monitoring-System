@@ -45,7 +45,7 @@ function Header() {
         <div className="flex items-center gap-[0.5vw] font-semibold text-slate-700">
           {menuHeader.map((item) => (
             <Link
-              to={`/${item.path}`}
+              to={`${item?.path}`}
               key={item.id}
               className="relative z-1 cursor-pointer overflow-hidden rounded-[20px] px-[1.2vw] py-[0.8vw] transition-colors duration-300 after:absolute after:inset-0 after:z-[-1] after:origin-center after:scale-x-0 after:bg-(--primaryCustom) after:transition-transform after:duration-300 after:content-[''] hover:text-white hover:after:scale-x-100"
             >

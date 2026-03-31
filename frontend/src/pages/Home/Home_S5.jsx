@@ -1,30 +1,31 @@
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { getAllPosts } from "@/services/blogService";
 
 function Home_S5() {
-  const blogHome = [
-    {
-      id: 1,
-      images:
-        "https://www.kidsplaza.vn/blog/wp-content/uploads/2025/08/raw-1024x683.png",
-      title: "Cẩm nang chăm sóc sức khỏe toàn diện trước khi thực hiện IVF",
-      desc: "Những lưu ý quan trọng về chế độ dinh dưỡng, tâm lý và sinh hoạt để chuẩn bị cho một thai kỳ khỏe mạnh.",
-    },
-    {
-      id: 2,
-      images:
-        "https://img.lsvn.vn/resize/th/upload/2026/01/20/168599-639045077623056496-12092383.png",
-      title:
-        "Hành trình 10 năm tìm con và cái kết viên mãn nhờ phương pháp ICSI",
-      desc: "Chia sẻ chân thực từ gia đình anh chị Minh - Hạnh về niềm tin và sự kiên trì trong hành trình đón thiên thần nhỏ.",
-    },
-    {
-      id: 3,
-      images:
-        "https://afhanoi.com/wp-content/uploads/2023/04/BS.CKI-Pham-Van-Huong-Pho-giam-doc-chuyen-mon-Benh-vien-Nam-hoc-va-Hiem-muon-Ha-Noi-kham-tu-van-cho-benh-nhan.jpg",
-      title: "Phân biệt phương pháp IUI và IVF: Lựa chọn nào phù hợp cho bạn?",
-      desc: "Bác sĩ chuyên khoa giải thích chi tiết về sự khác biệt, tỉ lệ thành công và chi phí của từng phương pháp điều trị.",
-    },
-  ];
+  const [blogHome, setBlogHome] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBlogData = async () => {
+      try {
+        const result = await getAllPosts();
+        setBlogHome(result.data.slice(0, 3));
+      } catch (error) {
+        console.error("Lỗi khi gọi API Blog ở trang chủ:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBlogData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="py-20 text-center text-gray-500">Đang tải tin tức...</div>
+    );
+  }
 
   return (
     <div className="bg-(--bg-section) py-20">
@@ -38,13 +39,19 @@ function Home_S5() {
           {blogHome.map((blog) => (
             <div className="cursor-pointer" key={blog.id}>
               <img
-                className="mb-4 h-[55vh] w-[30vw] rounded-lg object-cover"
-                src={blog.images}
-                alt="Image Blog"
+                className="mb-4 h-[50vh] w-[30vw] rounded-lg object-cover"
+                src={blog.image || "https://via.placeholder.com/400x300"}
+                alt={blog.title}
               />
-              <p className="mb-2 text-center font-bold">{blog.title}</p>
-              <p className="min-h-[11vh] text-center">{blog.desc}</p>
-              <Link>
+              <p className="mb-2 line-clamp-2 px-2 text-center font-bold">
+                {blog.title}
+              </p>
+
+              <p className="line-clamp-3 min-h-[12vh] px-4 text-center text-sm text-gray-600">
+                {blog.content}
+              </p>
+
+              <Link to={`/blog/${blog.id}`}>
                 <button className="hv-transition mx-auto flex cursor-pointer rounded-lg border bg-(--primary-bold) px-[1vw] py-[0.8vh] font-semibold text-white hover:border-(--primary-bold) hover:bg-transparent hover:text-(--primary-bold)">
                   Đọc thêm
                 </button>
@@ -52,6 +59,12 @@ function Home_S5() {
             </div>
           ))}
         </div>
+
+        {blogHome.length === 0 && (
+          <div className="text-center text-gray-400">
+            Hiện chưa có bài viết mới nhất.
+          </div>
+        )}
       </div>
     </div>
   );

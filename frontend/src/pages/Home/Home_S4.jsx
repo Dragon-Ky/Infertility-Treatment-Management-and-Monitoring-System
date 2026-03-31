@@ -28,7 +28,7 @@ function Home_S4() {
       desc: "Tiến hành các thủ thuật chuyên môn (Kích trứng, IUI, IVF...) với hệ thống trang thiết bị hiện đại và phòng Lab đạt chuẩn.",
     },
     {
-      id: 1,
+      id: 4,
       icon: <TbTimeline />,
       title: "Theo dõi & Kết quả",
       desc: "Chăm sóc sau thủ thuật, nhắc lịch kiểm tra và đồng hành cùng gia đình cho đến khi quá trình thụ thai thành công.",
