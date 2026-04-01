@@ -22,13 +22,13 @@ export const ProfileProvider = ({ children }) => {
   const updateProfile = async (updateData) => {
     setLoading(true);
     try {
-      const data = await updateProfileApi(updateData);
+      const response = await updateProfileApi(updateData);
+      // Lấy dữ liệu user mới trả về từ Backend
+      const updatedUser = response.user;
 
-      const currentUser = JSON.parse(localStorage.getItem("user"));
-      const newUserRecord = { ...currentUser, ...data.user };
-
-      setUser(newUserRecord);
-      localStorage.setItem("user", JSON.stringify(newUserRecord));
+      // Cập nhật State và LocalStorage
+      setUser(updatedUser);
+      localStorage.setItem("user", JSON.stringify(updatedUser));
 
       toast.success("Cập nhật thông tin thành công!");
       return { success: true };
