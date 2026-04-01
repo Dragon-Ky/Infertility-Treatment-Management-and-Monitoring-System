@@ -42,10 +42,13 @@ function Login() {
 
         if (userRole === "Admin") {
           navigate("/admin/dashboard");
+          window.location.reload();
         } else if (userRole === "Doctor") {
           navigate("/doctor/dashboard");
+          window.location.reload();
         } else {
           navigate("/");
+          window.location.reload();
         }
       }
     } catch (err) {
