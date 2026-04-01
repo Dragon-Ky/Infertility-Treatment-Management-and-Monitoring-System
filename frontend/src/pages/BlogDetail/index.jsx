@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getPostDetail } from "@/services/blogService";
 import { FaCalendarAlt, FaUser, FaChevronLeft } from "react-icons/fa";
+import { BlogSkeleton } from "@/components/Loading";
 
 function BlogDetail() {
   const { id } = useParams();
@@ -22,8 +23,7 @@ function BlogDetail() {
     fetchDetail();
   }, [id]);
 
-  if (loading)
-    return <div className="py-20 text-center">Đang tải nội dung...</div>;
+  if (loading) return <BlogSkeleton />;
   if (!post)
     return <div className="py-20 text-center">Không tìm thấy bài viết.</div>;
 
