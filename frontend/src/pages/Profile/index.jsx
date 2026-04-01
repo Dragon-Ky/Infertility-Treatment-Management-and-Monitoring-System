@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import api from "@/utils/api";
+import { useProfile } from "@/contexts/ProfileContext";
 import {
   FaUser,
   FaPhone,
@@ -8,10 +8,11 @@ import {
   FaSave,
   FaKey,
 } from "react-icons/fa";
-import { toast } from "react-hot-toast";
 
 function Profile() {
-  const [user, setUser] = useState({
+  const { user, loading, updateProfile, changePassword } = useProfile();
+
+  const [formData, setFormData] = useState({
     name: "",
     phone: "",
     email: "",
@@ -23,63 +24,38 @@ function Profile() {
     new_password_confirmation: "",
   });
 
-  const [loading, setLoading] = useState(false);
-
+  // ĐỒNG BỘ DỮ LIỆU: Khi 'user' trong Context có dữ liệu, cập nhật vào Form
   useEffect(() => {
-    const savedUser = JSON.parse(localStorage.getItem("user"));
-    if (savedUser) {
-      setUser({
-        name: savedUser.name || "",
-        phone: savedUser.phone || "",
-        email: savedUser.email || "",
+    if (user && user.email) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setFormData({
+        name: user.name || "",
+        phone: user.phone || "",
+        email: user.email || "",
       });
     }
-  }, []);
+  }, [user]);
 
-  const handleUpdateProfile = async (e) => {
+  // Xử lý cập nhật thông tin cá nhân
+  const handleUpdate = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    try {
-      const response = await api.post("/update-profile", {
-        name: user.name,
-        phone: user.phone,
-      });
-
-      // Cập nhật lại LocalStorage để hiển thị tên mới trên Navbar/Sidebar
-      const currentUser = JSON.parse(localStorage.getItem("user"));
-      const newUserRecord = { ...currentUser, ...response.data.user };
-      localStorage.setItem("user", JSON.stringify(newUserRecord));
-
-      toast.success("Cập nhật thông tin thành công!");
-    } catch (error) {
-      const msg = error.response?.data?.message || "Không thể cập nhật hồ sơ";
-      toast.error(msg);
-    } finally {
-      setLoading(false);
-    }
+    await updateProfile({
+      name: formData.name,
+      phone: formData.phone,
+    });
   };
 
-  const handleChangePassword = async (e) => {
+  // Xử lý đổi mật khẩu
+  const handlePassword = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    try {
-      await api.post("/change-password", passwords);
-
-      // Reset form mật khẩu sau khi thành công
+    const result = await changePassword(passwords);
+    // Nếu đổi thành công (logic trả về từ Context), reset form mật khẩu
+    if (result && result.success) {
       setPasswords({
         old_password: "",
         new_password: "",
         new_password_confirmation: "",
       });
-
-      toast.success("Đổi mật khẩu thành công!");
-    } catch (error) {
-      const msg =
-        error.response?.data?.message ||
-        "Mật khẩu cũ không đúng hoặc dữ liệu sai";
-      toast.error(msg);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -91,7 +67,7 @@ function Profile() {
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm lg:col-span-2">
-          <form onSubmit={handleUpdateProfile} className="space-y-6">
+          <form onSubmit={handleUpdate} className="space-y-6">
             <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-gray-700">
               <FaUser /> Thông tin cơ bản
             </h2>
@@ -105,7 +81,7 @@ function Profile() {
                   <FaEnvelope className="mr-2" />
                   <input
                     type="text"
-                    value={user.email}
+                    value={formData.email}
                     disabled
                     className="w-full cursor-not-allowed bg-transparent outline-none"
                   />
@@ -120,8 +96,10 @@ function Profile() {
                   <FaUser className="mr-2 text-gray-400" />
                   <input
                     type="text"
-                    value={user.name}
-                    onChange={(e) => setUser({ ...user, name: e.target.value })}
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                     className="w-full bg-transparent outline-none"
                     placeholder="Nhập họ tên"
                     required
@@ -137,9 +115,9 @@ function Profile() {
                   <FaPhone className="mr-2 text-gray-400" />
                   <input
                     type="text"
-                    value={user.phone}
+                    value={formData.phone}
                     onChange={(e) =>
-                      setUser({ ...user, phone: e.target.value })
+                      setFormData({ ...formData, phone: e.target.value })
                     }
                     className="w-full bg-transparent outline-none"
                     placeholder="Nhập số điện thoại"
@@ -152,7 +130,7 @@ function Profile() {
             <button
               type="submit"
               disabled={loading}
-              className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-2 font-bold text-white transition-all hover:bg-blue-700"
+              className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-2 font-bold text-white transition-all hover:bg-blue-700 disabled:opacity-50"
             >
               <FaSave /> {loading ? "Đang lưu..." : "Lưu thay đổi"}
             </button>
@@ -160,57 +138,51 @@ function Profile() {
         </div>
 
         <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-          <form onSubmit={handleChangePassword} className="space-y-4">
+          <form onSubmit={handlePassword} className="space-y-4">
             <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-gray-700">
               <FaLock /> Bảo mật
             </h2>
 
-            <div>
-              <input
-                type="password"
-                placeholder="Mật khẩu cũ"
-                value={passwords.old_password}
-                onChange={(e) =>
-                  setPasswords({ ...passwords, old_password: e.target.value })
-                }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
+            <input
+              type="password"
+              placeholder="Mật khẩu cũ"
+              value={passwords.old_password}
+              onChange={(e) =>
+                setPasswords({ ...passwords, old_password: e.target.value })
+              }
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
 
-            <div>
-              <input
-                type="password"
-                placeholder="Mật khẩu mới"
-                value={passwords.new_password}
-                onChange={(e) =>
-                  setPasswords({ ...passwords, new_password: e.target.value })
-                }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
+            <input
+              type="password"
+              placeholder="Mật khẩu mới"
+              value={passwords.new_password}
+              onChange={(e) =>
+                setPasswords({ ...passwords, new_password: e.target.value })
+              }
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
 
-            <div>
-              <input
-                type="password"
-                placeholder="Xác nhận mật khẩu"
-                value={passwords.new_password_confirmation}
-                onChange={(e) =>
-                  setPasswords({
-                    ...passwords,
-                    new_password_confirmation: e.target.value,
-                  })
-                }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
+            <input
+              type="password"
+              placeholder="Xác nhận mật khẩu"
+              value={passwords.new_password_confirmation}
+              onChange={(e) =>
+                setPasswords({
+                  ...passwords,
+                  new_password_confirmation: e.target.value,
+                })
+              }
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
 
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-gray-800 px-4 py-2 font-bold text-white transition-all hover:bg-black"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-gray-800 px-4 py-2 font-bold text-white transition-all hover:bg-black disabled:opacity-50"
             >
               <FaKey /> {loading ? "Đang xử lý..." : "Đổi mật khẩu"}
             </button>
