@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import api from "../../../utils/api";
 import {
   Table,
   TableBody,
@@ -18,6 +17,7 @@ import {
   HiOutlineSearch,
 } from "react-icons/hi";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { getPatientsForDoctor } from "@/services/doctorService";
 
 function DoctorDashboard() {
   const [patients, setPatients] = useState([]);
@@ -26,9 +26,9 @@ function DoctorDashboard() {
   useEffect(() => {
     const fetchPatients = async () => {
       try {
-        const response = await api.get("/doctor/patients");
-        if (response.data.status === "success") {
-          setPatients(response.data.data);
+        const result = await getPatientsForDoctor();
+        if (result.status === "success") {
+          setPatients(result.data);
         }
       } catch (error) {
         console.error("Lỗi lấy danh sách bệnh nhân:", error);
