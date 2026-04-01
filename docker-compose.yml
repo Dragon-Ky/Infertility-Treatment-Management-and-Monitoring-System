@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  report-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: report-service
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+    ports:
+      - "8006:9000"
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql-report
+      - DB_PORT=3306
+      - DB_DATABASE=report_db
+      - DB_USERNAME=root
+      - DB_PASSWORD=secret
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - CACHE_DRIVER=redis
+      - SESSION_DRIVER=redis
+      - QUEUE_CONNECTION=redis
+    depends_on:
+      - mysql-report
+      - redis
+    networks:
+      - report-network
+
+  mysql-report:
+    image: mysql:8.0
+    container_name: mysql-report
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: report_db
+    volumes:
+      - mysql-report-data:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    networks:
+      - report-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis-report
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis-report-data:/data
+    networks:
+      - report-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-report
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - .:/var/www
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - report-service
+    networks:
+      - report-network
+
+volumes:
+  mysql-report-data:
+  redis-report-data:
+
+networks:
+  report-network:
+    driver: bridge
