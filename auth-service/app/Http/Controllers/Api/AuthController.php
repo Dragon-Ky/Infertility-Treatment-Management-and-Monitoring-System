@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Password; 
 
 class AuthController extends Controller
 {
@@ -39,7 +40,15 @@ class AuthController extends Controller
             'name'     => 'required|string|max:255',
             'email'    => 'required|string|email|max:255|unique:users',
             'phone'    => 'required|string|max:15',
-            'password' => 'required|string|min:6',
+            // Siết chặt quy tắc mật khẩu
+            'password' => [
+                'required',
+                'string',
+                Password::min(8)
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols(),
+            ],
         ]);
 
         if ($validator->fails()) {
@@ -122,7 +131,16 @@ class AuthController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'old_password' => 'required',
-            'new_password' => 'required|string|min:6|confirmed', // Cần field new_password_confirmation
+            // Siết chặt quy tắc mật khẩu mới
+            'new_password' => [
+                'required',
+                'string',
+                'confirmed',
+                Password::min(8)
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols(),
+            ],
         ]);
 
         if ($validator->fails()) {
@@ -134,7 +152,6 @@ class AuthController extends Controller
 
         $user = auth('api')->user();
 
-        // Kiểm tra mật khẩu cũ
         if (!Hash::check($request->old_password, $user->password)) {
             return response()->json([
                 'status' => 'error',
@@ -142,7 +159,6 @@ class AuthController extends Controller
             ], 400);
         }
 
-        // Cập nhật mật khẩu mới
         $user->update([
             'password' => Hash::make($request->new_password)
         ]);
