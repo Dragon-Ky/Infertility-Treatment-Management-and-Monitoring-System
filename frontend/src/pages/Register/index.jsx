@@ -14,14 +14,18 @@ import {
   HiOutlinePhone,
   HiOutlineEye,
   HiOutlineEyeOff,
+  HiCheckCircle,
+  HiXCircle,
 } from "react-icons/hi";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import medicen from "../../assets/Images/logo.webp";
+import { requirements } from "@/constant/requirementsPassword.constant";
 
 function Register() {
   const [isVisible, setIsVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
@@ -33,6 +37,13 @@ function Register() {
 
     if (data.password !== data.confirmPassword) {
       setError("Mật khẩu xác nhận không trùng khớp!");
+      return;
+    }
+
+    // Kiểm tra độ mạnh mật khẩu trước khi gửi
+    const isStrong = requirements.every((req) => req.re.test(data.password));
+    if (!isStrong) {
+      setError("Mật khẩu chưa đạt yêu cầu bảo mật!");
       return;
     }
 
@@ -49,9 +60,13 @@ function Register() {
         navigate("/login");
       }
     } catch (err) {
-      setError(
-        err?.response?.data?.message || "Đăng ký thất bại. Vui lòng thử lại!",
-      );
+      const backendErrors = err?.response?.data?.errors;
+      if (backendErrors) {
+        const firstError = Object.values(backendErrors)[0][0];
+        setError(firstError);
+      } else {
+        setError(err?.response?.data?.message || "Đăng ký thất bại!");
+      }
     } finally {
       setLoading(false);
     }
@@ -63,7 +78,6 @@ function Register() {
         <div className="absolute top-12 left-12">
           <img src={medicen} alt="Medicen" className="w-40 opacity-90" />
         </div>
-
         <div className="relative z-10 flex flex-col items-center px-12 text-center">
           <div className="mb-8 flex h-24 w-24 items-center justify-center rounded-[32px] bg-white shadow-2xl shadow-blue-200/50">
             <TbActivityHeartbeat className="h-14 w-14 text-(--primaryCustom)" />
@@ -73,15 +87,14 @@ function Register() {
             <span className="text-(--primaryCustom)">hạnh phúc</span> của bạn
           </h2>
           <p className="mt-6 max-w-sm text-lg font-medium text-slate-500 italic">
-            "Tạo hồ sơ bệnh nhân để được đội ngũ bác sĩ hàng đầu hỗ trợ và theo
-            dõi liệu trình."
+            "Tạo hồ sơ bệnh nhân để được đội ngũ bác sĩ hàng đầu hỗ trợ."
           </p>
         </div>
       </div>
 
       <div className="flex w-full items-center justify-center p-8 lg:w-1/2">
         <div className="animate-in fade-in slide-in-from-right-8 w-full max-w-110 duration-700">
-          <header className="mb-10">
+          <header className="mb-8">
             <h1 className="mb-2 text-4xl font-black tracking-tight text-slate-900">
               Đăng ký hồ sơ
             </h1>
@@ -153,6 +166,8 @@ function Register() {
                   name="password"
                   type={isVisible ? "text" : "password"}
                   required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   className="h-12 rounded-none border-0 border-b-2 border-slate-100 bg-transparent px-0 pr-10 pl-9 text-lg shadow-none focus-visible:border-(--primaryCustom) focus-visible:ring-0"
                 />
@@ -167,6 +182,35 @@ function Register() {
                     <HiOutlineEye size={22} />
                   )}
                 </button>
+              </div>
+
+              <div
+                className={`grid transition-all duration-500 ease-in-out ${
+                  password
+                    ? "mt-4 grid-rows-[1fr] opacity-100"
+                    : "mt-0 grid-rows-[0fr] opacity-0"
+                }`}
+              >
+                <div className="overflow-hidden">
+                  <div className="grid grid-cols-2 gap-3 rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
+                    {requirements.map((req, idx) => {
+                      const isDone = req.re.test(password);
+                      return (
+                        <div
+                          key={idx}
+                          className={`flex items-center gap-2 text-[11px] font-bold transition-colors duration-300 ${isDone ? "text-green-600" : "text-slate-400"}`}
+                        >
+                          {isDone ? (
+                            <HiCheckCircle className="scale-110 text-sm" />
+                          ) : (
+                            <HiXCircle className="text-sm opacity-40" />
+                          )}
+                          <span>{req.label}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -195,7 +239,7 @@ function Register() {
             <Button
               disabled={loading}
               type="submit"
-              className="h-16 w-full rounded-2xl bg-(--primaryCustom) text-lg font-black text-white shadow-2xl shadow-blue-100 transition-all hover:bg-(--primaryCustom) hover:shadow-blue-200 active:scale-[0.98]"
+              className="h-16 w-full rounded-2xl bg-(--primaryCustom) text-lg font-black text-white shadow-2xl shadow-blue-100 transition-all hover:bg-(--primaryCustom) hover:shadow-blue-200 active:scale-[0.98] disabled:opacity-70"
             >
               {loading ? (
                 <AiOutlineLoading3Quarters className="animate-spin text-xl" />
@@ -205,7 +249,7 @@ function Register() {
             </Button>
           </form>
 
-          <div className="mt-12 border-t border-slate-50 pt-8 text-center">
+          <div className="mt-10 border-t border-slate-50 pt-8 text-center">
             <p className="font-medium text-slate-500 italic">
               Đã có tài khoản tại Medicen?
               <Link
