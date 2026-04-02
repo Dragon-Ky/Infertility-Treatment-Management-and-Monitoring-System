@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('medication_schedules', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('protocol_id')->constrained('treatment_protocols');
+            $table->string('medicine_name'); // Tên thuốc
+            $table->string('dosage'); // Liều lượng (VD: 225 IU, 2 viên)
+            $table->dateTime('scheduled_at'); // Thời gian được chỉ định dùng thuốc
+            $table->string('route'); // Đường dùng (Tiêm bắp, tiêm dưới da, uống)
             $table->timestamps();
         });
     }
