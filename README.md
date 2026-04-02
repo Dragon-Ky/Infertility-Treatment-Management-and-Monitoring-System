@@ -25,14 +25,14 @@ Dashboard & báo cáo thống kê
 Hệ thống được triển khai theo kiến trúc Microservices (BẮT BUỘC).
 
 2. 👥 User Roles
-Role	Mô tả
-Guest	Người truy cập xem thông tin cơ sở y tế, dịch vụ
-Customer	Bệnh nhân đăng ký dịch vụ điều trị
-Doctor	Bác sĩ theo dõi và cập nhật tiến trình điều trị
-Manager	Quản lý cơ sở y tế
-Admin	Quản trị hệ thống
+   Role Mô tả
+   Guest Người truy cập xem thông tin cơ sở y tế, dịch vụ
+   Customer Bệnh nhân đăng ký dịch vụ điều trị
+   Doctor Bác sĩ theo dõi và cập nhật tiến trình điều trị
+   Manager Quản lý cơ sở y tế
+   Admin Quản trị hệ thống
 3. 🧱 Kiến trúc hệ thống
-3.1 Kiến trúc tổng thể
+   3.1 Kiến trúc tổng thể
 
 Microservices Architecture
 
@@ -43,21 +43,21 @@ Service-to-Service Communication (REST / Message Broker)
 Distributed System
 
 3.2 Danh sách Microservices (Dự kiến)
-Service	Mô tả	Thành viên phụ trách
-Auth Service	Xác thực & phân quyền (JWT/OAuth2)	Member 1
-User Service	Quản lý hồ sơ bệnh nhân	Member 2
-Doctor Service	Quản lý bác sĩ & lịch làm việc	Member 3
-Treatment Service	Quản lý quá trình điều trị IUI, IVF	Member 4
-Appointment Service	Quản lý lịch hẹn & nhắc lịch	Member 5
-Notification Service	Gửi thông báo (Firebase)	Member 6
-Rating Service	Quản lý feedback & rating	Member 7
-Service Catalog	Quản lý dịch vụ & bảng giá	Member 8
-Reporting Service	Dashboard & báo cáo	Member 9
+Service Mô tả Thành viên phụ trách
+Auth Service Xác thực & phân quyền (JWT/OAuth2) Member 1
+User Service Quản lý hồ sơ bệnh nhân Member 2
+Doctor Service Quản lý bác sĩ & lịch làm việc Member 3
+Treatment Service Quản lý quá trình điều trị IUI, IVF Member 4
+Appointment Service Quản lý lịch hẹn & nhắc lịch Member 5
+Notification Service Gửi thông báo (Firebase) Member 6
+Rating Service Quản lý feedback & rating Member 7
+Service Catalog Quản lý dịch vụ & bảng giá Member 8
+Reporting Service Dashboard & báo cáo Member 9
 
 👉 Mỗi thành viên triển khai 01 Microservice độc lập
 
 4. 🛠️ Công nghệ sử dụng
-Backend
+   Backend
 
 NodeJS / Java Spring Boot / .NET (tuỳ nhóm chọn)
 
@@ -102,7 +102,7 @@ Project Management
 Jira (Quản lý task, sprint, backlog)
 
 5. 📦 Chức năng hệ thống
-5.1 Trang chủ
+   5.1 Trang chủ
 
 Giới thiệu cơ sở y tế
 
@@ -209,8 +209,8 @@ Sử dụng Apache NiFi
 Hỗ trợ ETL và Data Flow Management
 
 8. 🚀 Triển khai hệ thống
-8.1 Local Development
-docker-compose up --build
+   8.1 Local Development
+   docker-compose up --build
 
 8.2 Production
 
@@ -228,18 +228,17 @@ Azure
 
 9. 📊 Quản lý dự án
 
-Agile / Scrum
-
 Quản lý công việc bằng Jira
 
-Sprint Planning
-
 Daily Meeting
+
+Thống nhất dữ liệu Confluence
 
 Sprint Review
 
 10. 📁 Cấu trúc Repository (Gợi ý)
-```   
+
+```
 infertility-system/
 │
 ├── auth-service/
@@ -254,7 +253,9 @@ infertility-system/
 ├── docker-compose.yml
 └── README.md
 ```
+
 11. 📌 Yêu cầu bắt buộc
+
 ```
 ✅ Kiến trúc Microservices
 ✅ Docker hóa toàn bộ hệ thống
@@ -264,6 +265,7 @@ infertility-system/
 ✅ Quản lý dự án bằng Jira
 ✅ Mỗi thành viên đảm nhiệm 01 microservice
 ```
+
 12. 📈 Hướng phát triển tương lai
 
 Tích hợp AI tư vấn điều trị
