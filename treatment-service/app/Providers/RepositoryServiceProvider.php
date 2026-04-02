@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Providers;
+namespace App\Providers; // Dòng này bắt buộc phải có để hệ thống định vị được file
 
 use Illuminate\Support\ServiceProvider;
 
-class RepositoryServiceProvider extends ServiceProvider
+class RepositoryServiceProvider extends ServiceProvider // Tên class phải viết hoa chuẩn
 {
     public function register(): void
     {
