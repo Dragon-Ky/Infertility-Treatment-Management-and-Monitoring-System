@@ -14,4 +14,10 @@ class Doctor extends Model
         'specialization',
         'experience'
     ];
+
+    
+    public function schedules()
+    {
+        return $this->hasMany(DoctorSchedule::class);
+    }
 }
