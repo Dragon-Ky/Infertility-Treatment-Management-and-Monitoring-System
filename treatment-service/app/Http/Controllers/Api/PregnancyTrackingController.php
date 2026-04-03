@@ -3,47 +3,28 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\DTOs\Requests\CreatePregnancyTrackingRequestDTO;
+use App\Services\PregnancyTrackingService;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class PregnancyTrackingController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
+    public function __construct(protected PregnancyTrackingService $trackingService) {}
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
-        //
-    }
+        $validated = $request->validate([
+            'protocol_id' => 'required|integer',
+            'beta_hcg_level' => 'nullable|numeric',
+            'gestational_age_weeks' => 'nullable|integer|min:0',
+            'fetal_heartbeat' => 'nullable|string',
+            'outcome' => 'required|in:ongoing,miscarriage,live_birth,ectopic',
+        ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+        $dto = CreatePregnancyTrackingRequestDTO::fromArray($validated);
+        $responseDTO = $this->trackingService->createTracking($dto);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return response()->json(['message' => 'Lưu hồ sơ theo dõi thai kỳ thành công', 'data' => $responseDTO->toArray()], 201);
     }
 }
