@@ -3,47 +3,49 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\DTOs\Requests\CreateTreatmentEventRequestDTO;
+use App\Services\TreatmentEventService;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class TreatmentEventController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function __construct(
+        protected TreatmentEventService $eventService
+    ) {}
+
+    // API: Tạo sự kiện mới
+    public function store(Request $request): JsonResponse
     {
-        //
+        // Lễ tân kiểm tra form
+        $validated = $request->validate([
+            'protocol_id' => 'required|integer',
+            'event_type' => 'required|string',
+            'title' => 'required|string|max:255',
+            'event_datetime' => 'required|date',
+            'result_summary' => 'nullable|string',
+            'location' => 'nullable|string',
+        ]);
+
+        // Đóng gói hồ sơ
+        $dto = CreateTreatmentEventRequestDTO::fromArray($validated);
+
+        // Giao cho Chuyên gia xử lý
+        $responseDTO = $this->eventService->createEvent($dto);
+
+        // Báo kết quả cho Frontend (React)
+        return response()->json([
+            'message' => 'Tạo sự kiện thành công',
+            'data' => $responseDTO->toArray()
+        ], 201);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    // API: Lấy danh sách sự kiện của 1 phác đồ
+    public function index(Request $request): JsonResponse
     {
-        //
-    }
+        $protocolId = $request->query('protocol_id');
+        $data = $this->eventService->getEventsByProtocol((int) $protocolId);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return response()->json(['data' => $data], 200);
     }
 }
