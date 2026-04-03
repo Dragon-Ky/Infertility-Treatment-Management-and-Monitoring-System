@@ -3,47 +3,27 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\DTOs\Requests\CreateMedicationRecordRequestDTO;
+use App\Services\MedicationRecordService;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class MedicationRecordController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
+    public function __construct(protected MedicationRecordService $recordService) {}
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
-        //
-    }
+        $validated = $request->validate([
+            'schedule_id' => 'required|integer',
+            'administered_at' => 'required|date',
+            'staff_id' => 'required|integer',
+            'notes' => 'nullable|string',
+        ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+        $dto = CreateMedicationRecordRequestDTO::fromArray($validated);
+        $responseDTO = $this->recordService->createRecord($dto);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return response()->json(['message' => 'Ghi nhận dùng thuốc thành công', 'data' => $responseDTO->toArray()], 201);
     }
 }
