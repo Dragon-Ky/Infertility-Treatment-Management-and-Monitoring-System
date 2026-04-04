@@ -6,24 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('medication_records', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('schedule_id')->constrained('medication_schedules'); // Liên kết với lịch đã lên
-            $table->dateTime('administered_at'); // Thời gian thực tế đã dùng thuốc
-            $table->unsignedBigInteger('staff_id'); // Người thực hiện (Y tá hoặc BN tự xác nhận)
-            $table->text('notes')->nullable(); // Phản ứng phụ hoặc ghi chú khác
+            // Liên kết tới bảng lịch trình thuốc
+            $table->foreignId('medication_schedule_id')->constrained('medication_schedules'); 
+            $table->dateTime('scheduled_time'); // Thời gian dự kiến uống thuốc
+            $table->dateTime('actual_time');    // Thời gian thực tế đã uống
+            $table->enum('status', ['taken', 'missed', 'skipped']); // Trạng thái: Đã uống, Bỏ lỡ, Bỏ qua
+            $table->text('notes')->nullable(); 
+            $table->unsignedBigInteger('recorded_by'); // ID người ghi nhận (Y tá/Bệnh nhân)
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('medication_records');

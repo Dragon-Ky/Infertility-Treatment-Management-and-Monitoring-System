@@ -15,15 +15,20 @@ class MedicationRecordController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'schedule_id' => 'required|integer',
-            'administered_at' => 'required|date',
-            'staff_id' => 'required|integer',
-            'notes' => 'nullable|string',
+            'medication_schedule_id' => 'required|integer',
+            'scheduled_time'         => 'required|date',
+            'actual_time'            => 'required|date',
+            'status'                 => 'required|in:taken,missed,skipped',
+            'recorded_by'            => 'required|integer',
+            'notes'                  => 'nullable|string',
         ]);
 
         $dto = CreateMedicationRecordRequestDTO::fromArray($validated);
         $responseDTO = $this->recordService->createRecord($dto);
 
-        return response()->json(['message' => 'Ghi nhận dùng thuốc thành công', 'data' => $responseDTO->toArray()], 201);
+        return response()->json([
+            'message' => 'Ghi nhận dùng thuốc thành công', 
+            'data' => $responseDTO->toArray()
+        ], 201);
     }
 }

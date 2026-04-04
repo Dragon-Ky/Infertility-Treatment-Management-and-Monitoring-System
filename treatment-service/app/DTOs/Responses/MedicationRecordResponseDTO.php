@@ -9,9 +9,11 @@ readonly class MedicationRecordResponseDTO
 {
     public function __construct(
         public int $id,
-        public int $schedule_id,
-        public string $administered_at_formatted,
-        public int $staff_id,
+        public int $medication_schedule_id,
+        public string $scheduled_time_formatted,
+        public string $actual_time_formatted,
+        public string $status,
+        public int $recorded_by,
         public ?string $notes
     ) {}
 
@@ -19,9 +21,11 @@ readonly class MedicationRecordResponseDTO
     {
         return new self(
             id: $record->id,
-            schedule_id: $record->schedule_id,
-            administered_at_formatted: Carbon::parse($record->administered_at)->format('d/m/Y H:i'),
-            staff_id: $record->staff_id,
+            medication_schedule_id: $record->medication_schedule_id,
+            scheduled_time_formatted: Carbon::parse($record->scheduled_time)->format('d/m/Y H:i'),
+            actual_time_formatted: Carbon::parse($record->actual_time)->format('d/m/Y H:i'),
+            status: $record->status,
+            recorded_by: $record->recorded_by,
             notes: $record->notes
         );
     }
@@ -30,9 +34,11 @@ readonly class MedicationRecordResponseDTO
     {
         return [
             'id' => $this->id,
-            'schedule_id' => $this->schedule_id,
-            'administered_time' => $this->administered_at_formatted,
-            'staff_id' => $this->staff_id,
+            'medication_schedule_id' => $this->medication_schedule_id,
+            'scheduled_time' => $this->scheduled_time_formatted,
+            'actual_time' => $this->actual_time_formatted,
+            'status' => $this->status,
+            'recorded_by' => $this->recorded_by,
             'notes' => $this->notes,
         ];
     }

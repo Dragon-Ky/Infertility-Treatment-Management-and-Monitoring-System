@@ -7,22 +7,21 @@ use App\DTOs\Responses\MedicationRecordResponseDTO;
 use App\Repositories\Contracts\MedicationRecordRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 
-class MedicationRecordService extends BaseService
+class MedicationRecordService
 {
-    public function __construct(MedicationRecordRepositoryInterface $recordRepository)
-    {
-        parent::__construct($recordRepository);
-    }
+    public function __construct(protected MedicationRecordRepositoryInterface $repository) {}
 
     public function createRecord(CreateMedicationRecordRequestDTO $dto): MedicationRecordResponseDTO
     {
         DB::beginTransaction();
         try {
             $record = $this->repository->create([
-                'schedule_id' => $dto->schedule_id,
-                'administered_at' => $dto->administered_at,
-                'staff_id' => $dto->staff_id,
-                'notes' => $dto->notes,
+                'medication_schedule_id' => $dto->medication_schedule_id,
+                'scheduled_time'         => $dto->scheduled_time,
+                'actual_time'            => $dto->actual_time,
+                'status'                 => $dto->status,
+                'recorded_by'            => $dto->recorded_by,
+                'notes'                  => $dto->notes,
             ]);
             DB::commit();
             return MedicationRecordResponseDTO::fromModel($record);
