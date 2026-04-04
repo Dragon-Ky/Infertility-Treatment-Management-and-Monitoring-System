@@ -5,21 +5,24 @@ namespace App\DTOs\Requests;
 readonly class CreateTreatmentProtocolRequestDTO
 {
     public function __construct(
-        public int $patient_id,
+        public int $treatment_id,
         public int $doctor_id,
-        public string $name,
-        public ?string $start_date = null,
-        public ?string $end_date = null,
+        public string $protocol_name,
+        public ?string $diagnosis = null,
+        public ?string $prescription = null,
+        public ?string $notes = null,
     ) {}
 
     public static function fromArray(array $data): self
     {
+        // Sửa các key bên trong mảng $data cho khớp với Controller/Form
         return new self(
-            patient_id: $data['patient_id'],
+            treatment_id: $data['treatment_id'],
             doctor_id: $data['doctor_id'],
-            name: $data['name'],
-            start_date: $data['start_date'] ?? null,
-            end_date: $data['end_date'] ?? null,
+            protocol_name: $data['protocol_name'],
+            diagnosis: $data['diagnosis'] ?? null,
+            prescription: $data['prescription'] ?? null,
+            notes: $data['notes'] ?? null,
         );
     }
 }

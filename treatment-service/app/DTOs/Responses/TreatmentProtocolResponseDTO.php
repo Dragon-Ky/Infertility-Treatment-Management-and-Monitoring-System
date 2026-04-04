@@ -7,10 +7,13 @@ use App\Models\TreatmentProtocol;
 readonly class TreatmentProtocolResponseDTO
 {
     public function __construct(
-        public int $id,
-        public int $patient_id,
-        public string $name,
-        public string $status_label,
+        public int $id,              
+        public int $treatment_id,
+        public int $doctor_id,
+        public string $protocol_name,
+        public ?string $diagnosis,
+        public ?string $prescription,
+        public ?string $notes,
         public string $created_at_formatted
     ) {}
 
@@ -18,10 +21,13 @@ readonly class TreatmentProtocolResponseDTO
     {
         return new self(
             id: $protocol->id,
-            patient_id: $protocol->patient_id,
-            name: $protocol->name,
-            status_label: ucfirst($protocol->status), 
-            created_at_formatted: $protocol->created_at->format('d/m/Y H:i') 
+            treatment_id: $protocol->treatment_id,
+            doctor_id: $protocol->doctor_id,
+            protocol_name: $protocol->protocol_name,
+            diagnosis: $protocol->diagnosis,
+            prescription: $protocol->prescription,
+            notes: $protocol->notes,
+            created_at_formatted: $protocol->created_at->format('d/m/Y H:i')
         );
     }
 
@@ -29,9 +35,12 @@ readonly class TreatmentProtocolResponseDTO
     {
         return [
             'id' => $this->id,
-            'patient_id' => $this->patient_id,
-            'protocol_name' => $this->name,
-            'status' => $this->status_label,
+            'treatment_id' => $this->treatment_id,
+            'doctor_id' => $this->doctor_id,
+            'protocol_name' => $this->protocol_name,
+            'diagnosis' => $this->diagnosis,
+            'prescription' => $this->prescription,
+            'notes' => $this->notes,
             'created_at' => $this->created_at_formatted,
         ];
     }

@@ -15,19 +15,21 @@ class TreatmentProtocolController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'patient_id' => 'required|integer',
-            'doctor_id' => 'required|integer',
-            'name' => 'required|string|max:255',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'treatment_id'  => 'required|integer',
+            'doctor_id'     => 'required|integer',
+            'protocol_name' => 'required|string|max:255',
+            'diagnosis'     => 'nullable|string',
+            'prescription'  => 'nullable|string',
+            'notes'         => 'nullable|string',
         ]);
 
         $dto = CreateTreatmentProtocolRequestDTO::fromArray($validated);
         $responseDTO = $this->protocolService->createProtocol($dto);
 
         return response()->json([
+            'status'  => 'success',
             'message' => 'Tạo phác đồ thành công',
-            'data' => $responseDTO->toArray()
+            'data'    => $responseDTO->toArray()
         ], 201);
     }
 }
