@@ -22,4 +22,14 @@ abstract class BaseService
     {
         return $this->repository->find($id);
     }
+    public function update(int $id, array $data)
+    {
+        // Kiểm tra xem dữ liệu có tồn tại không trước khi sửa
+        $item = $this->findById($id);
+        if (!$item) {
+            throw new \Exception("Không tìm thấy dữ liệu để cập nhật.");
+        }
+
+        return $this->repository->update($id, $data);
+    }
 }

@@ -30,4 +30,12 @@ class TreatmentProtocolService
             throw $e;
         }
     }
+    // TreatmentProtocolService.php
+    public function updateProtocol(int $id, UpdateRequestDTO $dto): ResponseDTO
+    {
+        // Gọi hàm update từ BaseService
+        $protocol = $this->update($id, $dto->toArray()); 
+        
+        return ResponseDTO::fromModel($protocol);
+    }
 }
