@@ -26,5 +26,6 @@ class MedicationSchedule extends Model
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
+        'time_slots' => 'array', // Để lưu danh sách giờ uống thuốc dưới dạng JSON
     ];
 }

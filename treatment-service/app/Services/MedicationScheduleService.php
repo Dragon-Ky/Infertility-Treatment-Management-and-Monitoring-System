@@ -7,23 +7,24 @@ use App\DTOs\Responses\MedicationScheduleResponseDTO;
 use App\Repositories\Contracts\MedicationScheduleRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 
-class MedicationScheduleService extends BaseService
+class MedicationScheduleService
 {
-    public function __construct(MedicationScheduleRepositoryInterface $scheduleRepository)
-    {
-        parent::__construct($scheduleRepository);
-    }
+    public function __construct(protected MedicationScheduleRepositoryInterface $repository) {}
 
     public function createSchedule(CreateMedicationScheduleRequestDTO $dto): MedicationScheduleResponseDTO
     {
         DB::beginTransaction();
         try {
             $schedule = $this->repository->create([
-                'protocol_id' => $dto->protocol_id,
-                'medicine_name' => $dto->medicine_name,
-                'dosage' => $dto->dosage,
-                'scheduled_at' => $dto->scheduled_at,
-                'route' => $dto->route,
+                'treatment_id'    => $dto->treatment_id,
+                'medication_name' => $dto->medication_name,
+                'dosage'          => $dto->dosage,
+                'frequency'       => $dto->frequency,
+                'start_date'      => $dto->start_date,
+                'end_date'        => $dto->end_date,
+                'time_slots'      => $dto->time_slots,
+                'route'           => $dto->route,
+                'status'          => 'active', // Mặc định khi tạo là active
             ]);
             DB::commit();
             return MedicationScheduleResponseDTO::fromModel($schedule);

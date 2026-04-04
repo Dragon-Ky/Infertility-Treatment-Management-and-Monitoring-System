@@ -15,16 +15,22 @@ class MedicationScheduleController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'protocol_id' => 'required|integer',
-            'medicine_name' => 'required|string',
-            'dosage' => 'required|string',
-            'scheduled_at' => 'required|date',
-            'route' => 'required|string',
+            'treatment_id'    => 'required|integer',
+            'medication_name' => 'required|string',
+            'dosage'          => 'required|string',
+            'frequency'       => 'required|string',
+            'start_date'      => 'required|date',
+            'end_date'        => 'required|date|after_or_equal:start_date',
+            'time_slots'      => 'required|array',
+            'route'           => 'required|in:injection,oral,vaginal,other',
         ]);
 
         $dto = CreateMedicationScheduleRequestDTO::fromArray($validated);
         $responseDTO = $this->scheduleService->createSchedule($dto);
 
-        return response()->json(['message' => 'Lên lịch dùng thuốc thành công', 'data' => $responseDTO->toArray()], 201);
+        return response()->json([
+            'message' => 'Lên lịch dùng thuốc thành công', 
+            'data' => $responseDTO->toArray()
+        ], 201);
     }
 }

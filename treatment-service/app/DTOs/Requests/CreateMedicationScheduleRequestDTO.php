@@ -5,20 +5,26 @@ namespace App\DTOs\Requests;
 readonly class CreateMedicationScheduleRequestDTO
 {
     public function __construct(
-        public int $protocol_id,
-        public string $medicine_name,
+        public int $treatment_id,
+        public string $medication_name,
         public string $dosage,
-        public string $scheduled_at,
+        public string $frequency,
+        public string $start_date,
+        public string $end_date,
+        public array $time_slots,
         public string $route,
     ) {}
 
     public static function fromArray(array $data): self
     {
         return new self(
-            protocol_id: $data['protocol_id'],
-            medicine_name: $data['medicine_name'],
+            treatment_id: $data['treatment_id'],
+            medication_name: $data['medication_name'],
             dosage: $data['dosage'],
-            scheduled_at: $data['scheduled_at'],
+            frequency: $data['frequency'],
+            start_date: $data['start_date'],
+            end_date: $data['end_date'],
+            time_slots: $data['time_slots'],
             route: $data['route'],
         );
     }

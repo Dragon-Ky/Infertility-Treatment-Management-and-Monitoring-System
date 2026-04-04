@@ -3,26 +3,33 @@
 namespace App\DTOs\Responses;
 
 use App\Models\MedicationSchedule;
-use Carbon\Carbon;
 
 readonly class MedicationScheduleResponseDTO
 {
     public function __construct(
         public int $id,
-        public string $medicine_name,
+        public string $medication_name,
         public string $dosage,
-        public string $scheduled_at_formatted,
-        public string $route
+        public string $frequency,
+        public string $start_date,
+        public string $end_date,
+        public array $time_slots,
+        public string $route,
+        public string $status
     ) {}
 
     public static function fromModel(MedicationSchedule $schedule): self
     {
         return new self(
             id: $schedule->id,
-            medicine_name: $schedule->medicine_name,
+            medication_name: $schedule->medication_name,
             dosage: $schedule->dosage,
-            scheduled_at_formatted: Carbon::parse($schedule->scheduled_at)->format('d/m/Y H:i'),
-            route: $schedule->route
+            frequency: $schedule->frequency,
+            start_date: $schedule->start_date->format('Y-m-d'),
+            end_date: $schedule->end_date->format('Y-m-d'),
+            time_slots: $schedule->time_slots,
+            route: $schedule->route,
+            status: $schedule->status
         );
     }
 
@@ -30,10 +37,14 @@ readonly class MedicationScheduleResponseDTO
     {
         return [
             'id' => $this->id,
-            'medicine_name' => $this->medicine_name,
+            'medication_name' => $this->medication_name,
             'dosage' => $this->dosage,
-            'scheduled_time' => $this->scheduled_at_formatted,
+            'frequency' => $this->frequency,
+            'start_date' => $this->start_date,
+            'end_date' => $this->end_date,
+            'time_slots' => $this->time_slots,
             'route' => $this->route,
+            'status' => $this->status,
         ];
     }
 }
