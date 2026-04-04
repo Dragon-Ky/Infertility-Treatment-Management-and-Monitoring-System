@@ -22,7 +22,9 @@ class StorageRecord extends Model
     ];
 
     protected $casts = [
-        'start_date' => 'date',
+        'start_date'  => 'date',
         'expiry_date' => 'date',
+        'created_at'  => 'datetime',
+        'updated_at'  => 'datetime',
     ];
 }

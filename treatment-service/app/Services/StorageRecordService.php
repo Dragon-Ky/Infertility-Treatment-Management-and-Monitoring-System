@@ -7,29 +7,24 @@ use App\DTOs\Responses\StorageRecordResponseDTO;
 use App\Repositories\Contracts\StorageRecordRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 
-class StorageRecordService extends BaseService
+class StorageRecordService
 {
-    public function __construct(StorageRecordRepositoryInterface $storageRepository)
-    {
-        parent::__construct($storageRepository);
-    }
+    public function __construct(protected StorageRecordRepositoryInterface $repository) {}
 
     public function createStorage(CreateStorageRecordRequestDTO $dto): StorageRecordResponseDTO
     {
-        DB::beginTransaction();
-        try {
+        return DB::transaction(function () use ($dto) {
             $storage = $this->repository->create([
-                'patient_id' => $dto->patient_id,
-                'sample_type' => $dto->sample_type,
-                'tank_location' => $dto->tank_location,
-                'freeze_date' => $dto->freeze_date,
-                'expiration_date' => $dto->expiration_date,
+                'treatment_id'  => $dto->treatment_id,
+                'storage_type'  => $dto->storage_type,
+                'item_id'       => $dto->item_id,
+                'start_date'    => $dto->start_date,
+                'expiry_date'   => $dto->expiry_date,
+                'status'        => 'active',
+                'location_code' => $dto->location_code,
             ]);
-            DB::commit();
+            
             return StorageRecordResponseDTO::fromModel($storage);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
+        });
     }
 }

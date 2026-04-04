@@ -15,16 +15,20 @@ class StorageRecordController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'patient_id' => 'required|integer',
-            'sample_type' => 'required|string',
-            'tank_location' => 'required|string',
-            'freeze_date' => 'required|date',
-            'expiration_date' => 'required|date|after:freeze_date',
+            'treatment_id'  => 'required|integer',
+            'storage_type'  => 'required|in:embryo,sperm,oocyte',
+            'item_id'       => 'required|integer',
+            'start_date'    => 'required|date',
+            'expiry_date'   => 'required|date|after:start_date',
+            'location_code' => 'required|string|max:50',
         ]);
 
         $dto = CreateStorageRecordRequestDTO::fromArray($validated);
         $responseDTO = $this->storageService->createStorage($dto);
 
-        return response()->json(['message' => 'Lưu hồ sơ trữ đông thành công', 'data' => $responseDTO->toArray()], 201);
+        return response()->json([
+            'message' => 'Lưu hồ sơ trữ đông thành công', 
+            'data' => $responseDTO->toArray()
+        ], 201);
     }
 }
