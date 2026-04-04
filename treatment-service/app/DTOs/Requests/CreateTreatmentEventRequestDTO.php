@@ -2,26 +2,26 @@
 
 namespace App\DTOs\Requests;
 
-readonly class CreateTreatmentEventRequestDTO
-{
+readonly class CreateTreatmentEventRequestDTO {
     public function __construct(
-        public int $protocol_id,
+        public int $treatment_id,
         public string $event_type,
-        public string $title,
-        public string $event_datetime,
-        public ?string $result_summary = null,
-        public ?string $location = null,
+        public string $event_date,
+        public ?string $description = null,
+        public ?string $result = null,
+        public ?string $doctor_notes = null,
+        public array $attachments = [],
     ) {}
 
-    public static function fromArray(array $data): self
-    {
+    public static function fromArray(array $data): self {
         return new self(
-            protocol_id: $data['protocol_id'],
+            treatment_id: $data['treatment_id'],
             event_type: $data['event_type'],
-            title: $data['title'],
-            event_datetime: $data['event_datetime'],
-            result_summary: $data['result_summary'] ?? null,
-            location: $data['location'] ?? null,
+            event_date: $data['event_date'],
+            description: $data['description'] ?? null,
+            result: $data['result'] ?? null,
+            doctor_notes: $data['doctor_notes'] ?? null,
+            attachments: $data['attachments'] ?? [],
         );
-    }
+    } 
 }

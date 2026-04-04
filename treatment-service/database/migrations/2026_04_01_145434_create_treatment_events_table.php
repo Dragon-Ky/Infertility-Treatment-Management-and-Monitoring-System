@@ -9,17 +9,16 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
+    public function up(): void {
         Schema::create('treatment_events', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('protocol_id')->constrained('treatment_protocols')->onDelete('cascade');
-            // Liên kết sự kiện này vào phác đồ nào
-            $table->string('event_type'); // Loại sự kiện (Medication, Ultrasound, Lab Test)
-            $table->string('title'); // Tiêu đề ngắn gọn của sự kiện
-            $table->dateTime('event_datetime'); // Thời gian diễn ra sự kiện
-            $table->text('result_summary')->nullable(); // Kết quả nhanh (ví dụ: kích thước trứng, liều thuốc đã tiêm)
-            $table->string('location')->nullable(); // Nơi thực hiện (Phòng siêu âm, phòng Lab)
+            $table->foreignId('treatment_id')->constrained('treatment_protocols');
+            $table->enum('event_type', ['egg_retrieval', 'embryo_transfer', 'insemination', 'ultrasound', 'blood_test', 'consultation', 'other']);
+            $table->dateTime('event_date');
+            $table->text('description')->nullable();
+            $table->text('result')->nullable();
+            $table->text('doctor_notes')->nullable();
+            $table->json('attachments')->nullable(); // Lưu danh sách file/ảnh
             $table->timestamps();
         });
     }

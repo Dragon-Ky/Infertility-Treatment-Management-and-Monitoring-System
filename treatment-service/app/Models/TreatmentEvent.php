@@ -2,27 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class TreatmentEvent extends Model
-{
-    use HasFactory;
-
+class TreatmentEvent extends Model {
     protected $table = 'treatment_events';
-
-    protected $fillable = [
-        'treatment_id',
-        'event_type',
-        'event_date',
-        'description',
-        'result',
-        'doctor_notes',
-        'attachments',
-    ];
-
+    protected $fillable = ['treatment_id', 'event_type', 'event_date', 'description', 'result', 'doctor_notes', 'attachments'];
     protected $casts = [
         'event_date' => 'datetime',
-        'attachments' => 'array',
+        'attachments' => 'array', // Tự dịch JSON thành mảng
     ];
 }

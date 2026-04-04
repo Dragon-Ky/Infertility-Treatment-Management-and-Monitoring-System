@@ -14,38 +14,52 @@ class TreatmentEventController extends Controller
         protected TreatmentEventService $eventService
     ) {}
 
-    // API: Tạo sự kiện mới
+    /**
+     * API: Tạo sự kiện điều trị mới
+     */
     public function store(Request $request): JsonResponse
     {
-        // Lễ tân kiểm tra form
+        // 1. Lễ tân kiểm tra hồ sơ (Validation)
         $validated = $request->validate([
-            'protocol_id' => 'required|integer',
-            'event_type' => 'required|string',
-            'title' => 'required|string|max:255',
-            'event_datetime' => 'required|date',
-            'result_summary' => 'nullable|string',
-            'location' => 'nullable|string',
+            'treatment_id' => 'required|integer',
+            'event_type'   => 'required|in:egg_retrieval,embryo_transfer,insemination,ultrasound,blood_test,consultation,other',
+            'event_date'   => 'required|date',
+            'description'  => 'nullable|string',
+            'result'       => 'nullable|string',
+            'doctor_notes' => 'nullable|string',
+            'attachments'  => 'nullable|array',
         ]);
 
-        // Đóng gói hồ sơ
+        // 2. Đóng gói hồ sơ vào khay (DTO)
         $dto = CreateTreatmentEventRequestDTO::fromArray($validated);
 
-        // Giao cho Chuyên gia xử lý
+        // 3. Giao cho Chuyên gia (Service) xử lý lưu trữ
         $responseDTO = $this->eventService->createEvent($dto);
 
-        // Báo kết quả cho Frontend (React)
+        // 4. Báo kết quả thành công cho React
         return response()->json([
-            'message' => 'Tạo sự kiện thành công',
-            'data' => $responseDTO->toArray()
+            'message' => 'Ghi nhận sự kiện điều trị thành công',
+            'data'    => $responseDTO->toArray()
         ], 201);
     }
 
-    // API: Lấy danh sách sự kiện của 1 phác đồ
+    /**
+     * API: Lấy danh sách sự kiện của một đợt điều trị (Timeline)
+     */
     public function index(Request $request): JsonResponse
     {
-        $protocolId = $request->query('protocol_id');
-        $data = $this->eventService->getEventsByProtocol((int) $protocolId);
+        // Lấy treatment_id từ link (VD: /api/events?treatment_id=1)
+        $treatmentId = $request->query('treatment_id');
 
-        return response()->json(['data' => $data], 200);
+        if (!$treatmentId) {
+            return response()->json(['message' => 'Thiếu treatment_id'], 400);
+        }
+
+        // Gọi Service lấy dữ liệu theo đúng tên hàm mới
+        $data = $this->eventService->getEventsByTreatment((int) $treatmentId);
+
+        return response()->json([
+            'data' => $data
+        ], 200);
     }
 }

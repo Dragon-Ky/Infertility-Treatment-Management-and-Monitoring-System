@@ -9,46 +9,51 @@ use Illuminate\Support\Facades\DB;
 
 class TreatmentEventService extends BaseService
 {
-    // Lấy đúng kho chứa sự kiện
+    // 1. Khởi tạo: Lấy đúng "Thủ kho" chuyên quản lý Sự kiện điều trị
     public function __construct(TreatmentEventRepositoryInterface $eventRepository)
     {
         parent::__construct($eventRepository);
     }
 
-    // Hàm tạo sự kiện mới
+    /**
+     * 2. Hàm tạo sự kiện mới (Ví dụ: Ghi nhận một ca chọc trứng)
+     */
     public function createEvent(CreateTreatmentEventRequestDTO $dto): TreatmentEventResponseDTO
     {
         DB::beginTransaction();
         try {
-            // Nhờ Thủ kho cất dữ liệu vào DB
+            // Nhờ Thủ kho cất dữ liệu vào đúng các ngăn (Cột) trong DB
             $event = $this->repository->create([
-                'protocol_id' => $dto->protocol_id,
-                'event_type' => $dto->event_type,
-                'title' => $dto->title,
-                'event_datetime' => $dto->event_datetime,
-                'result_summary' => $dto->result_summary,
-                'location' => $dto->location,
+                'treatment_id' => $dto->treatment_id, // Gắn vào đúng đợt điều trị
+                'event_type'   => $dto->event_type,   // Loại sự kiện (Siêu âm, xét nghiệm...)
+                'event_date'   => $dto->event_date,   // Ngày giờ diễn ra
+                'description'  => $dto->description,  // Mô tả chi tiết
+                'result'       => $dto->result,       // Kết quả (nếu có)
+                'doctor_notes' => $dto->doctor_notes, // Ghi chú của bác sĩ
+                'attachments'  => $dto->attachments,  // Danh sách file/ảnh đính kèm
             ]);
 
             DB::commit();
             
-            // Format lại dữ liệu cho đẹp rồi trả về
+            // Chuyển đổi dữ liệu thô từ DB sang dạng đẹp (DTO) để trả về cho Frontend
             return TreatmentEventResponseDTO::fromModel($event);
         } catch (\Exception $e) {
-            DB::rollBack();
+            DB::rollBack(); // Nếu có lỗi thì xóa bỏ mọi thứ vừa làm để dữ liệu không bị rác
             throw $e;
         }
     }
 
-    // Hàm lấy danh sách sự kiện theo phác đồ (Cho Frontend hiển thị Timeline)
-    public function getEventsByProtocol(int $protocolId): array
+    /**
+     * 3. Hàm lấy danh sách sự kiện theo đợt điều trị (Để hiện Timeline)
+     */
+    public function getEventsByTreatment(int $treatmentId): array
     {
-        // Trong thực tế, bạn sẽ thêm hàm getByProtocolId vào Repository. 
-        // Ở đây ta dùng hàm all() cơ bản và lọc ra.
-        $events = $this->repository->all()->where('protocol_id', $protocolId);
+        // Lấy tất cả sự kiện thuộc về treatment_id này
+        $events = $this->repository->all()->where('treatment_id', $treatmentId);
         
         $result = [];
         foreach ($events as $event) {
+            // Biến mỗi dòng dữ liệu thành một "Gói quà" ResponseDTO gọn gàng
             $result[] = TreatmentEventResponseDTO::fromModel($event)->toArray();
         }
         return $result;
