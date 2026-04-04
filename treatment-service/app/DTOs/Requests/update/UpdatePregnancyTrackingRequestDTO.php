@@ -1,5 +1,5 @@
 <?php
-namespace App\DTOs\Requests;
+namespace App\DTOs\Requests\Update;
 
 readonly class UpdatePregnancyTrackingRequestDTO
 {

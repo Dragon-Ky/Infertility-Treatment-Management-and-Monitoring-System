@@ -1,6 +1,6 @@
 <?php
-namespace App\DTOs\Requests;
 
+namespace App\DTOs\Requests\Update;
 readonly class UpdateEmbryoRecordRequestDTO
 {
     public function __construct(
