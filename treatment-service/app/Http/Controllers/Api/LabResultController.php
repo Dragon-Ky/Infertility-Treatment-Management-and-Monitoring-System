@@ -15,16 +15,23 @@ class LabResultController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'protocol_id' => 'required|integer',
-            'test_name' => 'required|string',
-            'result_value' => 'required|string',
-            'unit' => 'required|string',
-            'interpretation' => 'nullable|string',
+            'treatment_id'    => 'required|integer',
+            'test_type'       => 'required|in:blood,ultrasound,hormone,spermogram,other',
+            'test_date'       => 'required|date',
+            'result_data'     => 'required|array', // Dữ liệu chỉ số phải là mảng
+            'reference_range' => 'nullable|string',
+            'unit'            => 'nullable|string',
+            'notes'           => 'nullable|string',
+            'doctor_notes'    => 'nullable|string',
+            'attachments'     => 'nullable|array',
         ]);
 
         $dto = CreateLabResultRequestDTO::fromArray($validated);
         $responseDTO = $this->labService->createLabResult($dto);
 
-        return response()->json(['message' => 'Lưu kết quả xét nghiệm thành công', 'data' => $responseDTO->toArray()], 201);
+        return response()->json([
+            'message' => 'Lưu kết quả xét nghiệm thành công', 
+            'data' => $responseDTO->toArray()
+        ], 201);
     }
 }
