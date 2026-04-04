@@ -10,18 +10,18 @@ use Illuminate\Http\JsonResponse;
 
 class EmbryoRecordController extends Controller
 {
-    public function __construct(
-        protected EmbryoRecordService $embryoService
-    ) {}
+    public function __construct(protected EmbryoRecordService $embryoService) {}
 
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'protocol_id' => 'required|integer',
-            'embryo_code' => 'required|string|unique:embryo_records,embryo_code', // Check trùng mã phôi
-            'stage' => 'required|string',
-            'grade' => 'required|string',
-            'status' => 'required|in:fresh,frozen,transferred,discarded',
+            'treatment_id'       => 'required|integer',
+            'embryo_code'        => 'required|string|unique:embryo_records,embryo_code',
+            'fertilization_date' => 'required|date',
+            'development_day'    => 'required|in:3,5,6',
+            'grade'              => 'required|string',
+            'status'             => 'required|in:frozen,transferred,discarded',
+            'notes'              => 'nullable|string',
         ]);
 
         $dto = CreateEmbryoRecordRequestDTO::fromArray($validated);
@@ -29,7 +29,7 @@ class EmbryoRecordController extends Controller
 
         return response()->json([
             'message' => 'Lưu hồ sơ phôi thành công',
-            'data' => $responseDTO->toArray()
+            'data'    => $responseDTO->toArray()
         ], 201);
     }
 }

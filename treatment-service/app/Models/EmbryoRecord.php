@@ -23,6 +23,8 @@ class EmbryoRecord extends Model
 
     protected $casts = [
         'fertilization_date' => 'date',
-        'development_day' => 'integer',
+        'development_day'    => 'integer',
+        'created_at'         => 'datetime',
+        'updated_at'         => 'datetime',
     ];
 }

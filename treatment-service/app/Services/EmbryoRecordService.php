@@ -7,30 +7,23 @@ use App\DTOs\Responses\EmbryoRecordResponseDTO;
 use App\Repositories\Contracts\EmbryoRecordRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 
-class EmbryoRecordService extends BaseService
+class EmbryoRecordService
 {
-    public function __construct(EmbryoRecordRepositoryInterface $embryoRepository)
-    {
-        parent::__construct($embryoRepository);
-    }
+    public function __construct(protected EmbryoRecordRepositoryInterface $repository) {}
 
     public function createEmbryo(CreateEmbryoRecordRequestDTO $dto): EmbryoRecordResponseDTO
     {
-        DB::beginTransaction();
-        try {
+        return DB::transaction(function () use ($dto) {
             $embryo = $this->repository->create([
-                'protocol_id' => $dto->protocol_id,
-                'embryo_code' => $dto->embryo_code,
-                'stage' => $dto->stage,
-                'grade' => $dto->grade,
-                'status' => $dto->status,
+                'treatment_id'       => $dto->treatment_id,
+                'embryo_code'        => $dto->embryo_code,
+                'fertilization_date' => $dto->fertilization_date,
+                'development_day'    => $dto->development_day,
+                'grade'              => $dto->grade,
+                'status'             => $dto->status,
+                'notes'              => $dto->notes,
             ]);
-
-            DB::commit();
             return EmbryoRecordResponseDTO::fromModel($embryo);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
+        });
     }
 }
