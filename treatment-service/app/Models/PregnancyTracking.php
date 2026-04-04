@@ -21,6 +21,8 @@ class PregnancyTracking extends Model
 
     protected $casts = [
         'tracking_date' => 'date',
-        'week_number' => 'integer',
+        'week_number'   => 'integer',
+        'created_at'    => 'datetime',
+        'updated_at'    => 'datetime',
     ];
 }

@@ -15,16 +15,19 @@ class PregnancyTrackingController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'protocol_id' => 'required|integer',
-            'beta_hcg_level' => 'nullable|numeric',
-            'gestational_age_weeks' => 'nullable|integer|min:0',
-            'fetal_heartbeat' => 'nullable|string',
-            'outcome' => 'required|in:ongoing,miscarriage,live_birth,ectopic',
+            'treatment_id'  => 'required|integer',
+            'tracking_date' => 'required|date',
+            'week_number'   => 'required|integer|min:0|max:42', // Thai kỳ thường tối đa 42 tuần
+            'status'        => 'required|in:ongoing,delivered,miscarried',
+            'notes'         => 'nullable|string',
         ]);
 
         $dto = CreatePregnancyTrackingRequestDTO::fromArray($validated);
         $responseDTO = $this->trackingService->createTracking($dto);
 
-        return response()->json(['message' => 'Lưu hồ sơ theo dõi thai kỳ thành công', 'data' => $responseDTO->toArray()], 201);
+        return response()->json([
+            'message' => 'Lưu hồ sơ theo dõi thai kỳ thành công', 
+            'data' => $responseDTO->toArray()
+        ], 201);
     }
 }

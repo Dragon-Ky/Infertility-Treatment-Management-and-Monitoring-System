@@ -7,29 +7,21 @@ use App\DTOs\Responses\PregnancyTrackingResponseDTO;
 use App\Repositories\Contracts\PregnancyTrackingRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 
-class PregnancyTrackingService extends BaseService
+class PregnancyTrackingService
 {
-    public function __construct(PregnancyTrackingRepositoryInterface $trackingRepository)
-    {
-        parent::__construct($trackingRepository);
-    }
+    public function __construct(protected PregnancyTrackingRepositoryInterface $repository) {}
 
     public function createTracking(CreatePregnancyTrackingRequestDTO $dto): PregnancyTrackingResponseDTO
     {
-        DB::beginTransaction();
-        try {
+        return DB::transaction(function () use ($dto) {
             $tracking = $this->repository->create([
-                'protocol_id' => $dto->protocol_id,
-                'beta_hcg_level' => $dto->beta_hcg_level,
-                'gestational_age_weeks' => $dto->gestational_age_weeks,
-                'fetal_heartbeat' => $dto->fetal_heartbeat,
-                'outcome' => $dto->outcome,
+                'treatment_id'  => $dto->treatment_id,
+                'tracking_date' => $dto->tracking_date,
+                'week_number'   => $dto->week_number,
+                'status'        => $dto->status,
+                'notes'         => $dto->notes,
             ]);
-            DB::commit();
             return PregnancyTrackingResponseDTO::fromModel($tracking);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
+        });
     }
 }

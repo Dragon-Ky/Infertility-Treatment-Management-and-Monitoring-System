@@ -8,20 +8,20 @@ readonly class PregnancyTrackingResponseDTO
 {
     public function __construct(
         public int $id,
-        public ?float $beta_hcg_level,
-        public ?int $gestational_age_weeks,
-        public ?string $fetal_heartbeat,
-        public string $outcome_label
+        public string $tracking_date_formatted,
+        public int $week_number,
+        public string $status_label,
+        public ?string $notes
     ) {}
 
     public static function fromModel(PregnancyTracking $tracking): self
     {
         return new self(
             id: $tracking->id,
-            beta_hcg_level: $tracking->beta_hcg_level ? (float) $tracking->beta_hcg_level : null,
-            gestational_age_weeks: $tracking->gestational_age_weeks,
-            fetal_heartbeat: $tracking->fetal_heartbeat,
-            outcome_label: ucfirst(str_replace('_', ' ', $tracking->outcome)) // VD: "live_birth" -> "Live birth"
+            tracking_date_formatted: $tracking->tracking_date->format('d/m/Y'),
+            week_number: $tracking->week_number,
+            status_label: ucfirst($tracking->status),
+            notes: $tracking->notes
         );
     }
 
@@ -29,10 +29,10 @@ readonly class PregnancyTrackingResponseDTO
     {
         return [
             'id' => $this->id,
-            'beta_hcg_level' => $this->beta_hcg_level,
-            'gestational_age_weeks' => $this->gestational_age_weeks,
-            'fetal_heartbeat' => $this->fetal_heartbeat,
-            'outcome' => $this->outcome_label,
+            'tracking_date' => $this->tracking_date_formatted,
+            'week_number' => $this->week_number,
+            'status' => $this->status_label,
+            'notes' => $this->notes,
         ];
     }
 }
