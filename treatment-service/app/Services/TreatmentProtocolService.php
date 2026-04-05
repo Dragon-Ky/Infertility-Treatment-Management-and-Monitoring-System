@@ -36,21 +36,15 @@ class TreatmentProtocolService
     
     public function updateProtocol(int $id, UpdateTreatmentProtocolRequestDTO $dto): TreatmentProtocolResponseDTO
     {
-        DB::beginTransaction();
-        try {
-            // 1. Chuyển DTO thành mảng và loại bỏ các giá trị null (không muốn sửa)
+        return DB::transaction(function () use ($id, $dto) {
+            // 1. Lọc bỏ các giá trị null: Chỉ giữ lại những gì người dùng muốn sửa
             $data = array_filter((array) $dto, fn($value) => !is_null($value));
 
-            // 2. Nhờ Repository cập nhật vào Database
+            // 2. Cập nhật thông qua Repository
             $protocol = $this->repository->update($id, $data);
 
-            DB::commit();
-
-            // 3. Trả về kết quả đã được format 
+            // 3. Trả về kết quả đã định dạng (Laravel tự động commit nếu chạy đến đây)
             return TreatmentProtocolResponseDTO::fromModel($protocol);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
+        });
     }
-}
+    }
