@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\DTOs\Requests\CreateLabResultRequestDTO;
 use App\DTOs\Responses\LabResultResponseDTO;
+use App\DTOs\Requests\update\UpdateLabResultRequestDTO;
 use App\Repositories\Contracts\LabResultRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 
@@ -32,5 +33,13 @@ class LabResultService
             DB::rollBack();
             throw $e;
         }
+    }
+    public function updateLabResult(int $id, UpdateLabResultRequestDTO $dto): LabResultResponseDTO
+    {
+        return DB::transaction(function () use ($id, $dto) {
+            $data = array_filter((array) $dto, fn($value) => !is_null($value));
+            $lab = $this->repository->update($id, $data);
+            return LabResultResponseDTO::fromModel($lab);
+        });
     }
 }
