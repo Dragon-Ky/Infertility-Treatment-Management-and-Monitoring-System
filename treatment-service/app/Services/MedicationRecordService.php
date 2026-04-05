@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\DTOs\Requests\CreateMedicationRecordRequestDTO;
 use App\DTOs\Responses\MedicationRecordResponseDTO;
+use App\DTOs\Requests\update\UpdateMedicationRecordRequestDTO;
 use App\Repositories\Contracts\MedicationRecordRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 
@@ -29,5 +30,13 @@ class MedicationRecordService
             DB::rollBack();
             throw $e;
         }
+    }
+    public function updateRecord(int $id, UpdateMedicationRecordRequestDTO $dto): MedicationRecordResponseDTO
+    {
+        return DB::transaction(function () use ($id, $dto) {
+            $data = array_filter((array) $dto, fn($value) => !is_null($value));
+            $record = $this->repository->update($id, $data);
+            return MedicationRecordResponseDTO::fromModel($record);
+        });
     }
 }
