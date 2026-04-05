@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\DTOs\Requests\CreateTreatmentProtocolRequestDTO;
+use App\DTOs\Requests\Update\UpdateTreatmentProtocolRequestDTO;
 use App\Services\TreatmentProtocolService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -31,5 +32,19 @@ class TreatmentProtocolController extends Controller
             'message' => 'Tạo phác đồ thành công',
             'data'    => $responseDTO->toArray()
         ], 201);
+    }
+    public function update(Request $request, int $id)
+    {
+        $validated = $request->validate([
+            'doctor_id'     => 'nullable|integer',
+            'protocol_name' => 'nullable|string|max:255',
+            'diagnosis'     => 'nullable|string',
+            'prescription'  => 'nullable|string',
+            'notes'         => 'nullable|string',
+        ]);
+
+        $dto = UpdateTreatmentProtocolRequestDTO::fromArray($validated);
+        $response = $this->protocolService->updateProtocol($id, $dto);
+        return response()->json(['message' => 'Cập nhật phác đồ thành công', 'data' => $response->toArray()]);
     }
 }
