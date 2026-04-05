@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\DTOs\Requests\CreatePregnancyTrackingRequestDTO;
 use App\DTOs\Responses\PregnancyTrackingResponseDTO;
+use App\DTOs\Requests\update\UpdatePregnancyTrackingRequestDTO;
 use App\Repositories\Contracts\PregnancyTrackingRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 
@@ -21,6 +22,14 @@ class PregnancyTrackingService
                 'status'        => $dto->status,
                 'notes'         => $dto->notes,
             ]);
+            return PregnancyTrackingResponseDTO::fromModel($tracking);
+        });
+    }
+    public function updateTracking(int $id, UpdatePregnancyTrackingRequestDTO $dto): PregnancyTrackingResponseDTO
+    {
+        return DB::transaction(function () use ($id, $dto) {
+            $data = array_filter((array) $dto, fn($value) => !is_null($value));
+            $tracking = $this->repository->update($id, $data);
             return PregnancyTrackingResponseDTO::fromModel($tracking);
         });
     }
