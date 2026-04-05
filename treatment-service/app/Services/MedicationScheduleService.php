@@ -4,8 +4,10 @@ namespace App\Services;
 
 use App\DTOs\Requests\CreateMedicationScheduleRequestDTO;
 use App\DTOs\Responses\MedicationScheduleResponseDTO;
+use App\DTOs\Requests\update\UpdateMedicationScheduleRequestDTO;
 use App\Repositories\Contracts\MedicationScheduleRepositoryInterface;
 use Illuminate\Support\Facades\DB;
+
 
 class MedicationScheduleService
 {
@@ -32,5 +34,13 @@ class MedicationScheduleService
             DB::rollBack();
             throw $e;
         }
+    }
+    public function updateSchedule(int $id, UpdateMedicationScheduleRequestDTO $dto): MedicationScheduleResponseDTO
+    {
+        return DB::transaction(function () use ($id, $dto) {
+            $data = array_filter((array) $dto, fn($value) => !is_null($value));
+            $schedule = $this->repository->update($id, $data);
+            return MedicationScheduleResponseDTO::fromModel($schedule);
+        });
     }
 }

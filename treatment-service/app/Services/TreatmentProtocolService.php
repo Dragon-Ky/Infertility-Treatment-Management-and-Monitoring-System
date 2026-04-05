@@ -46,7 +46,7 @@ class TreatmentProtocolService
 
             DB::commit();
 
-            // 3. Trả về kết quả đã được format đẹp đẽ
+            // 3. Trả về kết quả đã được format 
             return TreatmentProtocolResponseDTO::fromModel($protocol);
         } catch (\Exception $e) {
             DB::rollBack();
