@@ -43,4 +43,11 @@ class PregnancyTrackingController extends Controller
         $response = $this->trackingService->updateTracking($id, $dto);
         return response()->json(['message' => 'Cập nhật theo dõi thành công', 'data' => $response->toArray()]);
     }
+    public function destroy(int $id): JsonResponse
+    {
+        $this->trackingService->deleteTracking($id);
+        return response()->json([
+            'message' => 'Xóa hồ sơ theo dõi thai kỳ thành công'
+        ], 200);
+    }
 }

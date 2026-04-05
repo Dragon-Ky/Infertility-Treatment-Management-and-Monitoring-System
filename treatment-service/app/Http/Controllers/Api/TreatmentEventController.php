@@ -76,5 +76,12 @@ class TreatmentEventController extends Controller
         $response = $this->eventService->updateEvent($id, $dto);
         return response()->json(['message' => 'Cập nhật sự kiện thành công', 'data' => $response->toArray()]);
     }
+    public function destroy(int $id): JsonResponse
+    {
+        $this->eventService->deleteEvent($id);
+        return response()->json([
+            'message' => 'Xóa sự kiện điều trị thành công'
+        ], 200);
+    }
 
 }

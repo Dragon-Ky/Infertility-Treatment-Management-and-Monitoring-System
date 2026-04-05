@@ -48,4 +48,11 @@ class MedicationScheduleController extends Controller
         $response = $this->scheduleService->updateSchedule($id, $dto);
         return response()->json(['message' => 'Cập nhật lịch thuốc thành công', 'data' => $response->toArray()]);
     }
+    public function destroy(int $id): JsonResponse
+    {
+        $this->scheduleService->deleteSchedule($id);
+        return response()->json([
+            'message' => 'Xóa lịch dùng thuốc thành công'
+        ], 200);
+    }
 }

@@ -47,4 +47,11 @@ class TreatmentProtocolController extends Controller
         $response = $this->protocolService->updateProtocol($id, $dto);
         return response()->json(['message' => 'Cập nhật phác đồ thành công', 'data' => $response->toArray()]);
     }
+    public function destroy(int $id): JsonResponse
+    {
+        $this->protocolService->deleteProtocol($id);
+        return response()->json([
+            'message' => 'Xóa phác đồ điều trị thành công'
+        ], 200);
+    }
 }

@@ -44,4 +44,11 @@ class MedicationRecordController extends Controller
         $response = $this->recordService->updateRecord($id, $dto);
         return response()->json(['message' => 'Cập nhật ghi nhận thành công', 'data' => $response->toArray()]);
     }
+    public function destroy(int $id): JsonResponse
+    {
+        $this->recordService->deleteRecord($id);
+        return response()->json([
+            'message' => 'Xóa ghi nhận dùng thuốc thành công'
+        ], 200);
+    }
 }

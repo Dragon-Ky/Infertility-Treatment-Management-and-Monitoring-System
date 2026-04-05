@@ -47,4 +47,11 @@ class LabResultController extends Controller
         $response = $this->labService->updateLabResult($id, $dto);
         return response()->json(['message' => 'Cập nhật kết quả thành công', 'data' => $response->toArray()]);
     }
+    public function destroy(int $id): JsonResponse
+    {
+        $this->labService->deleteLabResult($id);
+        return response()->json([
+            'message' => 'Xóa kết quả xét nghiệm thành công'
+        ], 200);
+    }
 }

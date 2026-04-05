@@ -44,4 +44,11 @@ class StorageRecordController extends Controller
         $response = $this->storageService->updateStorage($id, $dto);
         return response()->json(['message' => 'Cập nhật trữ đông thành công', 'data' => $response->toArray()]);
     }
+    public function destroy(int $id): JsonResponse
+    {
+        $this->storageService->deleteStorageRecord($id);
+        return response()->json([
+            'message' => 'Xóa hồ sơ trữ đông thành công'
+        ], 200);
+    }
 }

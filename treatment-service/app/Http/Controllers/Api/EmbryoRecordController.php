@@ -55,4 +55,11 @@ class EmbryoRecordController extends Controller
             'data'    => $responseDTO->toArray()
         ], 200);
     }
+    public function destroy(int $id): JsonResponse
+    {
+        $this->embryoService->deleteEmbryoRecord($id);
+        return response()->json([
+            'message' => 'Xóa hồ sơ phôi thành công'
+        ], 200);
+    }
 }
