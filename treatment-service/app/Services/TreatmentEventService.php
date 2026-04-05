@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\DTOs\Requests\CreateTreatmentEventRequestDTO;
 use App\DTOs\Responses\TreatmentEventResponseDTO;
+use App\DTOs\Requests\update\UpdateTreatmentEventRequestDTO;
 use App\Repositories\Contracts\TreatmentEventRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 
@@ -57,5 +58,13 @@ class TreatmentEventService extends BaseService
             $result[] = TreatmentEventResponseDTO::fromModel($event)->toArray();
         }
         return $result;
+    }
+    public function updateEvent(int $id, UpdateTreatmentEventRequestDTO $dto): TreatmentEventResponseDTO
+    {
+        return DB::transaction(function () use ($id, $dto) { //
+            $data = array_filter((array) $dto, fn($value) => !is_null($value));
+            $event = $this->repository->update($id, $data);
+            return TreatmentEventResponseDTO::fromModel($event);
+        });
     }
 }
