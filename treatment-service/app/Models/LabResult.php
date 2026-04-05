@@ -23,12 +23,14 @@ class LabResult extends Model
         'notes',
         'doctor_notes',
         'attachments',
+        'is_active',
     ];
 
     /**
      * Chuyển đổi kiểu dữ liệu tự động
      */
     protected $casts = [
+        'is_active'   => 'boolean',
         'test_date'   => 'datetime', // Chuyển chuỗi ngày tháng thành đối tượng Carbon
         'result_data' => 'array',    // Tự động giải mã JSON thành Mảng khi đọc và ngược lại
         'attachments' => 'array',    // Tự động xử lý danh sách file đính kèm dạng Mảng

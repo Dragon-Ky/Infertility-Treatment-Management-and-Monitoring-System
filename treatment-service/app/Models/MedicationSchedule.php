@@ -21,9 +21,11 @@ class MedicationSchedule extends Model
         'time_slots',
         'route',
         'status',
+        'is_active',
     ];
 
     protected $casts = [
+        'is_active'  => 'boolean',
         'start_date' => 'date',
         'end_date' => 'date',
         'time_slots' => 'array', // Để lưu danh sách giờ uống thuốc dưới dạng JSON

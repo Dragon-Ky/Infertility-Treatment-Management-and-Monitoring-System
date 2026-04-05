@@ -20,12 +20,14 @@ class MedicationRecord extends Model
         'status',                 // Trạng thái (taken, missed, skipped)
         'notes',                  // Ghi chú/Phản ứng phụ
         'recorded_by',            // ID người thực hiện ghi nhận
+        'is_active'
     ];
 
     /**
      * Tự động chuyển đổi kiểu dữ liệu khi lấy từ DB ra
      */
     protected $casts = [
+        'is_active'      => 'boolean',
         'scheduled_time' => 'datetime',
         'actual_time'    => 'datetime',
         'created_at'     => 'datetime',

@@ -17,9 +17,11 @@ class PregnancyTracking extends Model
         'week_number',
         'status',
         'notes',
+        'is_active',
     ];
 
     protected $casts = [
+        'is_active'     => 'boolean',
         'tracking_date' => 'date',
         'week_number'   => 'integer',
         'created_at'    => 'datetime',

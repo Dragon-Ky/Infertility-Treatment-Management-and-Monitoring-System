@@ -19,9 +19,11 @@ class EmbryoRecord extends Model
         'grade',
         'status',
         'notes',
+        'is_active',
     ];
 
     protected $casts = [
+        'is_active'          => 'boolean',
         'fertilization_date' => 'date',
         'development_day'    => 'integer',
         'created_at'         => 'datetime',

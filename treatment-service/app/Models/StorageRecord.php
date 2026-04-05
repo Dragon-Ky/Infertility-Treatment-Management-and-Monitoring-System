@@ -19,9 +19,11 @@ class StorageRecord extends Model
         'expiry_date',
         'status',
         'location_code',
+        'is_active',
     ];
 
     protected $casts = [
+        'is_active'  => 'boolean',
         'start_date'  => 'date',
         'expiry_date' => 'date',
         'created_at'  => 'datetime',
