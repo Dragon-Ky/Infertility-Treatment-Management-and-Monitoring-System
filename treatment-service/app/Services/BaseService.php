@@ -15,7 +15,17 @@ abstract class BaseService
 
     public function delete(int $id): bool
     {
-        return $this->repository->delete($id);
+        // 1. Kiểm tra xem dữ liệu có tồn tại không trước khi "xóa"
+        $item = $this->findById($id);
+        
+        if (!$item) {
+            throw new \Exception("Không tìm thấy dữ liệu để xóa.");
+        }
+
+        // 2. Cập nhật is_active thành false (Số 0 trong Database)
+        return $this->repository->update($id, [
+            'is_active' => false
+        ]);
     }
 
     public function findById(int $id)

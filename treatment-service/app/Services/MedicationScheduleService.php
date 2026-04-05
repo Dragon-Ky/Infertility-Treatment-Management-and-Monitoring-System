@@ -43,4 +43,9 @@ class MedicationScheduleService
             return MedicationScheduleResponseDTO::fromModel($schedule);
         });
     }
+    public function deleteSchedule(int $id): bool
+    {
+        // Thay vì xóa vĩnh viễn, ta cập nhật trạng thái thành false
+        return $this->deleteSchedule($id);
+    }
 }

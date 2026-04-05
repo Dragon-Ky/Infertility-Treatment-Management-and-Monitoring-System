@@ -67,4 +67,9 @@ class TreatmentEventService extends BaseService
             return TreatmentEventResponseDTO::fromModel($event);
         });
     }
+    public function deleteEvent(int $id): bool
+    {
+        // Thay vì xóa vĩnh viễn, ta cập nhật trạng thái thành false
+        return $this->delete($id);
+    }
 }

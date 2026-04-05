@@ -29,11 +29,17 @@ class StorageRecordService
         });
     }
     public function updateStorage(int $id, UpdateStorageRecordRequestDTO $dto): StorageRecordResponseDTO
-{
-    return DB::transaction(function () use ($id, $dto) {
-        $data = array_filter((array) $dto, fn($value) => !is_null($value));
-        $storage = $this->repository->update($id, $data);
-        return StorageRecordResponseDTO::fromModel($storage);
-    });
-}
+    {
+        return DB::transaction(function () use ($id, $dto) {
+            $data = array_filter((array) $dto, fn($value) => !is_null($value));
+            $storage = $this->repository->update($id, $data);
+            return StorageRecordResponseDTO::fromModel($storage);
+        });
+    }
+    public function deleteStorageRecord(int $id): bool
+    {
+        // Thay vì xóa vĩnh viễn, ta cập nhật trạng thái thành false
+        return $this->deleteStorageRecord($id);
+    }
+
 }

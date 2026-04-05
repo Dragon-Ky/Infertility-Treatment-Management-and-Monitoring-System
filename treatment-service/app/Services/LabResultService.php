@@ -42,4 +42,9 @@ class LabResultService
             return LabResultResponseDTO::fromModel($lab);
         });
     }
+    public function deleteLabResult(int $id): bool
+    {
+        // Thay vì xóa vĩnh viễn, ta cập nhật trạng thái thành false
+        return $this->deleteLabResult($id);
+    }
 }

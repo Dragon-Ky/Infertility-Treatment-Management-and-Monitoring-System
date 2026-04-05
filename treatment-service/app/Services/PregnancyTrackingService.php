@@ -33,4 +33,9 @@ class PregnancyTrackingService
             return PregnancyTrackingResponseDTO::fromModel($tracking);
         });
     }
+    public function deleteTracking(int $id): bool
+    {
+        // Thay vì xóa vĩnh viễn, ta cập nhật trạng thái thành false
+        return $this->deleteTracking($id);
+    }
 }

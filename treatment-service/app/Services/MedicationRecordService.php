@@ -39,4 +39,9 @@ class MedicationRecordService
             return MedicationRecordResponseDTO::fromModel($record);
         });
     }
+    public function deleteRecord(int $id): bool
+    {
+        // Thay vì xóa vĩnh viễn, ta cập nhật trạng thái thành false
+        return $this->deleteRecord($id);
+    }
 }

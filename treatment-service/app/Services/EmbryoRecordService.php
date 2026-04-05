@@ -35,4 +35,9 @@ class EmbryoRecordService
             return EmbryoRecordResponseDTO::fromModel($embryo);
         });
     }
+    public function deleteEmbryoRecord(int $id): bool
+    {
+        // Thay vì xóa vĩnh viễn, ta cập nhật trạng thái thành false
+        return $this->deleteEmbryoRecord($id);
+    }
 }

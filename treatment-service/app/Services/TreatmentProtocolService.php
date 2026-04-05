@@ -47,4 +47,9 @@ class TreatmentProtocolService
             return TreatmentProtocolResponseDTO::fromModel($protocol);
         });
     }
+    public function deleteProtocol(int $id): bool
+    {
+        // Thay vì xóa vĩnh viễn, ta cập nhật trạng thái thành false
+        return $this->deleteProtocol($id);  
     }
+}
