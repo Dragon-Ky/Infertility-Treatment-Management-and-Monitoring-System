@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\DTOs\Requests\CreateMedicationRecordRequestDTO;
+use App\DTOs\Requests\Update\UpdateMedicationRecordRequestDTO;
 use App\Services\MedicationRecordService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -30,5 +31,17 @@ class MedicationRecordController extends Controller
             'message' => 'Ghi nhận dùng thuốc thành công', 
             'data' => $responseDTO->toArray()
         ], 201);
+    }
+    public function update(Request $request, int $id)
+    {
+        $validated = $request->validate([
+            'actual_time' => 'nullable|date',
+            'status'      => 'nullable|in:taken,missed,skipped',
+            'notes'       => 'nullable|string',
+        ]);
+
+        $dto = UpdateMedicationRecordRequestDTO::fromArray($validated);
+        $response = $this->recordService->updateRecord($id, $dto);
+        return response()->json(['message' => 'Cập nhật ghi nhận thành công', 'data' => $response->toArray()]);
     }
 }

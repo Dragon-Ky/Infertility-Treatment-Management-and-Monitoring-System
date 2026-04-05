@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\DTOs\Requests\CreatePregnancyTrackingRequestDTO;
+use App\DTOs\Requests\Update\UpdatePregnancyTrackingRequestDTO;
 use App\Services\PregnancyTrackingService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -29,5 +30,17 @@ class PregnancyTrackingController extends Controller
             'message' => 'Lưu hồ sơ theo dõi thai kỳ thành công', 
             'data' => $responseDTO->toArray()
         ], 201);
+    }
+    public function update(Request $request, int $id)
+    {
+        $validated = $request->validate([
+            'week_number' => 'nullable|integer|min:0',
+            'status'      => 'nullable|in:ongoing,delivered,miscarried',
+            'notes'       => 'nullable|string',
+        ]);
+
+        $dto = UpdatePregnancyTrackingRequestDTO::fromArray($validated);
+        $response = $this->trackingService->updateTracking($id, $dto);
+        return response()->json(['message' => 'Cập nhật theo dõi thành công', 'data' => $response->toArray()]);
     }
 }

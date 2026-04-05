@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\DTOs\Requests\CreateTreatmentEventRequestDTO;
+use App\DTOs\Requests\Update\UpdateTreatmentEventRequestDTO;
 use App\Services\TreatmentEventService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -62,4 +63,18 @@ class TreatmentEventController extends Controller
             'data' => $data
         ], 200);
     }
+    
+    public function update(Request $request, int $id)
+    {
+        $validated = $request->validate([
+            'result'       => 'nullable|string',
+            'doctor_notes' => 'nullable|string',
+            'attachments'  => 'nullable|array',
+        ]);
+
+        $dto = UpdateTreatmentEventRequestDTO::fromArray($validated);
+        $response = $this->eventService->updateEvent($id, $dto);
+        return response()->json(['message' => 'Cập nhật sự kiện thành công', 'data' => $response->toArray()]);
+    }
+
 }

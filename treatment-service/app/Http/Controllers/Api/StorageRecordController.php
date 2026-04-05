@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\DTOs\Requests\CreateStorageRecordRequestDTO;
+use App\DTOs\Requests\Update\UpdateStorageRecordRequestDTO;
 use App\Services\StorageRecordService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -30,5 +31,17 @@ class StorageRecordController extends Controller
             'message' => 'Lưu hồ sơ trữ đông thành công', 
             'data' => $responseDTO->toArray()
         ], 201);
+    }
+    public function update(Request $request, int $id)
+    {
+        $validated = $request->validate([
+            'expiry_date'   => 'nullable|date',
+            'status'        => 'nullable|in:active,expired,released',
+            'location_code' => 'nullable|string',
+        ]);
+
+        $dto = UpdateStorageRecordRequestDTO::fromArray($validated);
+        $response = $this->storageService->updateStorage($id, $dto);
+        return response()->json(['message' => 'Cập nhật trữ đông thành công', 'data' => $response->toArray()]);
     }
 }

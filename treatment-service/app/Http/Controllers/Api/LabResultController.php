@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\DTOs\Requests\CreateLabResultRequestDTO;
+use App\DTOs\Requests\Update\UpdateLabResultRequestDTO;
 use App\Services\LabResultService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -33,5 +34,17 @@ class LabResultController extends Controller
             'message' => 'Lưu kết quả xét nghiệm thành công', 
             'data' => $responseDTO->toArray()
         ], 201);
+    }
+    public function update(Request $request, int $id)
+    {
+        $validated = $request->validate([
+            'result_data'  => 'nullable|array',
+            'doctor_notes' => 'nullable|string',
+            'attachments'  => 'nullable|array',
+        ]);
+
+        $dto = UpdateLabResultRequestDTO::fromArray($validated);
+        $response = $this->labService->updateLabResult($id, $dto);
+        return response()->json(['message' => 'Cập nhật kết quả thành công', 'data' => $response->toArray()]);
     }
 }
