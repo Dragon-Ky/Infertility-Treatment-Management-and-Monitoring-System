@@ -1,0 +1,153 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # AUTH SERVICE
+  # ============================================
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./auth-service:/var/www
+    environment:
+      - APP_ENV=${AUTH_APP_ENV:-local}
+      - APP_DEBUG=${AUTH_APP_DEBUG:-true}
+      - APP_KEY=${AUTH_APP_KEY}
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql-auth
+      - DB_PORT=3306
+      - DB_DATABASE=${AUTH_DB_DATABASE:-auth_db}
+      - DB_USERNAME=${AUTH_DB_USERNAME:-root}
+      - DB_PASSWORD=${AUTH_DB_PASSWORD:-secret}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - CACHE_DRIVER=redis
+      - SESSION_DRIVER=redis
+      - QUEUE_CONNECTION=redis
+    depends_on:
+      - mysql-auth
+      - redis
+    networks:
+      - app-network
+
+  auth-nginx:
+    image: nginx:alpine
+    container_name: auth-nginx
+    restart: unless-stopped
+    ports:
+      - "${AUTH_PORT:-8001}:80"
+    volumes:
+      - ./auth-service:/var/www
+      - ./nginx/auth-service.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - auth-service
+    networks:
+      - app-network
+
+  mysql-auth:
+    image: mysql:8.0
+    container_name: mysql-auth
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${AUTH_DB_PASSWORD:-secret}
+      MYSQL_DATABASE: ${AUTH_DB_DATABASE:-auth_db}
+    volumes:
+      - mysql-auth-data:/var/lib/mysql
+    ports:
+      - "${AUTH_DB_PORT:-33061}:3306"
+    networks:
+      - app-network
+
+  # ============================================
+  # CATALOG SERVICE
+  # ============================================
+  catalog-service:
+    build:
+      context: ./catalog-service
+      dockerfile: Dockerfile
+    container_name: catalog-service
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./catalog-service:/var/www
+    environment:
+      - APP_ENV=${CATALOG_APP_ENV:-local}
+      - APP_DEBUG=${CATALOG_APP_DEBUG:-true}
+      - APP_KEY=${CATALOG_APP_KEY}
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql-catalog
+      - DB_PORT=3306
+      - DB_DATABASE=${CATALOG_DB_DATABASE:-catalog_db}
+      - DB_USERNAME=${CATALOG_DB_USERNAME:-root}
+      - DB_PASSWORD=${CATALOG_DB_PASSWORD:-secret}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - CACHE_DRIVER=redis
+      - SESSION_DRIVER=redis
+      - QUEUE_CONNECTION=redis
+    depends_on:
+      - mysql-catalog
+      - redis
+    networks:
+      - app-network
+
+  catalog-nginx:
+    image: nginx:alpine
+    container_name: catalog-nginx
+    restart: unless-stopped
+    ports:
+      - "${CATALOG_PORT:-8002}:80"
+    volumes:
+      - ./catalog-service:/var/www
+      - ./nginx/catalog-service.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - catalog-service
+    networks:
+      - app-network
+
+  mysql-catalog:
+    image: mysql:8.0
+    container_name: mysql-catalog
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${CATALOG_DB_PASSWORD:-secret}
+      MYSQL_DATABASE: ${CATALOG_DB_DATABASE:-catalog_db}
+    volumes:
+      - mysql-catalog-data:/var/lib/mysql
+    ports:
+      - "${CATALOG_DB_PORT:-33062}:3306"
+    networks:
+      - app-network
+
+  # ============================================
+  # REDIS (Shared Cache)
+  # ============================================
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - app-network
+
+# ============================================
+  # VOLUMES
+  # ============================================
+volumes:
+  mysql-auth-data:
+  mysql-catalog-data:
+  redis-data:
+
+# ============================================
+  # NETWORKS
+  # ============================================
+networks:
+  app-network:
+    driver: bridge
