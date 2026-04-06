@@ -54,4 +54,20 @@ class LabResultController extends Controller
             'message' => 'Xóa kết quả xét nghiệm thành công'
         ], 200);
     }
+    public function show(int $id): JsonResponse
+    {
+        $labResult = $this->labService->getLabResultById($id);
+
+        if (!$labResult || !$labResult->is_active) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy kết quả xét nghiệm hoặc đã bị vô hiệu hóa'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $labResult->toArray()
+        ], 200);
+    }
 }

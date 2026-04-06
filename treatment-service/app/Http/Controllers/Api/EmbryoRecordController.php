@@ -62,4 +62,20 @@ class EmbryoRecordController extends Controller
             'message' => 'Xóa hồ sơ phôi thành công'
         ], 200);
     }
+    public function show(int $id): JsonResponse
+    {
+        $embryo = $this->embryoService->getEmbryoRecordById($id);
+
+        if (!$embryo || !$embryo->is_active) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy hồ sơ phôi hoặc hồ sơ đã bị ẩn.'
+            ], 404);
+        }
+        
+        return response()->json([
+            'success' => true,
+            'data' => $embryo->toArray()
+        ], 200);
+    }
 }

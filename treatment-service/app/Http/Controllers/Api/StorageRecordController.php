@@ -51,4 +51,20 @@ class StorageRecordController extends Controller
             'message' => 'Xóa hồ sơ trữ đông thành công'
         ], 200);
     }
+    public function show(int $id): JsonResponse
+    {
+        $storage = $this->storageService->getStorageRecordById($id);
+
+        if (!$storage || !$storage->is_active) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy hồ sơ hoặc hồ sơ đã bị ẩn.'
+            ], 404);
+        }
+        
+        return response()->json([
+            'success' => true,
+            'data' => $storage
+        ]);
+    }  
 }

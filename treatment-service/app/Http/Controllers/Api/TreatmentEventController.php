@@ -83,5 +83,21 @@ class TreatmentEventController extends Controller
             'message' => 'Xóa sự kiện điều trị thành công'
         ], 200);
     }
+    public function show(int $id): JsonResponse
+    {
+        $event = $this->eventService->getEventById($id);
+
+        if (!$event || !$event->is_active) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy sự kiện hoặc sự kiện đã bị ẩn.'
+            ], 404);
+        }
+        
+        return response()->json([
+            'success' => true,
+            'data' => $event
+        ]);
+    }   
 
 }

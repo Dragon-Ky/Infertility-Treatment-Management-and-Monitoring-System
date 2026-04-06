@@ -55,4 +55,20 @@ class MedicationScheduleController extends Controller
             'message' => 'Xóa lịch dùng thuốc thành công'
         ], 200);
     }
+    public function show(int $id): JsonResponse
+    {
+        $schedule = $this->scheduleService->getScheduleById($id);
+
+        if (!$schedule || !$schedule->is_active) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy lịch dùng thuốc hoặc đã bị vô hiệu hóa'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $schedule->toArray()
+        ], 200);
+    }
 }

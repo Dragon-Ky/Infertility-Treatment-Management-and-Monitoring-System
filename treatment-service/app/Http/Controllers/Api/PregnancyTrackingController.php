@@ -50,4 +50,20 @@ class PregnancyTrackingController extends Controller
             'message' => 'Xóa hồ sơ theo dõi thai kỳ thành công'
         ], 200);
     }
+    public function show(int $id): JsonResponse
+    {
+        $tracking = $this->trackingService->getTrackingById($id);
+
+        if (!$tracking || !$tracking->is_active) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy hồ sơ theo dõi thai kỳ hoặc đã bị vô hiệu hóa'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $tracking->toArray()
+        ], 200);
+    }
 }

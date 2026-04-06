@@ -51,4 +51,20 @@ class MedicationRecordController extends Controller
             'message' => 'Xóa ghi nhận dùng thuốc thành công'
         ], 200);
     }
+    public function show(int $id): JsonResponse
+    {
+        $record = $this->recordService->getRecordById($id);
+
+        if (!$record || !$record->is_active) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy ghi nhận dùng thuốc hoặc đã bị vô hiệu hóa'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $record->toArray()
+        ], 200);
+    }
 }
