@@ -38,4 +38,9 @@ class PregnancyTrackingService
         // Thay vì xóa vĩnh viễn, ta cập nhật trạng thái thành false
         return $this->deleteTracking($id);
     }
+    public function getTrackingById(int $id): PregnancyTrackingResponseDTO
+    {
+        $tracking = $this->repository->find($id);
+        return PregnancyTrackingResponseDTO::fromModel($tracking);
+    }
 }

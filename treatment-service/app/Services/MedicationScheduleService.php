@@ -48,4 +48,9 @@ class MedicationScheduleService
         // Thay vì xóa vĩnh viễn, ta cập nhật trạng thái thành false
         return $this->deleteSchedule($id);
     }
+    public function getScheduleById(int $id): MedicationScheduleResponseDTO
+    {
+        $schedule = $this->repository->find($id);
+        return MedicationScheduleResponseDTO::fromModel($schedule);
+    }
 }

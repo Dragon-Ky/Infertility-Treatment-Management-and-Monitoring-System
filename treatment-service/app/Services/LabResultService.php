@@ -47,4 +47,9 @@ class LabResultService
         // Thay vì xóa vĩnh viễn, ta cập nhật trạng thái thành false
         return $this->deleteLabResult($id);
     }
+    public function getLabResultById(int $id): LabResultResponseDTO
+    {
+        $lab = $this->repository->find($id);
+        return LabResultResponseDTO::fromModel($lab);
+    }
 }

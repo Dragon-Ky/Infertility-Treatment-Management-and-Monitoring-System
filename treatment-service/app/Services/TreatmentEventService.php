@@ -72,4 +72,9 @@ class TreatmentEventService extends BaseService
         // Thay vì xóa vĩnh viễn, ta cập nhật trạng thái thành false
         return $this->delete($id);
     }
+    public function getEventById(int $id): TreatmentEventResponseDTO
+    {
+        $event = $this->repository->find($id);
+        return TreatmentEventResponseDTO::fromModel($event);
+    }
 }

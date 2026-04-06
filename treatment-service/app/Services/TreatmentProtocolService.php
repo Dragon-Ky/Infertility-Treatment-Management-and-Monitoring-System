@@ -52,4 +52,9 @@ class TreatmentProtocolService
         // Thay vì xóa vĩnh viễn, ta cập nhật trạng thái thành false
         return $this->deleteProtocol($id);  
     }
+    public function getProtocolById(int $id): TreatmentProtocolResponseDTO
+    {
+        $protocol = $this->repository->find($id);
+        return TreatmentProtocolResponseDTO::fromModel($protocol);
+    }
 }

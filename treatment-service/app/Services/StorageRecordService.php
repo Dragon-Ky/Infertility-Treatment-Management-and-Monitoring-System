@@ -41,5 +41,9 @@ class StorageRecordService
         // Thay vì xóa vĩnh viễn, ta cập nhật trạng thái thành false
         return $this->deleteStorageRecord($id);
     }
-
+    public function getStorageRecordById(int $id): StorageRecordResponseDTO
+    {
+        $storage = $this->repository->find($id);
+        return StorageRecordResponseDTO::fromModel($storage);
+    }
 }

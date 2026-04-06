@@ -40,4 +40,9 @@ class EmbryoRecordService
         // Thay vì xóa vĩnh viễn, ta cập nhật trạng thái thành false
         return $this->deleteEmbryoRecord($id);
     }
+    public function getEmbryoRecordById(int $id): EmbryoRecordResponseDTO
+    {
+        $embryo = $this->repository->find($id);
+        return EmbryoRecordResponseDTO::fromModel($embryo);
+    }
 }

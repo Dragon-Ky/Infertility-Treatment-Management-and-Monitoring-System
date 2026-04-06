@@ -44,4 +44,9 @@ class MedicationRecordService
         // Thay vì xóa vĩnh viễn, ta cập nhật trạng thái thành false
         return $this->deleteRecord($id);
     }
+    public function getRecordById(int $id): MedicationRecordResponseDTO
+    {
+        $record = $this->repository->find($id);
+        return MedicationRecordResponseDTO::fromModel($record);
+    }
 }
