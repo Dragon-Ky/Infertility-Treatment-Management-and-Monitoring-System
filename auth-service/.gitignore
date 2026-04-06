@@ -1,29 +1,24 @@
-# Frontend
 *.log
 .DS_Store
 .env
 .env.backup
 .env.production
-node_modules/
-vendor/
-Thumbs.db
-
-# IDEs
+.phpactor.json
+.phpunit.result.cache
 /.fleet
 /.idea
 /.nova
-/.zed
-/.vscode
-
-# Laravel/PHP
-.phpactor.json
-.phpunit.result.cache
 /.phpunit.cache
+/.vscode
+/.zed
 /auth.json
+/node_modules
 /public/build
 /public/hot
 /public/storage
 /storage/*.key
 /storage/pail
+/vendor
 Homestead.json
 Homestead.yaml
+Thumbs.db
