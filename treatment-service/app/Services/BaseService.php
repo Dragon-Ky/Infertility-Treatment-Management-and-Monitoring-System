@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Repositories\Contracts\BaseRepositoryInterface;
+use Illuminate\Support\Facades\DB;
 
 abstract class BaseService
 {
@@ -12,6 +13,26 @@ abstract class BaseService
     {
         $this->repository = $repository;
     }
+
+    public function updateWithDto(int $id, object $dto)
+    {
+        // 2. Bỏ dấu gạch chéo ngược \, chỉ dùng DB::transaction
+        return DB::transaction(function () use ($id, $dto) {
+            // Chuyển DTO thành mảng
+            $dtoAsArray = (array) $dto;
+
+            // Lọc bỏ các giá trị null (Người dùng không gửi thì không sửa)
+            $data = array_filter($dtoAsArray, fn($value) => !is_null($value));
+
+            // Gọi hàm update bên dưới
+            $model = $this->update($id, $data);
+
+            // Đóng gói kết quả trả về
+            $dtoClass = $this->getResponseDtoClass();
+            return $dtoClass::fromModel($model);
+        });
+    }
+    
 
     public function delete(int $id): bool
     {

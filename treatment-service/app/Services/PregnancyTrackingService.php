@@ -8,9 +8,12 @@ use App\DTOs\Requests\update\UpdatePregnancyTrackingRequestDTO;
 use App\Repositories\Contracts\PregnancyTrackingRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 
-class PregnancyTrackingService
+class PregnancyTrackingService extends BaseService
 {
-    public function __construct(protected PregnancyTrackingRepositoryInterface $repository) {}
+    public function __construct(PregnancyTrackingRepositoryInterface $repository) 
+    {
+        parent::__construct($repository);
+    }
 
     public function createTracking(CreatePregnancyTrackingRequestDTO $dto): PregnancyTrackingResponseDTO
     {
@@ -27,11 +30,7 @@ class PregnancyTrackingService
     }
     public function updateTracking(int $id, UpdatePregnancyTrackingRequestDTO $dto): PregnancyTrackingResponseDTO
     {
-        return DB::transaction(function () use ($id, $dto) {
-            $data = array_filter((array) $dto, fn($value) => !is_null($value));
-            $tracking = $this->repository->update($id, $data);
-            return PregnancyTrackingResponseDTO::fromModel($tracking);
-        });
+        return $this->updateWithDto($id, $dto);
     }
     public function deleteTracking(int $id): bool
     {

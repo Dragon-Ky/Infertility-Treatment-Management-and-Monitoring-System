@@ -8,9 +8,12 @@ use App\DTOs\Requests\update\UpdateStorageRecordRequestDTO;
 use App\Repositories\Contracts\StorageRecordRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 
-class StorageRecordService
+class StorageRecordService extends BaseService
 {
-    public function __construct(protected StorageRecordRepositoryInterface $repository) {}
+    public function __construct(StorageRecordRepositoryInterface $repository)
+    {
+        $this->repository = $repository;
+    }
 
     public function createStorage(CreateStorageRecordRequestDTO $dto): StorageRecordResponseDTO
     {
@@ -30,16 +33,12 @@ class StorageRecordService
     }
     public function updateStorage(int $id, UpdateStorageRecordRequestDTO $dto): StorageRecordResponseDTO
     {
-        return DB::transaction(function () use ($id, $dto) {
-            $data = array_filter((array) $dto, fn($value) => !is_null($value));
-            $storage = $this->repository->update($id, $data);
-            return StorageRecordResponseDTO::fromModel($storage);
-        });
+        return $this->updateWithDto($id, $dto);
     }
     public function deleteStorageRecord(int $id): bool
     {
         // Thay vì xóa vĩnh viễn, ta cập nhật trạng thái thành false
-        return $this->deleteStorageRecord($id);
+        return $this->delete($id);
     }
     public function getStorageRecordById(int $id): StorageRecordResponseDTO
     {

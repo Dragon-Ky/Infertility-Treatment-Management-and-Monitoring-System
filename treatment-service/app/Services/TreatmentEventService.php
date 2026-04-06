@@ -21,27 +21,18 @@ class TreatmentEventService extends BaseService
      */
     public function createEvent(CreateTreatmentEventRequestDTO $dto): TreatmentEventResponseDTO
     {
-        DB::beginTransaction();
-        try {
-            // Nhờ Thủ kho cất dữ liệu vào đúng các ngăn (Cột) trong DB
+        return DB::transaction(function () use ($dto) {
             $event = $this->repository->create([
-                'treatment_id' => $dto->treatment_id, // Gắn vào đúng đợt điều trị
-                'event_type'   => $dto->event_type,   // Loại sự kiện (Siêu âm, xét nghiệm...)
-                'event_date'   => $dto->event_date,   // Ngày giờ diễn ra
-                'description'  => $dto->description,  // Mô tả chi tiết
-                'result'       => $dto->result,       // Kết quả (nếu có)
-                'doctor_notes' => $dto->doctor_notes, // Ghi chú của bác sĩ
-                'attachments'  => $dto->attachments,  // Danh sách file/ảnh đính kèm
+                'treatment_id' => $dto->treatment_id,
+                'event_type'   => $dto->event_type,
+                'event_date'   => $dto->event_date,
+                'description'  => $dto->description,
+                'result'       => $dto->result,
+                'doctor_notes' => $dto->doctor_notes,
+                'attachments'  => $dto->attachments,
             ]);
-
-            DB::commit();
-            
-            // Chuyển đổi dữ liệu thô từ DB sang dạng đẹp (DTO) để trả về cho Frontend
             return TreatmentEventResponseDTO::fromModel($event);
-        } catch (\Exception $e) {
-            DB::rollBack(); // Nếu có lỗi thì xóa bỏ mọi thứ vừa làm để dữ liệu không bị rác
-            throw $e;
-        }
+        });
     }
 
     /**
@@ -61,11 +52,7 @@ class TreatmentEventService extends BaseService
     }
     public function updateEvent(int $id, UpdateTreatmentEventRequestDTO $dto): TreatmentEventResponseDTO
     {
-        return DB::transaction(function () use ($id, $dto) { //
-            $data = array_filter((array) $dto, fn($value) => !is_null($value));
-            $event = $this->repository->update($id, $data);
-            return TreatmentEventResponseDTO::fromModel($event);
-        });
+        return $this->updateWithDto($id, $dto);
     }
     public function deleteEvent(int $id): bool
     {

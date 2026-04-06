@@ -8,9 +8,13 @@ use App\DTOs\Requests\update\UpdateEmbryoRecordRequestDTO;
 use App\Repositories\Contracts\EmbryoRecordRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 
-class EmbryoRecordService
+
+class EmbryoRecordService extends BaseService
 {
-    public function __construct(protected EmbryoRecordRepositoryInterface $repository) {}
+    public function __construct(EmbryoRecordRepositoryInterface $repository) 
+    {
+        parent::__construct($repository);
+    }
 
     public function createEmbryo(CreateEmbryoRecordRequestDTO $dto): EmbryoRecordResponseDTO
     {
@@ -27,18 +31,14 @@ class EmbryoRecordService
             return EmbryoRecordResponseDTO::fromModel($embryo);
         });
     }
-    public function updateEmbryo(int $id, UpdateEmbryoRecordRequestDTO $dto): EmbryoRecordResponseDTO
+     public function updateEmbryo(int $id, UpdateEmbryoRecordRequestDTO $dto): EmbryoRecordResponseDTO
     {
-        return DB::transaction(function () use ($id, $dto) {
-            $data = array_filter((array) $dto, fn($value) => !is_null($value));
-            $embryo = $this->repository->update($id, $data);
-            return EmbryoRecordResponseDTO::fromModel($embryo);
-        });
+        return $this->updateWithDto($id, $dto);
     }
     public function deleteEmbryoRecord(int $id): bool
     {
         // Thay vì xóa vĩnh viễn, ta cập nhật trạng thái thành false
-        return $this->deleteEmbryoRecord($id);
+        return $this->delete($id);
     }
     public function getEmbryoRecordById(int $id): EmbryoRecordResponseDTO
     {

@@ -8,14 +8,18 @@ use App\DTOs\Requests\update\UpdateLabResultRequestDTO;
 use App\Repositories\Contracts\LabResultRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 
-class LabResultService
+use function Symfony\Component\Translation\t;
+
+class LabResultService extends BaseService
 {
-    public function __construct(protected LabResultRepositoryInterface $repository) {}
+    public function __construct(LabResultRepositoryInterface $repository)
+    {
+        parent::__construct($repository);
+    }
 
     public function createLabResult(CreateLabResultRequestDTO $dto): LabResultResponseDTO
     {
-        DB::beginTransaction();
-        try {
+        return DB::transaction(function () use ($dto) { 
             $lab = $this->repository->create([
                 'treatment_id'    => $dto->treatment_id,
                 'test_type'       => $dto->test_type,
@@ -26,26 +30,19 @@ class LabResultService
                 'notes'           => $dto->notes,
                 'doctor_notes'    => $dto->doctor_notes,
                 'attachments'     => $dto->attachments,
-            ]);
-            DB::commit();
-            return LabResultResponseDTO::fromModel($lab);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
+            ]);   
+            return LabResultResponseDTO::fromModel($lab);  
+        });
     }
+
     public function updateLabResult(int $id, UpdateLabResultRequestDTO $dto): LabResultResponseDTO
     {
-        return DB::transaction(function () use ($id, $dto) {
-            $data = array_filter((array) $dto, fn($value) => !is_null($value));
-            $lab = $this->repository->update($id, $data);
-            return LabResultResponseDTO::fromModel($lab);
-        });
+        return $this->updateWithDto($id, $dto);
     }
     public function deleteLabResult(int $id): bool
     {
         // Thay vì xóa vĩnh viễn, ta cập nhật trạng thái thành false
-        return $this->deleteLabResult($id);
+        return $this->delete($id);
     }
     public function getLabResultById(int $id): LabResultResponseDTO
     {

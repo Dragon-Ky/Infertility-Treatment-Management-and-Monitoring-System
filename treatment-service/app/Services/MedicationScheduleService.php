@@ -9,14 +9,15 @@ use App\Repositories\Contracts\MedicationScheduleRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 
 
-class MedicationScheduleService
+class MedicationScheduleService extends BaseService
 {
-    public function __construct(protected MedicationScheduleRepositoryInterface $repository) {}
-
+    public function __construct( MedicationScheduleRepositoryInterface $repository) 
+    {
+        parent::__construct($repository);
+    }
     public function createSchedule(CreateMedicationScheduleRequestDTO $dto): MedicationScheduleResponseDTO
     {
-        DB::beginTransaction();
-        try {
+        return DB::transaction(function () use ($dto) {
             $schedule = $this->repository->create([
                 'treatment_id'    => $dto->treatment_id,
                 'medication_name' => $dto->medication_name,
@@ -26,27 +27,19 @@ class MedicationScheduleService
                 'end_date'        => $dto->end_date,
                 'time_slots'      => $dto->time_slots,
                 'route'           => $dto->route,
-                'status'          => 'active', // Mặc định khi tạo là active
+                'status'          => 'active', 
             ]);
-            DB::commit();
             return MedicationScheduleResponseDTO::fromModel($schedule);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
+        });
     }
     public function updateSchedule(int $id, UpdateMedicationScheduleRequestDTO $dto): MedicationScheduleResponseDTO
     {
-        return DB::transaction(function () use ($id, $dto) {
-            $data = array_filter((array) $dto, fn($value) => !is_null($value));
-            $schedule = $this->repository->update($id, $data);
-            return MedicationScheduleResponseDTO::fromModel($schedule);
-        });
+        return $this->updateWithDto($id, $dto);
     }
     public function deleteSchedule(int $id): bool
     {
         // Thay vì xóa vĩnh viễn, ta cập nhật trạng thái thành false
-        return $this->deleteSchedule($id);
+        return $this->delete($id);
     }
     public function getScheduleById(int $id): MedicationScheduleResponseDTO
     {
