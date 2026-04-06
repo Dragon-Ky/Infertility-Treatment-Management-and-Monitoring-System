@@ -13,7 +13,8 @@ readonly class EmbryoRecordResponseDTO
         public int $development_day,
         public string $grade,
         public string $status_label,
-        public ?string $notes
+        public ?string $notes,
+        public bool $is_active,
     ) {}
 
     public static function fromModel(EmbryoRecord $embryo): self
@@ -25,7 +26,8 @@ readonly class EmbryoRecordResponseDTO
             development_day: $embryo->development_day,
             grade: $embryo->grade,
             status_label: ucfirst($embryo->status),
-            notes: $embryo->notes
+            notes: $embryo->notes,
+            is_active: $embryo->is_active,
         );
     }
 
@@ -39,6 +41,7 @@ readonly class EmbryoRecordResponseDTO
             'grade' => $this->grade,
             'status' => $this->status_label,
             'notes' => $this->notes,
+            'is_active' => $this->is_active,
         ];
     }
 }

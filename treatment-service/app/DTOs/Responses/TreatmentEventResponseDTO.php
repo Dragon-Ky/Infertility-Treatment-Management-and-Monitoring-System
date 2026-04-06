@@ -9,7 +9,8 @@ readonly class TreatmentEventResponseDTO {
         public string $event_type,
         public string $event_date_formatted,
         public ?string $result,
-        public array $attachments
+        public array $attachments,
+        public bool $is_active,
     ) {}
 
     public static function fromModel(TreatmentEvent $event): self {
@@ -18,7 +19,8 @@ readonly class TreatmentEventResponseDTO {
             event_type: $event->event_type,
             event_date_formatted: $event->event_date->format('d/m/Y H:i'),
             result: $event->result,
-            attachments: $event->attachments ?? []
+            attachments: $event->attachments ?? [],
+            is_active: $event->is_active,
         );
     }
 
@@ -29,6 +31,7 @@ readonly class TreatmentEventResponseDTO {
             'event_date' => $this->event_date_formatted,
             'result' => $this->result,
             'attachments' => $this->attachments,
+            'is_active' => $this->is_active,
         ];
     }
 }

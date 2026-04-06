@@ -15,7 +15,8 @@ readonly class MedicationScheduleResponseDTO
         public string $end_date,
         public array $time_slots,
         public string $route,
-        public string $status
+        public string $status,
+        public bool $is_active,
     ) {}
 
     public static function fromModel(MedicationSchedule $schedule): self
@@ -29,7 +30,8 @@ readonly class MedicationScheduleResponseDTO
             end_date: $schedule->end_date->format('Y-m-d'),
             time_slots: $schedule->time_slots,
             route: $schedule->route,
-            status: $schedule->status
+            status: $schedule->status,
+            is_active: $schedule->is_active,
         );
     }
 
@@ -45,6 +47,7 @@ readonly class MedicationScheduleResponseDTO
             'time_slots' => $this->time_slots,
             'route' => $this->route,
             'status' => $this->status,
+            'is_active' => $this->is_active,
         ];
     }
 }

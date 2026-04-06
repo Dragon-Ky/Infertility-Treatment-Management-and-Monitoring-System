@@ -13,7 +13,8 @@ readonly class LabResultResponseDTO
         public array $result_data,
         public ?string $unit,
         public ?string $doctor_notes,
-        public array $attachments
+        public array $attachments,
+        public bool $is_active,
     ) {}
 
     public static function fromModel(LabResult $lab): self
@@ -25,7 +26,8 @@ readonly class LabResultResponseDTO
             result_data: $lab->result_data,
             unit: $lab->unit,
             doctor_notes: $lab->doctor_notes,
-            attachments: $lab->attachments ?? []
+            attachments: $lab->attachments ?? [],
+            is_active: $lab->is_active,
         );
     }
 
@@ -39,6 +41,7 @@ readonly class LabResultResponseDTO
             'unit' => $this->unit,
             'doctor_notes' => $this->doctor_notes,
             'attachments' => $this->attachments,
+            'is_active' => $this->is_active,
         ];
     }
 }

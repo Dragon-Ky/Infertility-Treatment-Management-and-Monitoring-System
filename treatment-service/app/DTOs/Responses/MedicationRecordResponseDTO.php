@@ -14,7 +14,8 @@ readonly class MedicationRecordResponseDTO
         public string $actual_time_formatted,
         public string $status,
         public int $recorded_by,
-        public ?string $notes
+        public ?string $notes,
+        public bool $is_active,
     ) {}
 
     public static function fromModel(MedicationRecord $record): self
@@ -26,7 +27,8 @@ readonly class MedicationRecordResponseDTO
             actual_time_formatted: Carbon::parse($record->actual_time)->format('d/m/Y H:i'),
             status: $record->status,
             recorded_by: $record->recorded_by,
-            notes: $record->notes
+            notes: $record->notes,
+            is_active: $record->is_active,
         );
     }
 
@@ -40,6 +42,7 @@ readonly class MedicationRecordResponseDTO
             'status' => $this->status,
             'recorded_by' => $this->recorded_by,
             'notes' => $this->notes,
+            'is_active' => $this->is_active,
         ];
     }
 }

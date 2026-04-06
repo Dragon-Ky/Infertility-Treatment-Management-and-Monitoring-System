@@ -11,7 +11,8 @@ readonly class PregnancyTrackingResponseDTO
         public string $tracking_date_formatted,
         public int $week_number,
         public string $status_label,
-        public ?string $notes
+        public ?string $notes,
+        public bool $is_active
     ) {}
 
     public static function fromModel(PregnancyTracking $tracking): self
@@ -21,7 +22,8 @@ readonly class PregnancyTrackingResponseDTO
             tracking_date_formatted: $tracking->tracking_date->format('d/m/Y'),
             week_number: $tracking->week_number,
             status_label: ucfirst($tracking->status),
-            notes: $tracking->notes
+            notes: $tracking->notes,
+            is_active: $tracking->is_active,
         );
     }
 
@@ -33,6 +35,7 @@ readonly class PregnancyTrackingResponseDTO
             'week_number' => $this->week_number,
             'status' => $this->status_label,
             'notes' => $this->notes,
+            'is_active' => $this->is_active,
         ];
     }
 }

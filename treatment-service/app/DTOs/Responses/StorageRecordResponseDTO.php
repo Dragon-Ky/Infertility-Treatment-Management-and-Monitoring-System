@@ -15,7 +15,8 @@ readonly class StorageRecordResponseDTO
         public string $expiry_date_formatted,
         public string $status,
         public string $location_code,
-        public bool $is_near_expiry
+        public bool $is_near_expiry,
+        public bool $is_active,
     ) {}
 
     public static function fromModel(StorageRecord $storage): self
@@ -31,7 +32,8 @@ readonly class StorageRecordResponseDTO
             status: $storage->status,
             location_code: $storage->location_code,
             // Cảnh báo nếu còn dưới 30 ngày là hết hạn
-            is_near_expiry: $expiry->isFuture() && $expiry->diffInDays(now()) <= 30
+            is_near_expiry: $expiry->isFuture() && $expiry->diffInDays(now()) <= 30,
+            is_active: $storage->is_active,
         );
     }
 
@@ -46,6 +48,7 @@ readonly class StorageRecordResponseDTO
             'status' => $this->status,
             'location_code' => $this->location_code,
             'is_near_expiry' => $this->is_near_expiry,
+            'is_active' => $this->is_active,
         ];
     }
 }

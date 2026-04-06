@@ -14,7 +14,8 @@ readonly class TreatmentProtocolResponseDTO
         public ?string $diagnosis,
         public ?string $prescription,
         public ?string $notes,
-        public string $created_at_formatted
+        public string $created_at_formatted,
+        public bool $is_active,
     ) {}
 
     public static function fromModel(TreatmentProtocol $protocol): self
@@ -27,7 +28,9 @@ readonly class TreatmentProtocolResponseDTO
             diagnosis: $protocol->diagnosis,
             prescription: $protocol->prescription,
             notes: $protocol->notes,
-            created_at_formatted: $protocol->created_at->format('d/m/Y H:i')
+            created_at_formatted: $protocol->created_at->format('d/m/Y H:i'),
+            is_active: $protocol->is_active,
+            
         );
     }
 
@@ -42,6 +45,7 @@ readonly class TreatmentProtocolResponseDTO
             'prescription' => $this->prescription,
             'notes' => $this->notes,
             'created_at' => $this->created_at_formatted,
+            'is_active' => $this->is_active,
         ];
     }
 }
