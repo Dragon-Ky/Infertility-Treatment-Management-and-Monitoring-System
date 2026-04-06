@@ -18,4 +18,7 @@ interface BaseRepositoryInterface
 
     // Xóa bản ghi theo ID
     public function delete($id);
+
+    // Tìm bản ghi theo các thuộc tính
+    public function findByAttributes(array $attributes);
 }

@@ -46,4 +46,9 @@ abstract class BaseRepository implements BaseRepositoryInterface
         $record = $this->model->findOrFail($id);
         return $record->delete();
     }
+    // Tìm bản ghi theo các thuộc tính
+    public function findByAttributes(array $attributes)
+    {
+        return $this->model->where($attributes)->get();
+    }
 }
