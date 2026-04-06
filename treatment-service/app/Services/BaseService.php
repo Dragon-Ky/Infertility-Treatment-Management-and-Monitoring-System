@@ -42,4 +42,22 @@ abstract class BaseService
 
         return $this->repository->update($id, $data);
     }
+    abstract protected function getResponseDtoClass(): string;
+    public function getAllActive(): array
+    {
+        // 1. Lấy danh sách từ Repository
+        $items = $this->repository->findByAttributes(['is_active' => true]);
+        
+        // 2. Lấy tên cái "Hộp quà" mà Service con đã khai báo
+        $dtoClass = $this->getResponseDtoClass();
+
+        $result = [];
+        foreach ($items as $item) {
+            // 3. Dùng tên lớp DTO đó để đóng gói
+            // PHP cho phép dùng biến $dtoClass để gọi hàm static: $dtoClass::fromModel()
+            $result[] = $dtoClass::fromModel($item)->toArray();
+        }
+        
+        return $result;
+    }
 }

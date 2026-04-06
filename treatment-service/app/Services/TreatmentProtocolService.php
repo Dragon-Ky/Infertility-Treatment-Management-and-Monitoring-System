@@ -57,4 +57,8 @@ class TreatmentProtocolService
         $protocol = $this->repository->find($id);
         return TreatmentProtocolResponseDTO::fromModel($protocol);
     }
+    public function getResponseDtoClass(): string
+    {
+        return TreatmentProtocolResponseDTO::class;
+    }
 }

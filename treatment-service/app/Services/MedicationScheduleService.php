@@ -53,4 +53,8 @@ class MedicationScheduleService
         $schedule = $this->repository->find($id);
         return MedicationScheduleResponseDTO::fromModel($schedule);
     }
+    public function getResponseDtoClass(): string
+    {
+        return MedicationScheduleResponseDTO::class;
+    }
 }

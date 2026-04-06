@@ -43,4 +43,8 @@ class PregnancyTrackingService
         $tracking = $this->repository->find($id);
         return PregnancyTrackingResponseDTO::fromModel($tracking);
     }
+    public function getResponseDtoClass(): string
+    {
+        return PregnancyTrackingResponseDTO::class;
+    }
 }

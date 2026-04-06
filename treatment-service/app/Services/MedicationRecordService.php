@@ -49,4 +49,8 @@ class MedicationRecordService
         $record = $this->repository->find($id);
         return MedicationRecordResponseDTO::fromModel($record);
     }
+    public function getResponseDtoClass(): string
+    {
+        return MedicationRecordResponseDTO::class;
+    }
 }

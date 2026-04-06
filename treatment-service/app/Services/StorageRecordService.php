@@ -46,4 +46,8 @@ class StorageRecordService
         $storage = $this->repository->find($id);
         return StorageRecordResponseDTO::fromModel($storage);
     }
+    public function getResponseDtoClass(): string
+    {
+        return StorageRecordResponseDTO::class;
+    }
 }

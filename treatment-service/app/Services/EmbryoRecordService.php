@@ -45,4 +45,8 @@ class EmbryoRecordService
         $embryo = $this->repository->find($id);
         return EmbryoRecordResponseDTO::fromModel($embryo);
     }
+    public function getResponseDtoClass(): string
+    {
+        return EmbryoRecordResponseDTO::class;
+    }
 }

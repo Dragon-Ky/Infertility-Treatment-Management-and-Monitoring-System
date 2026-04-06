@@ -52,4 +52,8 @@ class LabResultService
         $lab = $this->repository->find($id);
         return LabResultResponseDTO::fromModel($lab);
     }
+    public function getResponseDtoClass(): string
+    {
+        return LabResultResponseDTO::class;
+    }
 }

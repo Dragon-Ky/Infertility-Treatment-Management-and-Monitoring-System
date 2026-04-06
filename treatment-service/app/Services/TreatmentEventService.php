@@ -77,4 +77,8 @@ class TreatmentEventService extends BaseService
         $event = $this->repository->find($id);
         return TreatmentEventResponseDTO::fromModel($event);
     }
+    public function getResponseDtoClass(): string
+    {
+        return TreatmentEventResponseDTO::class;
+    }
 }
