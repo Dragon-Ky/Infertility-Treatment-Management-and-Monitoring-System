@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         // Cập nhật bảng medication_schedules
@@ -21,15 +20,15 @@ return new class extends Migration
             if (!Schema::hasColumn('medication_records', 'is_active')) {
                 $table->boolean('is_active')->default(true)->after('recorded_by');
             }
-            
+
             // Làm cho actual_time có thể null (vì lúc lên lịch chưa uống ngay)
             $table->dateTime('actual_time')->nullable()->change();
 
             // Cấu hình lại khóa ngoại để có onDelete('cascade')
             $table->dropForeign(['medication_schedule_id']);
             $table->foreign('medication_schedule_id')
-                  ->references('id')->on('medication_schedules')
-                  ->onDelete('cascade');
+                ->references('id')->on('medication_schedules')
+                ->onDelete('cascade');
         });
     }
 
@@ -40,7 +39,7 @@ return new class extends Migration
             $table->foreign('medication_schedule_id')->references('id')->on('medication_schedules');
             $table->dropColumn('is_active');
         });
-        
+
         Schema::table('medication_schedules', function (Blueprint $table) {
             $table->dropColumn('is_active');
         });
