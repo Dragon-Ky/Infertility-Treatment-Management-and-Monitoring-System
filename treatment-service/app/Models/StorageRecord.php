@@ -29,4 +29,9 @@ class StorageRecord extends Model
         'created_at'  => 'datetime',
         'updated_at'  => 'datetime',
     ];
+    public function item()
+{
+    // Mối quan hệ đa hình: item_id sẽ tự hiểu trỏ đi đâu dựa vào storage_type
+    return $this->morphTo();
+}
 }

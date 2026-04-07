@@ -29,4 +29,9 @@ class EmbryoRecord extends Model
         'created_at'         => 'datetime',
         'updated_at'         => 'datetime',
     ];
+    public function storage()
+    {
+        // "Tôi là phôi, tôi có một bản ghi lưu trữ tương ứng"
+        return $this->morphOne(StorageRecord::class, 'item');
+    }
 }
