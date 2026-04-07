@@ -4,14 +4,27 @@ namespace App\Http\Controllers;
 
 use App\Models\Service;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class ServiceController extends Controller
 {
+    
+    // GET ALL SERVICES (CACHE)
+    
     public function index()
     {
-        return response()->json(Service::all());
+        $cacheKey = "services_all";
+
+        $services = Cache::remember($cacheKey, 600, function () {
+            return Service::with('category')->get();
+        });
+
+        return response()->json($services);
     }
 
+    
+    // CREATE SERVICE
+    
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -21,27 +34,71 @@ class ServiceController extends Controller
             'price' => 'required|numeric'
         ]);
 
-        return response()->json(Service::create($data), 201);
+        $service = Service::create($data);
+
+        // clear cache list
+        Cache::forget("services_all");
+
+        return response()->json($service, 201);
     }
 
+    
+    // GET ONE SERVICE (CACHE)
+   
     public function show($id)
     {
-        return response()->json(Service::findOrFail($id));
-    }
+        $cacheKey = "service_" . $id;
 
-    public function update(Request $request, $id)
-    {
-        $service = Service::findOrFail($id);
+        $service = Cache::remember($cacheKey, 600, function () use ($id) {
+            return Service::with('category')->find($id);
+        });
 
-        $service->update($request->all());
+        if (!$service) {
+            return response()->json([
+                'message' => 'Service not found'
+            ], 404);
+        }
 
         return response()->json($service);
     }
 
+    
+    // UPDATE SERVICE
+   
+    public function update(Request $request, $id)
+    {
+        $service = Service::findOrFail($id);
+
+        $data = $request->validate([
+            'service_category_id' => 'sometimes|exists:service_categories,id',
+            'name' => 'sometimes|string',
+            'description' => 'nullable|string',
+            'price' => 'sometimes|numeric'
+        ]);
+
+        $service->update($data);
+
+        // clear cache
+        Cache::forget("services_all");
+        Cache::forget("service_" . $id);
+
+        return response()->json($service);
+    }
+
+    
+    // DELETE SERVICE
+    
     public function destroy($id)
     {
-        Service::destroy($id);
+        $service = Service::findOrFail($id);
+        $service->delete();
 
-        return response()->json(['message' => 'Deleted']);
+        // clear cache
+        Cache::forget("services_all");
+        Cache::forget("service_" . $id);
+
+        return response()->json([
+            'message' => 'Deleted successfully'
+        ]);
     }
 }
