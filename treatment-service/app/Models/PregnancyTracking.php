@@ -27,4 +27,9 @@ class PregnancyTracking extends Model
         'created_at'    => 'datetime',
         'updated_at'    => 'datetime',
     ];
+
+    public function treatmentProtocol()
+    {
+        return $this->belongsTo(TreatmentProtocol::class, 'treatment_id', 'id');
+    }
 }

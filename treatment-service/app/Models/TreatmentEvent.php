@@ -21,4 +21,9 @@ class TreatmentEvent extends Model {
         'attachments' => 'array', // Tự dịch JSON thành mảng
         'is_active' => 'boolean',
     ];
+
+    public function treatmentProtocol()
+    {
+        return $this->belongsTo(TreatmentProtocol::class, 'treatment_id', 'id');
+    }
 }

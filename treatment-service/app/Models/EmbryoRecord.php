@@ -34,4 +34,9 @@ class EmbryoRecord extends Model
         // "Tôi là phôi, tôi có một bản ghi lưu trữ tương ứng"
         return $this->morphOne(StorageRecord::class, 'item');
     }
+
+    public function treatmentProtocol()
+    {
+        return $this->belongsTo(TreatmentProtocol::class, 'treatment_id', 'id');
+    }
 }

@@ -31,9 +31,14 @@ class MedicationSchedule extends Model
         'time_slots' => 'array', // Để lưu danh sách giờ uống thuốc dưới dạng JSON
     ];
     
-    public function medicationSchedule()
+    public function medicationRecords()
     {
-        // "Tôi thuộc về một lịch trình cụ thể"
-        return $this->belongsTo(MedicationSchedule::class, 'medication_schedule_id', 'id');
+        // "Một lịch trình thuốc sẽ có nhiều lần uống (bản ghi) thuốc"
+        return $this->hasMany(MedicationRecord::class, 'medication_schedule_id', 'id');
+    }
+
+    public function treatmentProtocol()
+    {
+        return $this->belongsTo(TreatmentProtocol::class, 'treatment_id', 'id');
     }
 }

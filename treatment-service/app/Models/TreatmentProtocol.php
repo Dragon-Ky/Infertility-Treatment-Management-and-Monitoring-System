@@ -23,4 +23,34 @@ class TreatmentProtocol extends Model
     protected $casts = [
         'is_active' => 'boolean',
     ];
+
+    public function medicationSchedules()
+    {
+        return $this->hasMany(MedicationSchedule::class, 'treatment_id', 'id');
+    }
+
+    public function storageRecords()
+    {
+        return $this->hasMany(StorageRecord::class, 'treatment_id', 'id');
+    }
+
+    public function embryoRecords()
+    {
+        return $this->hasMany(EmbryoRecord::class, 'treatment_id', 'id');
+    }
+
+    public function treatmentEvents()
+    {
+        return $this->hasMany(TreatmentEvent::class, 'treatment_id', 'id');
+    }
+
+    public function labResults()
+    {
+        return $this->hasMany(LabResult::class, 'treatment_id', 'id');
+    }
+
+    public function pregnancyTrackings()
+    {
+        return $this->hasMany(PregnancyTracking::class, 'treatment_id', 'id');
+    }
 }

@@ -30,8 +30,13 @@ class StorageRecord extends Model
         'updated_at'  => 'datetime',
     ];
     public function item()
-{
-    // Mối quan hệ đa hình: item_id sẽ tự hiểu trỏ đi đâu dựa vào storage_type
-    return $this->morphTo();
-}
+    {
+        // Mối quan hệ đa hình: item_id sẽ tự hiểu trỏ đi đâu dựa vào storage_type/item_type
+        return $this->morphTo();
+    }
+
+    public function treatmentProtocol()
+    {
+        return $this->belongsTo(TreatmentProtocol::class, 'treatment_id', 'id');
+    }
 }
