@@ -54,20 +54,19 @@ class TreatmentProtocolController extends Controller
             'message' => 'Xóa phác đồ điều trị thành công'
         ], 200);
     }
-    public function show(int $id): JsonResponse
+     public function show(int $id): JsonResponse
     {
-        $protocol = $this->protocolService->getProtocolById($id);
-
-        if (!$protocol || !$protocol->is_active) {
+        try {
+            $protocol = $this->protocolService->getProtocolById($id);
+            return response()->json([
+                'success' => true,
+                'data' => $protocol->toArray()
+            ], 200);
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Không tìm thấy phác đồ hoặc phác đồ đã bị ẩn.'
+                'message' => $e->getMessage()
             ], 404);
         }
-        
-        return response()->json([
-            'success' => true,
-            'data' => $protocol
-        ]);
     }
 }
