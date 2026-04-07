@@ -40,15 +40,22 @@ class MedicationScheduleController extends Controller
     {
         $validated = $request->validate([
             'medication_name' => 'nullable|string',
-            'dosage' => 'nullable|string',
-            'frequency' => 'nullable|string',
-            'status' => 'nullable|in:active,completed,paused',
-            'time_slots' => 'nullable|array',
+            'dosage'          => 'nullable|string',
+            'frequency'       => 'nullable|string',
+            'status'          => 'nullable|in:active,completed,paused',
+            'time_slots'      => 'nullable|array',
+            'route'           => 'nullable|in:injection,oral,vaginal,other', // Bổ sung route
+            'start_date'      => 'nullable|date',
+            'end_date'        => 'nullable|date|after_or_equal:start_date',
         ]);
 
         $dto = UpdateMedicationScheduleRequestDTO::fromArray($validated);
         $response = $this->scheduleService->updateSchedule($id, $dto);
-        return response()->json(['message' => 'Cập nhật lịch thuốc thành công', 'data' => $response->toArray()]);
+        
+        return response()->json([
+            'message' => 'Cập nhật lịch thuốc thành công', 
+            'data' => $response->toArray()
+        ]);
     }
     public function destroy(int $id): JsonResponse
     {
