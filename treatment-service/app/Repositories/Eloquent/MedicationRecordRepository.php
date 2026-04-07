@@ -12,4 +12,9 @@ class MedicationRecordRepository extends BaseRepository implements MedicationRec
     {
         parent::__construct($model);
     }
+    public function getRecordWithSchedule(int $id)
+    {
+        // "with" sẽ đi tìm hàm medicationSchedule() trong Model MedicationRecord
+        return $this->model->with('medicationSchedule')->find($id);
+    }
 }

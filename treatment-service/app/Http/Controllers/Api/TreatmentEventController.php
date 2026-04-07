@@ -13,7 +13,8 @@ class TreatmentEventController extends Controller
 {
     public function __construct(
         protected TreatmentEventService $eventService
-    ) {}
+    ) {
+    }
 
     /**
      * API: Tạo sự kiện điều trị mới
@@ -23,12 +24,12 @@ class TreatmentEventController extends Controller
         // 1. Lễ tân kiểm tra hồ sơ (Validation)
         $validated = $request->validate([
             'treatment_id' => 'required|integer',
-            'event_type'   => 'required|in:egg_retrieval,embryo_transfer,insemination,ultrasound,blood_test,consultation,other',
-            'event_date'   => 'required|date',
-            'description'  => 'nullable|string',
-            'result'       => 'nullable|string',
+            'event_type' => 'required|in:egg_retrieval,embryo_transfer,insemination,ultrasound,blood_test,consultation,other',
+            'event_date' => 'required|date',
+            'description' => 'nullable|string',
+            'result' => 'nullable|string',
             'doctor_notes' => 'nullable|string',
-            'attachments'  => 'nullable|array',
+            'attachments' => 'nullable|array',
         ]);
 
         // 2. Đóng gói hồ sơ vào khay (DTO)
@@ -40,7 +41,7 @@ class TreatmentEventController extends Controller
         // 4. Báo kết quả thành công cho React
         return response()->json([
             'message' => 'Ghi nhận sự kiện điều trị thành công',
-            'data'    => $responseDTO->toArray()
+            'data' => $responseDTO->toArray()
         ], 201);
     }
 
@@ -63,13 +64,13 @@ class TreatmentEventController extends Controller
             'data' => $data
         ], 200);
     }
-    
+
     public function update(Request $request, int $id)
     {
         $validated = $request->validate([
-            'result'       => 'nullable|string',
+            'result' => 'nullable|string',
             'doctor_notes' => 'nullable|string',
-            'attachments'  => 'nullable|array',
+            'attachments' => 'nullable|array',
         ]);
 
         $dto = UpdateTreatmentEventRequestDTO::fromArray($validated);
@@ -85,19 +86,17 @@ class TreatmentEventController extends Controller
     }
     public function show(int $id): JsonResponse
     {
-        $event = $this->eventService->getEventById($id);
-
-        if (!$event || !$event->is_active) {
+        try {
+            $event = $this->eventService->getEventById($id);
+            return response()->json([
+                'success' => true,
+                'data' => $event->toArray()
+            ], 200);
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Không tìm thấy sự kiện hoặc sự kiện đã bị ẩn.'
+                'message' => $e->getMessage()
             ], 404);
         }
-        
-        return response()->json([
-            'success' => true,
-            'data' => $event
-        ]);
-    }   
-
+    }
 }

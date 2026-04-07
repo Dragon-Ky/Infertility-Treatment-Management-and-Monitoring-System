@@ -33,4 +33,9 @@ class MedicationRecord extends Model
         'created_at'     => 'datetime',
         'updated_at'     => 'datetime',
     ];
+    public function medicationRecords()
+    {
+        // "Tôi có nhiều bản ghi uống thuốc"
+        return $this->hasMany(MedicationRecord::class, 'medication_schedule_id', 'id');
+    }
 }

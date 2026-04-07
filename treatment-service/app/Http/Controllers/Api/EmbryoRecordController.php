@@ -11,18 +11,20 @@ use Illuminate\Http\JsonResponse;
 
 class EmbryoRecordController extends Controller
 {
-    public function __construct(protected EmbryoRecordService $embryoService) {}
+    public function __construct(protected EmbryoRecordService $embryoService)
+    {
+    }
 
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'treatment_id'       => 'required|integer',
-            'embryo_code'        => 'required|string|unique:embryo_records,embryo_code',
+            'treatment_id' => 'required|integer',
+            'embryo_code' => 'required|string|unique:embryo_records,embryo_code',
             'fertilization_date' => 'required|date',
-            'development_day'    => 'required|in:3,5,6',
-            'grade'              => 'required|string',
-            'status'             => 'required|in:frozen,transferred,discarded',
-            'notes'              => 'nullable|string',
+            'development_day' => 'required|in:3,5,6',
+            'grade' => 'required|string',
+            'status' => 'required|in:frozen,transferred,discarded',
+            'notes' => 'nullable|string',
         ]);
 
         $dto = CreateEmbryoRecordRequestDTO::fromArray($validated);
@@ -30,7 +32,7 @@ class EmbryoRecordController extends Controller
 
         return response()->json([
             'message' => 'Lưu hồ sơ phôi thành công',
-            'data'    => $responseDTO->toArray()
+            'data' => $responseDTO->toArray()
         ], 201);
     }
     public function update(Request $request, int $id): JsonResponse
@@ -39,9 +41,9 @@ class EmbryoRecordController extends Controller
         // Lưu ý: Các trường ở đây nên là 'nullable' vì Update không bắt buộc gửi hết
         $validated = $request->validate([
             'development_day' => 'nullable|in:3,5,6',
-            'grade'           => 'nullable|string',
-            'status'          => 'nullable|in:frozen,transferred,discarded',
-            'notes'           => 'nullable|string',
+            'grade' => 'nullable|string',
+            'status' => 'nullable|in:frozen,transferred,discarded',
+            'notes' => 'nullable|string',
         ]);
 
         // 2. Đóng gói vào DTO Update
@@ -52,7 +54,7 @@ class EmbryoRecordController extends Controller
 
         return response()->json([
             'message' => 'Cập nhật hồ sơ phôi thành công',
-            'data'    => $responseDTO->toArray()
+            'data' => $responseDTO->toArray()
         ], 200);
     }
     public function destroy(int $id): JsonResponse
@@ -64,18 +66,17 @@ class EmbryoRecordController extends Controller
     }
     public function show(int $id): JsonResponse
     {
-        $embryo = $this->embryoService->getEmbryoRecordById($id);
-
-        if (!$embryo || !$embryo->is_active) {
+        try {
+            $embryo = $this->embryoService->getEmbryoRecordById($id);
+            return response()->json([
+                'success' => true,
+                'data' => $embryo->toArray()
+            ], 200);
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Không tìm thấy hồ sơ phôi hoặc hồ sơ đã bị ẩn.'
+                'message' => $e->getMessage()
             ], 404);
         }
-        
-        return response()->json([
-            'success' => true,
-            'data' => $embryo->toArray()
-        ], 200);
     }
 }

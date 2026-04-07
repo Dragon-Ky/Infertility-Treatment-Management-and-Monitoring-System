@@ -11,36 +11,38 @@ use Illuminate\Http\JsonResponse;
 
 class LabResultController extends Controller
 {
-    public function __construct(protected LabResultService $labService) {}
+    public function __construct(protected LabResultService $labService)
+    {
+    }
 
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'treatment_id'    => 'required|integer',
-            'test_type'       => 'required|in:blood,ultrasound,hormone,spermogram,other',
-            'test_date'       => 'required|date',
-            'result_data'     => 'required|array', // Dữ liệu chỉ số phải là mảng
+            'treatment_id' => 'required|integer',
+            'test_type' => 'required|in:blood,ultrasound,hormone,spermogram,other',
+            'test_date' => 'required|date',
+            'result_data' => 'required|array', // Dữ liệu chỉ số phải là mảng
             'reference_range' => 'nullable|string',
-            'unit'            => 'nullable|string',
-            'notes'           => 'nullable|string',
-            'doctor_notes'    => 'nullable|string',
-            'attachments'     => 'nullable|array',
+            'unit' => 'nullable|string',
+            'notes' => 'nullable|string',
+            'doctor_notes' => 'nullable|string',
+            'attachments' => 'nullable|array',
         ]);
 
         $dto = CreateLabResultRequestDTO::fromArray($validated);
         $responseDTO = $this->labService->createLabResult($dto);
 
         return response()->json([
-            'message' => 'Lưu kết quả xét nghiệm thành công', 
+            'message' => 'Lưu kết quả xét nghiệm thành công',
             'data' => $responseDTO->toArray()
         ], 201);
     }
     public function update(Request $request, int $id)
     {
         $validated = $request->validate([
-            'result_data'  => 'nullable|array',
+            'result_data' => 'nullable|array',
             'doctor_notes' => 'nullable|string',
-            'attachments'  => 'nullable|array',
+            'attachments' => 'nullable|array',
         ]);
 
         $dto = UpdateLabResultRequestDTO::fromArray($validated);
@@ -56,18 +58,17 @@ class LabResultController extends Controller
     }
     public function show(int $id): JsonResponse
     {
-        $labResult = $this->labService->getLabResultById($id);
-
-        if (!$labResult || !$labResult->is_active) {
+        try {
+            $labResult = $this->labService->getLabResultById($id);
+            return response()->json([
+                'success' => true,
+                'data' => $labResult->toArray()
+            ], 200);
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Không tìm thấy kết quả xét nghiệm hoặc đã bị vô hiệu hóa'
+                'message' => $e->getMessage()
             ], 404);
         }
-
-        return response()->json([
-            'success' => true,
-            'data' => $labResult->toArray()
-        ], 200);
     }
 }

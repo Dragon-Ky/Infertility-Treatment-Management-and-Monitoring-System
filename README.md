@@ -46,10 +46,15 @@ Distributed System
 Service	Mô tả	Thành viên phụ trách
 Auth Service	Xác thực & phân quyền (JWT/OAuth2)	Member 1
 User Service	Quản lý hồ sơ bệnh nhân	Member 2
+
 Doctor Service	Quản lý bác sĩ & lịch làm việc	Member 3
+
 Treatment Service	Quản lý quá trình điều trị IUI, IVF	Member 4
+
 Appointment Service	Quản lý lịch hẹn & nhắc lịch	Member 5
+
 Notification Service	Gửi thông báo (Firebase)	Member 6
+
 Rating Service	Quản lý feedback & rating	Member 7
 Service Catalog	Quản lý dịch vụ & bảng giá	Member 8
 Reporting Service	Dashboard & báo cáo	Member 9

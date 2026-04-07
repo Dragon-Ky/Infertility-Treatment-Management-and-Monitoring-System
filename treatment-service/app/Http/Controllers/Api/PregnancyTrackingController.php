@@ -11,23 +11,25 @@ use Illuminate\Http\JsonResponse;
 
 class PregnancyTrackingController extends Controller
 {
-    public function __construct(protected PregnancyTrackingService $trackingService) {}
+    public function __construct(protected PregnancyTrackingService $trackingService)
+    {
+    }
 
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'treatment_id'  => 'required|integer',
+            'treatment_id' => 'required|integer',
             'tracking_date' => 'required|date',
-            'week_number'   => 'required|integer|min:0|max:42', // Thai kỳ thường tối đa 42 tuần
-            'status'        => 'required|in:ongoing,delivered,miscarried',
-            'notes'         => 'nullable|string',
+            'week_number' => 'required|integer|min:0|max:42', // Thai kỳ thường tối đa 42 tuần
+            'status' => 'required|in:ongoing,delivered,miscarried',
+            'notes' => 'nullable|string',
         ]);
 
         $dto = CreatePregnancyTrackingRequestDTO::fromArray($validated);
         $responseDTO = $this->trackingService->createTracking($dto);
 
         return response()->json([
-            'message' => 'Lưu hồ sơ theo dõi thai kỳ thành công', 
+            'message' => 'Lưu hồ sơ theo dõi thai kỳ thành công',
             'data' => $responseDTO->toArray()
         ], 201);
     }
@@ -35,8 +37,8 @@ class PregnancyTrackingController extends Controller
     {
         $validated = $request->validate([
             'week_number' => 'nullable|integer|min:0',
-            'status'      => 'nullable|in:ongoing,delivered,miscarried',
-            'notes'       => 'nullable|string',
+            'status' => 'nullable|in:ongoing,delivered,miscarried',
+            'notes' => 'nullable|string',
         ]);
 
         $dto = UpdatePregnancyTrackingRequestDTO::fromArray($validated);
@@ -52,18 +54,17 @@ class PregnancyTrackingController extends Controller
     }
     public function show(int $id): JsonResponse
     {
-        $tracking = $this->trackingService->getTrackingById($id);
-
-        if (!$tracking || !$tracking->is_active) {
+        try {
+            $tracking = $this->trackingService->getTrackingById($id);
+            return response()->json([
+                'success' => true,
+                'data' => $tracking->toArray()
+            ], 200);
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Không tìm thấy hồ sơ theo dõi thai kỳ hoặc đã bị vô hiệu hóa'
+                'message' => $e->getMessage()
             ], 404);
         }
-
-        return response()->json([
-            'success' => true,
-            'data' => $tracking->toArray()
-        ], 200);
     }
 }

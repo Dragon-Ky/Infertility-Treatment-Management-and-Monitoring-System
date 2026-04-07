@@ -27,10 +27,20 @@ class MedicationScheduleService extends BaseService
                 'end_date'        => $dto->end_date,
                 'time_slots'      => $dto->time_slots,
                 'route'           => $dto->route,
-                'status'          => 'active', 
+                'status'          => 'active',
+                'is_active'       => true 
             ]);
             return MedicationScheduleResponseDTO::fromModel($schedule);
         });
+    }
+
+    public function getScheduleById(int $id): MedicationScheduleResponseDTO
+    {
+        $schedule = $this->repository->find($id);
+        if (!$schedule) {
+            throw new \Exception("Không tìm thấy lịch trình với ID: $id");
+        }
+        return MedicationScheduleResponseDTO::fromModel($schedule);
     }
     public function updateSchedule(int $id, UpdateMedicationScheduleRequestDTO $dto): MedicationScheduleResponseDTO
     {
@@ -41,11 +51,7 @@ class MedicationScheduleService extends BaseService
         // Thay vì xóa vĩnh viễn, ta cập nhật trạng thái thành false
         return $this->delete($id);
     }
-    public function getScheduleById(int $id): MedicationScheduleResponseDTO
-    {
-        $schedule = $this->repository->find($id);
-        return MedicationScheduleResponseDTO::fromModel($schedule);
-    }
+
     public function getResponseDtoClass(): string
     {
         return MedicationScheduleResponseDTO::class;

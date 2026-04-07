@@ -30,4 +30,10 @@ class MedicationSchedule extends Model
         'end_date' => 'date',
         'time_slots' => 'array', // Để lưu danh sách giờ uống thuốc dưới dạng JSON
     ];
+    
+    public function medicationSchedule()
+    {
+        // "Tôi thuộc về một lịch trình cụ thể"
+        return $this->belongsTo(MedicationSchedule::class, 'medication_schedule_id', 'id');
+    }
 }

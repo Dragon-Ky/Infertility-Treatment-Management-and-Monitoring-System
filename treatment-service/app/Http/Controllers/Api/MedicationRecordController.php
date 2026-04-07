@@ -11,24 +11,26 @@ use Illuminate\Http\JsonResponse;
 
 class MedicationRecordController extends Controller
 {
-    public function __construct(protected MedicationRecordService $recordService) {}
+    public function __construct(protected MedicationRecordService $recordService)
+    {
+    }
 
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'medication_schedule_id' => 'required|integer',
-            'scheduled_time'         => 'required|date',
-            'actual_time'            => 'required|date',
-            'status'                 => 'required|in:taken,missed,skipped',
-            'recorded_by'            => 'required|integer',
-            'notes'                  => 'nullable|string',
+            'scheduled_time' => 'required|date',
+            'actual_time' => 'required|date',
+            'status' => 'required|in:taken,missed,skipped',
+            'recorded_by' => 'required|integer',
+            'notes' => 'nullable|string',
         ]);
 
         $dto = CreateMedicationRecordRequestDTO::fromArray($validated);
         $responseDTO = $this->recordService->createRecord($dto);
 
         return response()->json([
-            'message' => 'Ghi nhận dùng thuốc thành công', 
+            'message' => 'Ghi nhận dùng thuốc thành công',
             'data' => $responseDTO->toArray()
         ], 201);
     }
@@ -36,8 +38,8 @@ class MedicationRecordController extends Controller
     {
         $validated = $request->validate([
             'actual_time' => 'nullable|date',
-            'status'      => 'nullable|in:taken,missed,skipped',
-            'notes'       => 'nullable|string',
+            'status' => 'nullable|in:taken,missed,skipped',
+            'notes' => 'nullable|string',
         ]);
 
         $dto = UpdateMedicationRecordRequestDTO::fromArray($validated);
@@ -53,18 +55,17 @@ class MedicationRecordController extends Controller
     }
     public function show(int $id): JsonResponse
     {
-        $record = $this->recordService->getRecordById($id);
-
-        if (!$record || !$record->is_active) {
+        try {
+            $record = $this->recordService->getRecordById($id);
+            return response()->json([
+                'success' => true,
+                'data' => $record->toArray()
+            ], 200);
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Không tìm thấy ghi nhận dùng thuốc hoặc đã bị vô hiệu hóa'
+                'message' => $e->getMessage()
             ], 404);
         }
-
-        return response()->json([
-            'success' => true,
-            'data' => $record->toArray()
-        ], 200);
     }
 }

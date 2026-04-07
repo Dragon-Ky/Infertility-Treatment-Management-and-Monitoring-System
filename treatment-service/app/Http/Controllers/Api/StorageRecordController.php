@@ -11,16 +11,18 @@ use Illuminate\Http\JsonResponse;
 
 class StorageRecordController extends Controller
 {
-    public function __construct(protected StorageRecordService $storageService) {}
+    public function __construct(protected StorageRecordService $storageService)
+    {
+    }
 
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'treatment_id'  => 'required|integer',
-            'storage_type'  => 'required|in:embryo,sperm,oocyte',
-            'item_id'       => 'required|integer',
-            'start_date'    => 'required|date',
-            'expiry_date'   => 'required|date|after:start_date',
+            'treatment_id' => 'required|integer',
+            'storage_type' => 'required|in:embryo,sperm,oocyte',
+            'item_id' => 'required|integer',
+            'start_date' => 'required|date',
+            'expiry_date' => 'required|date|after:start_date',
             'location_code' => 'required|string|max:50',
         ]);
 
@@ -28,15 +30,15 @@ class StorageRecordController extends Controller
         $responseDTO = $this->storageService->createStorage($dto);
 
         return response()->json([
-            'message' => 'Lưu hồ sơ trữ đông thành công', 
+            'message' => 'Lưu hồ sơ trữ đông thành công',
             'data' => $responseDTO->toArray()
         ], 201);
     }
     public function update(Request $request, int $id)
     {
         $validated = $request->validate([
-            'expiry_date'   => 'nullable|date',
-            'status'        => 'nullable|in:active,expired,released',
+            'expiry_date' => 'nullable|date',
+            'status' => 'nullable|in:active,expired,released',
             'location_code' => 'nullable|string',
         ]);
 
@@ -53,18 +55,17 @@ class StorageRecordController extends Controller
     }
     public function show(int $id): JsonResponse
     {
-        $storage = $this->storageService->getStorageRecordById($id);
-
-        if (!$storage || !$storage->is_active) {
+        try {
+            $storage = $this->storageService->getStorageRecordById($id);
+            return response()->json([
+                'success' => true,
+                'data' => $storage->toArray()
+            ], 200);
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Không tìm thấy hồ sơ hoặc hồ sơ đã bị ẩn.'
+                'message' => $e->getMessage()
             ], 404);
         }
-        
-        return response()->json([
-            'success' => true,
-            'data' => $storage
-        ]);
-    }  
+    }
 }

@@ -6,11 +6,12 @@ use App\DTOs\Requests\CreateMedicationRecordRequestDTO;
 use App\DTOs\Responses\MedicationRecordResponseDTO;
 use App\DTOs\Requests\update\UpdateMedicationRecordRequestDTO;
 use App\Repositories\Contracts\MedicationRecordRepositoryInterface;
+
 use Illuminate\Support\Facades\DB;
 
 class MedicationRecordService extends BaseService
 {
-    public function __construct( MedicationRecordRepositoryInterface $repository) 
+    public function __construct(MedicationRecordRepositoryInterface $repository)
     {
         parent::__construct($repository);
     }
@@ -19,12 +20,13 @@ class MedicationRecordService extends BaseService
         return DB::transaction(function () use ($dto) {
             $record = $this->repository->create([
                 'medication_schedule_id' => $dto->medication_schedule_id,
-                'scheduled_time'         => $dto->scheduled_time,
-                'actual_time'            => $dto->actual_time,
-                'status'                 => $dto->status,
-                'recorded_by'            => $dto->recorded_by,
-                'notes'                  => $dto->notes,
+                'scheduled_time' => $dto->scheduled_time,
+                'actual_time' => $dto->actual_time,
+                'status' => $dto->status,
+                'recorded_by' => $dto->recorded_by,
+                'notes' => $dto->notes,
             ]);
+            $record->load('medicationSchedule');
             return MedicationRecordResponseDTO::fromModel($record);
         });
     }
@@ -39,7 +41,16 @@ class MedicationRecordService extends BaseService
     }
     public function getRecordById(int $id): MedicationRecordResponseDTO
     {
-        $record = $this->repository->find($id);
+        // Gọi trực tiếp từ $this->repository (vì bạn đã tiêm Interface vào construct rồi)
+        /** @var MedicationRecordRepositoryInterface $repo */
+        $repo = $this->repository;
+        $record = $repo->getRecordWithSchedule($id);
+
+        if (!$record) {
+            // Nên thêm ID vào thông báo lỗi để dễ tìm kiếm lỗi sau này
+            throw new \Exception("Không tìm thấy bản ghi uống thuốc với ID: $id");
+        }
+
         return MedicationRecordResponseDTO::fromModel($record);
     }
     public function getResponseDtoClass(): string
