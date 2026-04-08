@@ -15,7 +15,7 @@ return new class extends Migration
                 ->constrained('services')
                 ->onDelete('cascade');
 
-            $table->string('name'); // Basic / Premium / VIP
+            $table->string('name'); 
             $table->decimal('price', 12, 2);
             $table->text('description')->nullable();
 
