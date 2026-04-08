@@ -37,7 +37,7 @@ class LabResultController extends Controller
             'data' => $responseDTO->toArray()
         ], 201);
     }
-    public function update(Request $request, int $id)
+    public function update(Request $request, int $id): JsonResponse
     {
         $validated = $request->validate([
             'result_data' => 'nullable|array',

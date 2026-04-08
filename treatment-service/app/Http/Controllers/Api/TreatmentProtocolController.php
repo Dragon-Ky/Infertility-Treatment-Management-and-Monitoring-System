@@ -33,7 +33,7 @@ class TreatmentProtocolController extends Controller
             'data'    => $responseDTO->toArray()
         ], 201);
     }
-    public function update(Request $request, int $id)
+    public function update(Request $request, int $id): JsonResponse
     {
         $validated = $request->validate([
             'doctor_id'     => 'nullable|integer',

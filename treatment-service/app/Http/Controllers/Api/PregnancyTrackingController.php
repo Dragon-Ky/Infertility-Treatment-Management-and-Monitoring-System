@@ -33,7 +33,7 @@ class PregnancyTrackingController extends Controller
             'data' => $responseDTO->toArray()
         ], 201);
     }
-    public function update(Request $request, int $id)
+    public function update(Request $request, int $id): JsonResponse
     {
         $validated = $request->validate([
             'week_number' => 'nullable|integer|min:0',

@@ -34,7 +34,7 @@ class MedicationRecordController extends Controller
             'data' => $responseDTO->toArray()
         ], 201);
     }
-    public function update(Request $request, int $id)
+    public function update(Request $request, int $id): JsonResponse
     {
         $validated = $request->validate([
             'actual_time' => 'nullable|date',

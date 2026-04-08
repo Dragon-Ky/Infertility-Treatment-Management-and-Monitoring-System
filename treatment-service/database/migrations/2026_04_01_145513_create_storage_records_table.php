@@ -13,6 +13,7 @@ return new class extends Migration
             $table->foreignId('treatment_id')->constrained('treatment_protocols'); 
             $table->enum('storage_type', ['embryo', 'sperm', 'oocyte']); // Loại trữ đông
             $table->unsignedBigInteger('item_id'); // ID của phôi/tinh trùng/trứng cụ thể
+            $table->string('item_type'); // Loại đối tượng (VD: blastocyst, sperm_sample, oocyte_batch)
             $table->date('start_date');            // Ngày bắt đầu trữ
             $table->date('expiry_date');           // Ngày hết hạn
             $table->enum('status', ['active', 'expired', 'released'])->default('active');

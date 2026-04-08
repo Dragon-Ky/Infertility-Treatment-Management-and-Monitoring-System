@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('pregnancy_tracking', function (Blueprint $table) {
+        Schema::create('pregnancy_trackings', function (Blueprint $table) {
             $table->id();
             $table->foreignId('treatment_id')->constrained('treatment_protocols'); 
             $table->date('tracking_date'); // Ngày ghi nhận

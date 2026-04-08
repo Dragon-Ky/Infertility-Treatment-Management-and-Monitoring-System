@@ -35,7 +35,7 @@ class PregnancyTrackingService extends BaseService
     public function deleteTracking(int $id): bool
     {
         // Thay vì xóa vĩnh viễn, ta cập nhật trạng thái thành false
-        return $this->deleteTracking($id);
+        return $this->delete($id);
     }
     public function getTrackingById(int $id): PregnancyTrackingResponseDTO
     {

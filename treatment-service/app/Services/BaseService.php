@@ -17,12 +17,13 @@ abstract class BaseService
     public function updateWithDto(int $id, object $dto)
     {
         return DB::transaction(function () use ($id, $dto) {
-            $dtoAsArray = (array) $dto;
-            $data = array_filter($dtoAsArray, fn($value) => !is_null($value));
+            // Chuyển DTO thành mảng và lọc bỏ các giá trị null (tránh ghi đè dữ liệu cũ bằng null)
+            $data = array_filter((array) $dto, fn($value) => !is_null($value));
 
+            // Gọi hàm update đã tối ưu ở trên
             $model = $this->update($id, $data);
 
-            // KIỂM TRA: Nếu có quan hệ cần nạp, hãy nạp nó trước khi đóng gói DTO
+            // Nạp các quan hệ nếu có (như MedicationSchedule)
             $relations = $this->getRelationsToLoad();
             if (!empty($relations)) {
                 $model->load($relations);
@@ -58,16 +59,11 @@ abstract class BaseService
     }
     public function update(int $id, array $data)
     {
-        // 1. Thực hiện update và nhận về kết quả (thường là true/false hoặc Model)
-        $updated = $this->repository->update($id, $data);
+        // 1. Repository đã dùng findOrFail, nên nếu không có ID, nó sẽ văng lỗi ngay tại đây.
+        // Bạn không cần kiểm tra if (!$updated) nữa.
+        $this->repository->update($id, $data);
 
-        // 2. Kiểm tra nếu không update được (do không tìm thấy ID)
-        if (!$updated) {
-            throw new \Exception("Không tìm thấy dữ liệu để cập nhật hoặc dữ liệu không thay đổi.");
-        }
-
-        // 3. Trả về item đã được cập nhật
-        // Nếu Repository của bạn trả về bool, bạn chỉ cần gọi findById 1 lần duy nhất ở đây
+        // 2. Trả về item đã được cập nhật bằng cách gọi hàm tìm kiếm có sẵn
         return $this->findById($id);
     }
     abstract protected function getResponseDtoClass(): string;
