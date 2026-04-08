@@ -7,22 +7,33 @@ use Illuminate\Http\Request;
 
 class DoctorController extends Controller
 {
+    
     public function index()
     {
-        return response()->json(Doctor::all());
+        return response()->json(
+            Doctor::with('schedules')->get()
+        );
     }
 
+    
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name' => 'required|string',
-            'specialization' => 'required|string',
-            'experience' => 'required|integer'
+            'full_name' => 'required|string|max:255',
+            'specialization' => 'required|string|max:255',
+            'degree' => 'nullable|string|max:255',
+            'experience_years' => 'required|integer|min:0',
+            'bio' => 'nullable|string',
+            'consultation_fee' => 'nullable|numeric|min:0',
+            'status' => 'in:active,inactive'
         ]);
 
-        return response()->json(Doctor::create($data), 201);
+        $doctor = Doctor::create($data);
+
+        return response()->json($doctor, 201);
     }
 
+   
     public function show($id)
     {
         return response()->json(
@@ -30,19 +41,33 @@ class DoctorController extends Controller
         );
     }
 
+    
     public function update(Request $request, $id)
     {
         $doctor = Doctor::findOrFail($id);
 
-        $doctor->update($request->all());
+        $data = $request->validate([
+            'full_name' => 'sometimes|string|max:255',
+            'specialization' => 'sometimes|string|max:255',
+            'degree' => 'nullable|string|max:255',
+            'experience_years' => 'sometimes|integer|min:0',
+            'bio' => 'nullable|string',
+            'consultation_fee' => 'nullable|numeric|min:0',
+            'status' => 'in:active,inactive'
+        ]);
+
+        $doctor->update($data);
 
         return response()->json($doctor);
     }
 
+    
     public function destroy($id)
     {
         Doctor::destroy($id);
 
-        return response()->json(['message' => 'Deleted']);
+        return response()->json([
+            'message' => 'Doctor deleted successfully'
+        ]);
     }
 }

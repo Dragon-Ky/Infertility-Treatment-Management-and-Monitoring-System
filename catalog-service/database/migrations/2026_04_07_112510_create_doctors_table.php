@@ -11,13 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-    Schema::create('doctors', function (Blueprint $table) {
-    $table->id();
-    $table->string('name');
-    $table->string('specialization');
-    $table->integer('experience');
-    $table->timestamps();
-});
+        Schema::create('doctors', function (Blueprint $table) {
+            $table->id();
+
+            
+            $table->string('full_name');
+            $table->string('specialization')->nullable();
+            $table->integer('experience_years')->default(0);
+
+            $table->timestamps();
+        });
     }
 
     /**
