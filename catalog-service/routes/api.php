@@ -7,21 +7,56 @@ use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\ServiceCategoryController;
 use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\ServicePricingController;
 
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+*/
+
+// AUTH USER (Sanctum)
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
 
+// =========================
 //  DOCTORS
+// =========================
 Route::apiResource('doctors', DoctorController::class);
 
 
+// =========================
 //  SERVICES (IUI / IVF)
+// =========================
 Route::apiResource('services', ServiceController::class);
 
-// 🏷️ SERVICE CATEGORIES
+
+// =========================
+//  SERVICE CATEGORIES
+// =========================
 Route::apiResource('service-categories', ServiceCategoryController::class);
 
-// 📅 DOCTOR SCHEDULES
+
+// =========================
+//  DOCTOR SCHEDULES
+// =========================
 Route::apiResource('schedules', ScheduleController::class);
+
+
+// =========================
+//  SERVICE PRICINGS (NEW MODULE)
+// =========================
+
+
+Route::get('/services/{id}/pricings', [ServicePricingController::class, 'getByService']);
+
+
+Route::post('/pricings', [ServicePricingController::class, 'store']);
+
+
+Route::put('/pricings/{id}', [ServicePricingController::class, 'update']);
+
+
+Route::delete('/pricings/{id}', [ServicePricingController::class, 'destroy']);
