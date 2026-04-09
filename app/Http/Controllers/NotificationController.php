@@ -48,7 +48,7 @@ class NotificationController extends Controller
         // Service này chỉ đi giao thư, không có dữ liệu khám bệnh, nên trả về mảng rỗng chuẩn format
         return response()->json([
             "success" => true,
-            "data" => [
+              "data" => [
                 "records" => [], 
                 "total" => 0,
                 "syncedAt" => now()->toIso8601String()
