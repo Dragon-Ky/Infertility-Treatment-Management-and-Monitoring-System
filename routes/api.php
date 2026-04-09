@@ -1,14 +1,20 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\TreatmentController;
-use Illuminate\Support\Facades\Route;
 
-// Quản lý lịch hẹn
-Route::post('/appointments', [AppointmentController::class, 'store']);
-Route::get('/appointments', [AppointmentController::class, 'index']);
-Route::get('/appointments/{id}', [AppointmentController::class, 'show']);
+// Group cho Appointment
+Route::prefix('appointments')->group(function () {
+    Route::get('/', [AppointmentController::class, 'index']);      // Xem danh sách
+    Route::post('/', [AppointmentController::class, 'store']);     // Thêm mới/Chọn bác sĩ
+    Route::put('/{id}', [AppointmentController::class, 'update']); // Sửa lịch
+    Route::delete('/{id}', [AppointmentController::class, 'destroy']); // Xóa lịch
+});
 
-// Quản lý điều trị
-Route::post('/treatments/register', [TreatmentController::class, 'register']);
-Route::get('/treatments/{id}/schedule', [TreatmentController::class, 'viewSchedule']);
+// Group cho Treatment
+Route::prefix('treatments')->group(function () {
+    Route::post('/register', [TreatmentController::class, 'register']); // Đăng ký đợt điều trị
+    Route::get('/{id}', [TreatmentController::class, 'show']);          // Xem lịch trình
+    Route::patch('/{id}/status', [TreatmentController::class, 'updateStatus']); // Cập nhật trạng thái
+});
