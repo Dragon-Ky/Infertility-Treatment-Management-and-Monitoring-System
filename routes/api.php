@@ -26,3 +26,13 @@ Route::get('/health-check', function () {
         'timezone' => config('app.timezone')
     ]);
 });
+
+// Route cho bệnh nhân (Mặc định)
+Route::get('/treatments', [TreatmentController::class, 'index']);
+
+// Route cho Admin/Doctor
+Route::middleware([CheckRole::class . ':admin,doctor'])->group(function () {
+    Route::get('/admin/treatments', [TreatmentController::class, 'allTreatments']);
+    Route::put('/admin/treatments/{id}/status', [TreatmentController::class, 'updateStatus']);
+    Route::get('/admin/appointments', [AppointmentController::class, 'allAppointments']);
+});
