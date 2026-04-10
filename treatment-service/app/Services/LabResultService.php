@@ -7,11 +7,20 @@ use App\DTOs\Responses\LabResultResponseDTO;
 use App\DTOs\Requests\update\UpdateLabResultRequestDTO;
 use App\Repositories\Contracts\LabResultRepositoryInterface;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 use function Symfony\Component\Translation\t;
 
 class LabResultService extends BaseService
 {
+    protected function getCacheKeyPrefix(): string
+    {
+        return 'lab_result';
+    }
+    protected function getResponseDtoClass(): string
+    {
+        return LabResultResponseDTO::class;
+    }
     public function __construct(LabResultRepositoryInterface $repository)
     {
         parent::__construct($repository);
@@ -31,6 +40,7 @@ class LabResultService extends BaseService
                 'doctor_notes'    => $dto->doctor_notes,
                 'attachments'     => $dto->attachments,
             ]);   
+            Cache::forget("embryo:all_active");
             return LabResultResponseDTO::fromModel($lab);  
         });
     }
@@ -49,8 +59,5 @@ class LabResultService extends BaseService
         $lab = $this->repository->find($id);
         return LabResultResponseDTO::fromModel($lab);
     }
-    public function getResponseDtoClass(): string
-    {
-        return LabResultResponseDTO::class;
-    }
+    
 }

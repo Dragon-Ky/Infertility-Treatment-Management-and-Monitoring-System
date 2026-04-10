@@ -7,9 +7,17 @@ use App\DTOs\Responses\PregnancyTrackingResponseDTO;
 use App\DTOs\Requests\update\UpdatePregnancyTrackingRequestDTO;
 use App\Repositories\Contracts\PregnancyTrackingRepositoryInterface;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Cache;
 class PregnancyTrackingService extends BaseService
 {
+    protected function getCacheKeyPrefix(): string
+    {
+        return 'pregnancy_tracking';
+    }
+    protected function getResponseDtoClass(): string
+    {
+        return PregnancyTrackingResponseDTO::class;
+    }
     public function __construct(PregnancyTrackingRepositoryInterface $repository) 
     {
         parent::__construct($repository);
@@ -25,6 +33,7 @@ class PregnancyTrackingService extends BaseService
                 'status'        => $dto->status,
                 'notes'         => $dto->notes,
             ]);
+                Cache::forget("embryo:all_active");
             return PregnancyTrackingResponseDTO::fromModel($tracking);
         });
     }
@@ -42,8 +51,5 @@ class PregnancyTrackingService extends BaseService
         $tracking = $this->repository->find($id);
         return PregnancyTrackingResponseDTO::fromModel($tracking);
     }
-    public function getResponseDtoClass(): string
-    {
-        return PregnancyTrackingResponseDTO::class;
-    }
+   
 }

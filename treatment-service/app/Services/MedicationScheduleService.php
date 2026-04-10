@@ -7,10 +7,18 @@ use App\DTOs\Responses\MedicationScheduleResponseDTO;
 use App\DTOs\Requests\update\UpdateMedicationScheduleRequestDTO;
 use App\Repositories\Contracts\MedicationScheduleRepositoryInterface;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Cache;
 
 class MedicationScheduleService extends BaseService
 {
+    protected function getCacheKeyPrefix(): string
+    {
+        return 'medication_schedule';
+    }
+    protected function getResponseDtoClass(): string
+    {
+        return MedicationScheduleResponseDTO::class;
+    }
     public function __construct( MedicationScheduleRepositoryInterface $repository) 
     {
         parent::__construct($repository);
@@ -30,6 +38,7 @@ class MedicationScheduleService extends BaseService
                 'status'          => 'active',
                 'is_active'       => true 
             ]);
+            Cache::forget("embryo:all_active");
             return MedicationScheduleResponseDTO::fromModel($schedule);
         });
     }
@@ -52,8 +61,5 @@ class MedicationScheduleService extends BaseService
         return $this->delete($id);
     }
 
-    public function getResponseDtoClass(): string
-    {
-        return MedicationScheduleResponseDTO::class;
-    }
+    
 }

@@ -7,9 +7,17 @@ use App\DTOs\Responses\TreatmentEventResponseDTO;
 use App\DTOs\Requests\update\UpdateTreatmentEventRequestDTO;
 use App\Repositories\Contracts\TreatmentEventRepositoryInterface;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Cache;
 class TreatmentEventService extends BaseService
 {
+    protected function getCacheKeyPrefix(): string
+    {
+        return 'treatment_event';
+    }
+    protected function getResponseDtoClass(): string
+    {
+        return TreatmentEventResponseDTO::class;
+    }
     // 1. Khởi tạo: Lấy đúng "Thủ kho" chuyên quản lý Sự kiện điều trị
     public function __construct(TreatmentEventRepositoryInterface $eventRepository)
     {
@@ -31,6 +39,7 @@ class TreatmentEventService extends BaseService
                 'doctor_notes' => $dto->doctor_notes,
                 'attachments'  => $dto->attachments,
             ]);
+            Cache::forget("embryo:all_active");
             return TreatmentEventResponseDTO::fromModel($event);
         });
     }
@@ -64,8 +73,5 @@ class TreatmentEventService extends BaseService
         $event = $this->repository->find($id);
         return TreatmentEventResponseDTO::fromModel($event);
     }
-    public function getResponseDtoClass(): string
-    {
-        return TreatmentEventResponseDTO::class;
-    }
+    
 }

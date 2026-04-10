@@ -8,10 +8,18 @@ use App\DTOs\Requests\update\UpdateTreatmentProtocolRequestDTO;
 use App\DTOs\Responses\TreatmentProtocolResponseDTO;
 use App\Repositories\Contracts\TreatmentProtocolRepositoryInterface;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Cache;
 
 class TreatmentProtocolService extends BaseService
 {
+    protected function getCacheKeyPrefix(): string
+    {
+        return 'treatment_protocol';
+    }
+    protected function getResponseDtoClass(): string
+    {
+        return TreatmentProtocolResponseDTO::class;
+    }
     public function __construct(TreatmentProtocolRepositoryInterface $repository) 
     {
         parent::__construct($repository);
@@ -28,6 +36,7 @@ class TreatmentProtocolService extends BaseService
                 'prescription' => $dto->prescription,
                 'notes'        => $dto->notes,
             ]);
+            Cache::forget("embryo:all_active");
             return TreatmentProtocolResponseDTO::fromModel($protocol);
         });
     }
@@ -46,8 +55,5 @@ class TreatmentProtocolService extends BaseService
         $protocol = $this->repository->find($id);
         return TreatmentProtocolResponseDTO::fromModel($protocol);
     }
-    public function getResponseDtoClass(): string
-    {
-        return TreatmentProtocolResponseDTO::class;
-    }
+    
 }

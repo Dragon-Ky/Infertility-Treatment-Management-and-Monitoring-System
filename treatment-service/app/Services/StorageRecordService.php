@@ -7,9 +7,18 @@ use App\DTOs\Responses\StorageRecordResponseDTO;
 use App\DTOs\Requests\update\UpdateStorageRecordRequestDTO;
 use App\Repositories\Contracts\StorageRecordRepositoryInterface;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class StorageRecordService extends BaseService
 {
+    protected function getCacheKeyPrefix(): string
+    {
+        return 'storage_record';
+    }
+    protected function getResponseDtoClass(): string
+    {
+        return StorageRecordResponseDTO::class;
+    }
     public function __construct(StorageRecordRepositoryInterface $repository)
     {
         $this->repository = $repository;
@@ -27,7 +36,8 @@ class StorageRecordService extends BaseService
                 'status'        => 'active',
                 'location_code' => $dto->location_code,
             ]);
-            
+            Cache::forget("embryo:all_active");
+
             return StorageRecordResponseDTO::fromModel($storage);
         });
     }
@@ -44,9 +54,5 @@ class StorageRecordService extends BaseService
     {
         $storage = $this->repository->find($id);
         return StorageRecordResponseDTO::fromModel($storage);
-    }
-    public function getResponseDtoClass(): string
-    {
-        return StorageRecordResponseDTO::class;
     }
 }

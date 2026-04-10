@@ -7,10 +7,19 @@ use App\DTOs\Responses\EmbryoRecordResponseDTO;
 use App\DTOs\Requests\update\UpdateEmbryoRecordRequestDTO;
 use App\Repositories\Contracts\EmbryoRecordRepositoryInterface;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 
 class EmbryoRecordService extends BaseService
 {
+    protected function getCacheKeyPrefix(): string
+    {
+        return 'embryo_record';
+    }
+    protected function getResponseDtoClass(): string
+    {
+        return EmbryoRecordResponseDTO::class;
+    }
     public function __construct(EmbryoRecordRepositoryInterface $repository) 
     {
         parent::__construct($repository);
@@ -28,6 +37,7 @@ class EmbryoRecordService extends BaseService
                 'status'             => $dto->status,
                 'notes'              => $dto->notes,
             ]);
+            Cache::forget("embryo:all_active");
             return EmbryoRecordResponseDTO::fromModel($embryo);
         });
     }
@@ -45,8 +55,5 @@ class EmbryoRecordService extends BaseService
         $embryo = $this->repository->find($id);
         return EmbryoRecordResponseDTO::fromModel($embryo);
     }
-    public function getResponseDtoClass(): string
-    {
-        return EmbryoRecordResponseDTO::class;
-    }
+   
 }

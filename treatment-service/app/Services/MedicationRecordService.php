@@ -6,11 +6,19 @@ use App\DTOs\Requests\CreateMedicationRecordRequestDTO;
 use App\DTOs\Responses\MedicationRecordResponseDTO;
 use App\DTOs\Requests\update\UpdateMedicationRecordRequestDTO;
 use App\Repositories\Contracts\MedicationRecordRepositoryInterface;
-
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class MedicationRecordService extends BaseService
 {
+    protected function getCacheKeyPrefix(): string
+    {
+        return 'medication_record';
+    }
+    protected function getResponseDtoClass(): string
+    {
+        return MedicationRecordResponseDTO::class;
+    }
     public function __construct(MedicationRecordRepositoryInterface $repository)
     {
         parent::__construct($repository);
@@ -27,6 +35,7 @@ class MedicationRecordService extends BaseService
                 'notes' => $dto->notes,
             ]);
             $record->load('medicationSchedule');
+            Cache::forget("embryo:all_active");
             return MedicationRecordResponseDTO::fromModel($record);
         });
     }
@@ -53,8 +62,5 @@ class MedicationRecordService extends BaseService
 
         return MedicationRecordResponseDTO::fromModel($record);
     }
-    public function getResponseDtoClass(): string
-    {
-        return MedicationRecordResponseDTO::class;
-    }
+    
 }

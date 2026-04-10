@@ -4,15 +4,17 @@ namespace App\Services;
 
 use App\Repositories\Contracts\BaseRepositoryInterface;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Cache;
 abstract class BaseService
 {
     protected BaseRepositoryInterface $repository;
+    protected int $cacheTtl = 3600;
 
     public function __construct(BaseRepositoryInterface $repository)
     {
         $this->repository = $repository;
     }
+    abstract protected function getCacheKeyPrefix(): string;
 
     public function updateWithDto(int $id, object $dto)
     {
@@ -48,40 +50,50 @@ abstract class BaseService
         }
 
         // 2. Cập nhật is_active thành false (Số 0 trong Database)
-        return $this->repository->update($id, [
-            'is_active' => false
-        ]);
+        $result = $this->repository->update($id, ['is_active' => false]);
+        $this->clearCache($id);
+        return $result;
     }
 
     public function findById(int $id)
     {
-        return $this->repository->find($id);
+        $key = "{$this->getCacheKeyPrefix()}:{$id}";
+
+        return Cache::remember($key, $this->cacheTtl, function () use ($id) {
+            return $this->repository->find($id);
+        });
     }
     public function update(int $id, array $data)
     {
         // 1. Repository đã dùng findOrFail, nên nếu không có ID, nó sẽ văng lỗi ngay tại đây.
-        // Bạn không cần kiểm tra if (!$updated) nữa.
+        
         $this->repository->update($id, $data);
+
+        $this->clearCache($id);
 
         // 2. Trả về item đã được cập nhật bằng cách gọi hàm tìm kiếm có sẵn
         return $this->findById($id);
     }
+
+
     abstract protected function getResponseDtoClass(): string;
     public function getAllActive(): array
     {
-        // 1. Lấy danh sách từ Repository
-        $items = $this->repository->findByAttributes(['is_active' => true]);
+        $key = "{$this->getCacheKeyPrefix()}:all_active";
 
-        // 2. Lấy tên cái "Hộp quà" mà Service con đã khai báo
-        $dtoClass = $this->getResponseDtoClass();
+        return Cache::remember($key, $this->cacheTtl, function () {
+            $items = $this->repository->findByAttributes(['is_active' => true]);
+            $dtoClass = $this->getResponseDtoClass();
 
-        $result = [];
-        foreach ($items as $item) {
-            // 3. Dùng tên lớp DTO đó để đóng gói
-            // PHP cho phép dùng biến $dtoClass để gọi hàm static: $dtoClass::fromModel()
-            $result[] = $dtoClass::fromModel($item)->toArray();
-        }
-
-        return $result;
+            return array_map(fn($item) => $dtoClass::fromModel($item)->toArray(), $items->all());
+        });
     }
+
+
+    protected function clearCache(int $id): void
+    {
+        Cache::forget("{$this->getCacheKeyPrefix()}:{$id}");
+        Cache::forget("{$this->getCacheKeyPrefix()}:all_active");
+    }
+    
 }
