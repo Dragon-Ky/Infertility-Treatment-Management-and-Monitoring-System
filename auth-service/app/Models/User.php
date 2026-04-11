@@ -22,7 +22,9 @@ class User extends Authenticatable implements JWTSubject
         'name',
         'email',
         'password',
-        'phone', 
+        'phone',
+        'avatar',
+        'status',
     ];
 
     /**
@@ -38,13 +40,14 @@ class User extends Authenticatable implements JWTSubject
     /**
      * Get the attributes that should be cast.
      *
-     * @return array<string,
+     * @return array<string, string>
      */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'status' => 'integer',
         ];
     }
 
