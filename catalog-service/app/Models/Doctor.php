@@ -10,14 +10,29 @@ class Doctor extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name',
+        'user_id',
+        'full_name',
+        'avatar',
         'specialization',
-        'experience'
+        'degree',
+        'experience_years',
+        'bio',
+        'education',
+        'certifications',
+        'rating_avg',
+        'rating_count',
+        'consultation_fee',
+        'status'
     ];
 
-    
     public function schedules()
     {
         return $this->hasMany(DoctorSchedule::class);
+    }
+
+    
+    public function ratings()
+    {
+        return $this->hasMany(Rating::class);
     }
 }
