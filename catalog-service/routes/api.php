@@ -9,7 +9,8 @@ use App\Http\Controllers\ServiceCategoryController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\ServicePricingController;
 use App\Http\Controllers\RatingController;
-
+use App\Http\Controllers\BlogCategoryController;
+use App\Http\Controllers\BlogController;
 
 // AUTH USER (Sanctum)
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -64,3 +65,14 @@ Route::get('/doctors/{doctorId}/ratings', [RatingController::class, 'getByDoctor
 Route::post('/ratings', [RatingController::class, 'store']);
 Route::put('/ratings/{id}', [RatingController::class, 'update']);
 Route::delete('/ratings/{id}', [RatingController::class, 'destroy']);
+
+// =========================
+//  BLOG CATEGORIES
+// =========================
+Route::apiResource('blog-categories', BlogCategoryController::class);
+
+// =========================
+//  BLOGS
+// =========================
+Route::get('/blogs/published', [BlogController::class, 'published']);
+Route::apiResource('blogs', BlogController::class);
