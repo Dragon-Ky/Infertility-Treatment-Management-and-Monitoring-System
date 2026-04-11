@@ -24,26 +24,28 @@ import { requirements } from "@/constant/requirementsPassword.constant";
 function Register() {
   const [isVisible, setIsVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [message, setMessage] = useState({ text: "", type: "" });
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    setError("");
+    setMessage({ text: "", type: "" });
 
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData);
 
     if (data.password !== data.confirmPassword) {
-      setError("Mật khẩu xác nhận không trùng khớp!");
+      setMessage({
+        text: "Mật khẩu xác nhận không trùng khớp!",
+        type: "error",
+      });
       return;
     }
 
-    // Kiểm tra độ mạnh mật khẩu trước khi gửi
     const isStrong = requirements.every((req) => req.re.test(data.password));
     if (!isStrong) {
-      setError("Mật khẩu chưa đạt yêu cầu bảo mật!");
+      setMessage({ text: "Mật khẩu chưa đạt yêu cầu bảo mật!", type: "error" });
       return;
     }
 
@@ -57,18 +59,30 @@ function Register() {
       });
 
       if (response) {
-        navigate("/login");
+        setMessage({
+          text: "Đăng ký hồ sơ thành công! Đang chuyển hướng...",
+          type: "success",
+        });
+
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
       }
     } catch (err) {
       const backendErrors = err?.response?.data?.errors;
       if (backendErrors) {
         const firstError = Object.values(backendErrors)[0][0];
-        setError(firstError);
+        setMessage({ text: firstError, type: "error" });
       } else {
-        setError(err?.response?.data?.message || "Đăng ký thất bại!");
+        setMessage({
+          text: err?.response?.data?.message || "Đăng ký thất bại!",
+          type: "error",
+        });
       }
     } finally {
-      setLoading(false);
+      if (message.type !== "success") {
+        setLoading(false);
+      }
     }
   };
 
@@ -230,9 +244,15 @@ function Register() {
               </div>
             </div>
 
-            {error && (
-              <div className="animate-in fade-in rounded-xl border border-red-100 bg-red-50 p-4 text-sm font-bold text-red-600">
-                {error}
+            {message.text && (
+              <div
+                className={`animate-in fade-in rounded-xl border p-4 text-sm font-bold duration-500 ${
+                  message.type === "success"
+                    ? "border-green-100 bg-green-50 text-green-600"
+                    : "border-red-100 bg-red-50 text-red-600"
+                }`}
+              >
+                {message.text}
               </div>
             )}
 
