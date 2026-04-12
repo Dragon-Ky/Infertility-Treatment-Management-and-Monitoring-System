@@ -17,45 +17,38 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-
 // =========================
 //  DOCTORS
 // =========================
+Route::get('/doctors/trashed', [DoctorController::class, 'trashed']);        
+Route::post('/doctors/{id}/restore', [DoctorController::class, 'restore']);
+Route::delete('/doctors/{id}/force-delete', [DoctorController::class, 'forceDelete']);
 Route::apiResource('doctors', DoctorController::class);
-
 
 // =========================
 //  SERVICES (IUI / IVF)
 // =========================
+Route::get('/services/trashed', [ServiceController::class, 'trashed']);      
+Route::post('/services/{id}/restore', [ServiceController::class, 'restore']);
+Route::delete('/services/{id}/force-delete', [ServiceController::class, 'forceDelete']);
+Route::get('/services/{id}/pricings', [ServicePricingController::class, 'getByService']);
 Route::apiResource('services', ServiceController::class);
-
 
 // =========================
 //  SERVICE CATEGORIES
 // =========================
 Route::apiResource('service-categories', ServiceCategoryController::class);
 
-
 // =========================
 //  DOCTOR SCHEDULES
 // =========================
 Route::apiResource('schedules', ScheduleController::class);
 
-
 // =========================
-//  SERVICE PRICINGS (NEW MODULE)
+//  SERVICE PRICINGS
 // =========================
-
-
-Route::get('/services/{id}/pricings', [ServicePricingController::class, 'getByService']);
-
-
 Route::post('/pricings', [ServicePricingController::class, 'store']);
-
-
 Route::put('/pricings/{id}', [ServicePricingController::class, 'update']);
-
-
 Route::delete('/pricings/{id}', [ServicePricingController::class, 'destroy']);
 
 // =========================
@@ -74,5 +67,8 @@ Route::apiResource('blog-categories', BlogCategoryController::class);
 // =========================
 //  BLOGS
 // =========================
+Route::get('/blogs/trashed', [BlogController::class, 'trashed']);            
 Route::get('/blogs/published', [BlogController::class, 'published']);
+Route::post('/blogs/{id}/restore', [BlogController::class, 'restore']);
+Route::delete('/blogs/{id}/force-delete', [BlogController::class, 'forceDelete']);
 Route::apiResource('blogs', BlogController::class);

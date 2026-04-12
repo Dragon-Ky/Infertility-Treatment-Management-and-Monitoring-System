@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 
 class DoctorController extends Controller
 {
-    
     public function index()
     {
         return response()->json(
@@ -15,7 +14,6 @@ class DoctorController extends Controller
         );
     }
 
-    
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -33,7 +31,6 @@ class DoctorController extends Controller
         return response()->json($doctor, 201);
     }
 
-   
     public function show($id)
     {
         return response()->json(
@@ -41,7 +38,6 @@ class DoctorController extends Controller
         );
     }
 
-    
     public function update(Request $request, $id)
     {
         $doctor = Doctor::findOrFail($id);
@@ -61,13 +57,51 @@ class DoctorController extends Controller
         return response()->json($doctor);
     }
 
-    
+   
     public function destroy($id)
     {
-        Doctor::destroy($id);
+        $doctor = Doctor::findOrFail($id);
+        $doctor->delete();
 
         return response()->json([
+            'success' => true,
             'message' => 'Doctor deleted successfully'
+        ]);
+    }
+
+    
+    public function restore($id)
+    {
+        $doctor = Doctor::withTrashed()->findOrFail($id);
+        $doctor->restore();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Doctor restored successfully',
+            'data'    => $doctor
+        ]);
+    }
+
+    
+    public function forceDelete($id)
+    {
+        $doctor = Doctor::withTrashed()->findOrFail($id);
+        $doctor->forceDelete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Doctor permanently deleted'
+        ]);
+    }
+
+    
+    public function trashed()
+    {
+        $doctors = Doctor::onlyTrashed()->get();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $doctors
         ]);
     }
 }

@@ -8,9 +8,6 @@ use Illuminate\Support\Facades\Cache;
 
 class ServiceController extends Controller
 {
-    
-    // GET ALL SERVICES (CACHE)
-    
     public function index()
     {
         $cacheKey = "services_all";
@@ -22,9 +19,6 @@ class ServiceController extends Controller
         return response()->json($services);
     }
 
-    
-    // CREATE SERVICE
-    
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -36,15 +30,11 @@ class ServiceController extends Controller
 
         $service = Service::create($data);
 
-        // clear cache list
         Cache::forget("services_all");
 
         return response()->json($service, 201);
     }
 
-    
-    // GET ONE SERVICE (CACHE)
-   
     public function show($id)
     {
         $cacheKey = "service_" . $id;
@@ -55,6 +45,7 @@ class ServiceController extends Controller
 
         if (!$service) {
             return response()->json([
+                'success' => false,
                 'message' => 'Service not found'
             ], 404);
         }
@@ -62,9 +53,6 @@ class ServiceController extends Controller
         return response()->json($service);
     }
 
-    
-    // UPDATE SERVICE
-   
     public function update(Request $request, $id)
     {
         $service = Service::findOrFail($id);
@@ -78,7 +66,6 @@ class ServiceController extends Controller
 
         $service->update($data);
 
-        // clear cache
         Cache::forget("services_all");
         Cache::forget("service_" . $id);
 
@@ -86,19 +73,58 @@ class ServiceController extends Controller
     }
 
     
-    // DELETE SERVICE
-    
     public function destroy($id)
     {
         $service = Service::findOrFail($id);
         $service->delete();
 
-        // clear cache
         Cache::forget("services_all");
         Cache::forget("service_" . $id);
 
         return response()->json([
-            'message' => 'Deleted successfully'
+            'success' => true,
+            'message' => 'Service deleted successfully'
+        ]);
+    }
+
+    
+    public function restore($id)
+    {
+        $service = Service::withTrashed()->findOrFail($id);
+        $service->restore();
+
+        Cache::forget("services_all");
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Service restored successfully',
+            'data'    => $service
+        ]);
+    }
+
+    
+    public function forceDelete($id)
+    {
+        $service = Service::withTrashed()->findOrFail($id);
+        $service->forceDelete();
+
+        Cache::forget("services_all");
+        Cache::forget("service_" . $id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Service permanently deleted'
+        ]);
+    }
+
+    
+    public function trashed()
+    {
+        $services = Service::onlyTrashed()->with('category')->get();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $services
         ]);
     }
 }

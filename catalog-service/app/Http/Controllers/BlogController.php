@@ -60,7 +60,6 @@ class BlogController extends Controller
             ], 404);
         }
 
-        // Tăng view mỗi lần xem
         $blog->increment('views');
 
         return response()->json([
@@ -103,6 +102,7 @@ class BlogController extends Controller
         ]);
     }
 
+    // Soft delete
     public function destroy($id)
     {
         $blog = Blog::find($id);
@@ -122,7 +122,42 @@ class BlogController extends Controller
         ]);
     }
 
-    
+    // Khôi phục blog đã xóa
+    public function restore($id)
+    {
+        $blog = Blog::withTrashed()->findOrFail($id);
+        $blog->restore();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Blog restored successfully',
+            'data'    => $blog->load('category')
+        ]);
+    }
+
+    // Xóa vĩnh viễn
+    public function forceDelete($id)
+    {
+        $blog = Blog::withTrashed()->findOrFail($id);
+        $blog->forceDelete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Blog permanently deleted'
+        ]);
+    }
+
+    // Xem danh sách blog đã bị soft delete
+    public function trashed()
+    {
+        $blogs = Blog::onlyTrashed()->with('category')->get();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $blogs
+        ]);
+    }
+
     public function published()
     {
         $blogs = Blog::with('category')
