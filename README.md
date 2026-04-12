@@ -25,14 +25,14 @@ Dashboard & báo cáo thống kê
 Hệ thống được triển khai theo kiến trúc Microservices (BẮT BUỘC).
 
 2. 👥 User Roles
-Role	Mô tả
-Guest	Người truy cập xem thông tin cơ sở y tế, dịch vụ
-Customer	Bệnh nhân đăng ký dịch vụ điều trị
-Doctor	Bác sĩ theo dõi và cập nhật tiến trình điều trị
-Manager	Quản lý cơ sở y tế
-Admin	Quản trị hệ thống
+   Role Mô tả
+   Guest Người truy cập xem thông tin cơ sở y tế, dịch vụ
+   Customer Bệnh nhân đăng ký dịch vụ điều trị
+   Doctor Bác sĩ theo dõi và cập nhật tiến trình điều trị
+   Manager Quản lý cơ sở y tế
+   Admin Quản trị hệ thống
 3. 🧱 Kiến trúc hệ thống
-3.1 Kiến trúc tổng thể
+   3.1 Kiến trúc tổng thể
 
 Microservices Architecture
 
@@ -42,72 +42,55 @@ Service-to-Service Communication (REST / Message Broker)
 
 Distributed System
 
-3.2 Danh sách Microservices (Dự kiến)
-Service	Mô tả	Thành viên phụ trách
-Auth Service	Xác thực & phân quyền (JWT/OAuth2)	Member 1
-User Service	Quản lý hồ sơ bệnh nhân	Member 2
+Redis (cache session), Docker
 
-Doctor Service	Quản lý bác sĩ & lịch làm việc	Member 3
+3.2 Danh sách Microservices
+Mỗi thành viên triển khai 01 Microservice độc lập
 
-Treatment Service	Quản lý quá trình điều trị IUI, IVF	Member 4
+```
+Service	      Mô tả
+auth-service      Login / Logout, Phân quyền (Admin/Doctor/Guest/Customer),
+                  Quản lý tài khoản và phân quyền
 
-Appointment Service	Quản lý lịch hẹn & nhắc lịch	Member 5
+catalog-service   CRUD Dịch vụ (IUI/IVF), Thông tin bác sĩ, Bảng giá,
+                  View Doctor Profiles
 
-Notification Service	Gửi thông báo (Firebase)	Member 6
+appointment-service  Register New Treatment, Đặt lịch khám, Chọn bác sĩ,
+                     View Treatment Schedule
 
-Rating Service	Quản lý feedback & rating	Member 7
-Service Catalog	Quản lý dịch vụ & bảng giá	Member 8
-Reporting Service	Dashboard & báo cáo	Member 9
+treatment-service    Quản lý phác đồ, Lịch tiêm thuốc, Ghi nhận kết quả
+                     xét nghiệm/thụ thai, Record Treatment Events,
+                     Enter Lab Results
 
-👉 Mỗi thành viên triển khai 01 Microservice độc lập
+notification-service Receive Reminders (Firebase), Send Appointment /
+                     Reminder, Nhận thông báo push RabbitMQ + Firebase, Docker
+
+report-service       View Dashboard & Reports, Thống kê số ca /
+                     tỷ lệ thành công / doanh thu, Monitor Data Sync (NiFi)
+```
 
 4. 🛠️ Công nghệ sử dụng
-Backend
-
-NodeJS / Java Spring Boot / .NET (tuỳ nhóm chọn)
-
-RESTful API
-
-JWT Authentication
+   Backend
+   PHP
+   RESTful API
+   JWT Authentication
 
 Frontend
-
-ReactJS / NextJS
+ReactJS
 
 Database
-
-PostgreSQL / MySQL
-
+MySQL
 Redis (Memory Cache)
-
 Caching
-
-Redis Cache
-
-Memory Cache
-
-Notification
-
 Firebase Cloud Messaging (FCM)
-
-Data Synchronization
-
 Apache NiFi (đồng bộ dữ liệu giữa services)
-
-Containerization & Deployment
-
 Docker
 
-Docker Compose
-
-VPS / Cloud (AWS / GCP / Azure)
-
 Project Management
-
 Jira (Quản lý task, sprint, backlog)
 
 5. 📦 Chức năng hệ thống
-5.1 Trang chủ
+   5.1 Trang chủ
 
 Giới thiệu cơ sở y tế
 
@@ -214,50 +197,35 @@ Sử dụng Apache NiFi
 Hỗ trợ ETL và Data Flow Management
 
 8. 🚀 Triển khai hệ thống
-8.1 Local Development
-docker-compose up --build
+   8.1 Local Development
+   docker-compose up --build
 
 8.2 Production
-
 Deploy từng service bằng Docker
 
-Deploy trên:
-
-VPS
-
-AWS EC2
-
-GCP
-
-Azure
-
 9. 📊 Quản lý dự án
-
-Quản lý công việc bằng Jira
-
-Daily Meeting
-
-Thống nhất dữ liệu Confluence 
-
-Sprint Review
+   Quản lý công việc bằng Jira
+   Daily Meeting
+   Thống nhất dữ liệu Confluence
 
 10. 📁 Cấu trúc Repository (Gợi ý)
-```   
+
+```
 infertility-system/
 │
 ├── auth-service/
-├── user-service/
-├── doctor-service/
-├── treatment-service/
+├── catalog-service/
 ├── appointment-service/
+├── treatment-service/
 ├── notification-service/
-├── rating-service/
-├── reporting-service/
+├── report-service/
 ├── api-gateway/
 ├── docker-compose.yml
 └── README.md
 ```
+
 11. 📌 Yêu cầu bắt buộc
+
 ```
 ✅ Kiến trúc Microservices
 ✅ Docker hóa toàn bộ hệ thống
@@ -267,12 +235,12 @@ infertility-system/
 ✅ Quản lý dự án bằng Jira
 ✅ Mỗi thành viên đảm nhiệm 01 microservice
 ```
+
 12. 📈 Hướng phát triển tương lai
 
+```
 Tích hợp AI tư vấn điều trị
-
 Mobile App (Flutter)
-
 Hệ thống phân tích dữ liệu nâng cao
-
 Machine Learning dự đoán tỷ lệ thành công
+```
