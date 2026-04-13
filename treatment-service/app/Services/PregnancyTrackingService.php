@@ -34,7 +34,7 @@ class PregnancyTrackingService extends BaseService
                 'notes'         => $dto->notes,
                 'is_active'     => true,
             ]);
-                Cache::forget("embryo:all_active");
+                Cache::forget("pregnancy_tracking:all_active");
             return PregnancyTrackingResponseDTO::fromModel($tracking);
         });
     }

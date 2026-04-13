@@ -37,7 +37,7 @@ class TreatmentProtocolService extends BaseService
                 'notes'        => $dto->notes,
                 'is_active'    => true,
             ]);
-            Cache::forget("embryo:all_active");
+            Cache::forget("treatment_protocol:all_active");
             return TreatmentProtocolResponseDTO::fromModel($protocol);
         });
     }

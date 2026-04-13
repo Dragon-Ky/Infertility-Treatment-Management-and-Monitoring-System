@@ -38,7 +38,7 @@ class MedicationScheduleService extends BaseService
                 'status'          => 'active',
                 'is_active'       => true 
             ]);
-            Cache::forget("embryo:all_active");
+            Cache::forget("medication_schedule:all_active");
             return MedicationScheduleResponseDTO::fromModel($schedule);
         });
     }

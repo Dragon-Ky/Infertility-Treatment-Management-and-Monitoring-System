@@ -36,7 +36,7 @@ class MedicationRecordService extends BaseService
                 'is_active'=> true,
             ]);
             $record->load('medicationSchedule');
-            Cache::forget("embryo:all_active");
+            Cache::forget("medication_record:all_active");
             return MedicationRecordResponseDTO::fromModel($record);
         });
     }

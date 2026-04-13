@@ -37,7 +37,7 @@ class StorageRecordService extends BaseService
                 'location_code' => $dto->location_code,
                 'is_active'     => true,
             ]);
-            Cache::forget("embryo:all_active");
+            Cache::forget("storage_record:all_active");
 
             return StorageRecordResponseDTO::fromModel($storage);
         });

@@ -40,7 +40,7 @@ class TreatmentEventService extends BaseService
                 'attachments'  => $dto->attachments,
                 'is_active'    => true,
             ]);
-            Cache::forget("embryo:all_active");
+            Cache::forget("treatment_event:all_active");
             return TreatmentEventResponseDTO::fromModel($event);
         });
     }

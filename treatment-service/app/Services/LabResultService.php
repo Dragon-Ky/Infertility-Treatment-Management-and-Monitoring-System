@@ -41,7 +41,7 @@ class LabResultService extends BaseService
                 'attachments'     => $dto->attachments,
                 'is_active'         => true,
             ]);   
-            Cache::forget("embryo:all_active");
+            Cache::forget("lab_result:all_active");
             return LabResultResponseDTO::fromModel($lab);  
         });
     }
