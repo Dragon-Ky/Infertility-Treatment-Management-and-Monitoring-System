@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\TreatmentProtocolController;
 use App\Http\Controllers\Api\TreatmentEventController;
-use App\Http\Controllers\Api\EmbryoRecordController;
+use App\Http\Controllers\Api\SpecimenRecordController;
 use App\Http\Controllers\Api\LabResultController;
 use App\Http\Controllers\Api\MedicationScheduleController;
 use App\Http\Controllers\Api\MedicationRecordController;
@@ -22,8 +22,8 @@ Route::prefix('v1/treatment')->group(function () {
     // 2. Nhật ký sự kiện (Timeline Events)
     Route::apiResource('events', TreatmentEventController::class);
 
-    // 3. Hồ sơ Phôi (Embryos)
-    Route::apiResource('embryos', EmbryoRecordController::class);
+    // 3. Hồ sơ Mẫu vật chung (Phôi, Trứng, Tinh Trùng)
+    Route::apiResource('specimens', SpecimenRecordController::class);
 
     // 4. Kết quả xét nghiệm (Lab Results)
     Route::apiResource('lab-results', LabResultController::class);

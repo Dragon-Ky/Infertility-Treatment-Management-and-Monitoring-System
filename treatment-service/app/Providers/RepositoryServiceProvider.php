@@ -20,8 +20,8 @@ class RepositoryServiceProvider extends ServiceProvider // Tên class phải vi�
             \App\Repositories\Eloquent\TreatmentEventRepository::class
         );
         $this->app->bind(
-            \App\Repositories\Contracts\EmbryoRecordRepositoryInterface::class,
-            \App\Repositories\Eloquent\EmbryoRecordRepository::class
+            \App\Repositories\Contracts\SpecimenRecordRepositoryInterface::class,
+            \App\Repositories\Eloquent\SpecimenRecordRepository::class
         );
         $this->app->bind(
             \App\Repositories\Contracts\LabResultRepositoryInterface::class,
