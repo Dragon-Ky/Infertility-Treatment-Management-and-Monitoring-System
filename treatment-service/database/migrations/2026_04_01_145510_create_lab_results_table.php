@@ -17,9 +17,7 @@ return new class extends Migration
             $table->json('result_data');   // Lưu các chỉ số phức tạp dưới dạng JSON
             $table->string('reference_range')->nullable(); // Khoảng tham chiếu an toàn
             $table->string('unit')->nullable();            // Đơn vị đo
-            $table->text('notes')->nullable();             // Ghi chú chung
             $table->text('doctor_notes')->nullable();      // Đánh giá chuyên môn của bác sĩ
-            $table->json('attachments')->nullable();       // Danh sách file đính kèm (ảnh siêu âm, PDF...)
             $table->timestamps();
         });
     }

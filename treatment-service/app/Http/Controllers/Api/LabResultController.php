@@ -30,9 +30,7 @@ class LabResultController extends Controller
             'result_data' => 'required|array', // Dữ liệu chỉ số phải là mảng
             'reference_range' => 'nullable|string',
             'unit' => 'nullable|string',
-            'notes' => 'nullable|string',
             'doctor_notes' => 'nullable|string',
-            'attachments' => 'nullable|array',
         ]);
 
         $dto = CreateLabResultRequestDTO::fromArray($validated);
@@ -48,7 +46,6 @@ class LabResultController extends Controller
         $validated = $request->validate([
             'result_data' => 'nullable|array',
             'doctor_notes' => 'nullable|string',
-            'attachments' => 'nullable|array',
         ]);
 
         $dto = UpdateLabResultRequestDTO::fromArray($validated);

@@ -33,7 +33,7 @@ class MedicationRecordService extends BaseService
                 'status' => $dto->status,
                 'recorded_by' => $dto->recorded_by,
                 'notes' => $dto->notes,
-                'is_active'=> true,
+                'is_active' => true,
             ]);
             $record->load('medicationSchedule');
             Cache::forget("medication_record:all_active");

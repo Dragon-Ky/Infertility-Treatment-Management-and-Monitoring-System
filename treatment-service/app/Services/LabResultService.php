@@ -36,10 +36,8 @@ class LabResultService extends BaseService
                 'result_data'     => $dto->result_data,
                 'reference_range' => $dto->reference_range,
                 'unit'            => $dto->unit,
-                'notes'           => $dto->notes,
                 'doctor_notes'    => $dto->doctor_notes,
-                'attachments'     => $dto->attachments,
-                'is_active'         => true,
+                'is_active'       => true,
             ]);   
             Cache::forget("lab_result:all_active");
             return LabResultResponseDTO::fromModel($lab);  
