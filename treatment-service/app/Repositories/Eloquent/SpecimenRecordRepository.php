@@ -7,8 +7,8 @@ use App\Repositories\Contracts\SpecimenRecordRepositoryInterface;
 
 class SpecimenRecordRepository extends BaseRepository implements SpecimenRecordRepositoryInterface
 {
-    public function getModelClass(): string
+    public function __construct(SpecimenRecord $model)
     {
-        return SpecimenRecord::class;
+        parent::__construct($model);
     }
 }

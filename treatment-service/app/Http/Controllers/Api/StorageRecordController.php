@@ -27,6 +27,7 @@ class StorageRecordController extends Controller
             'treatment_id' => 'required|integer',
             'storage_type' => 'required|in:embryo,sperm,oocyte',
             'item_id' => 'required|integer',
+            'item_type' => 'nullable|string',
             'start_date' => 'required|date',
             'expiry_date' => 'required|date|after:start_date',
             'location_code' => 'required|string|max:50',

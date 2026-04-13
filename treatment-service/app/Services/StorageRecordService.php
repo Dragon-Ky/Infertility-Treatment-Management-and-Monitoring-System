@@ -31,6 +31,7 @@ class StorageRecordService extends BaseService
                 'treatment_id'  => $dto->treatment_id,
                 'storage_type'  => $dto->storage_type,
                 'item_id'       => $dto->item_id,
+                'item_type'     => $dto->item_type,
                 'start_date'    => $dto->start_date,
                 'expiry_date'   => $dto->expiry_date,
                 'status'        => 'active',
