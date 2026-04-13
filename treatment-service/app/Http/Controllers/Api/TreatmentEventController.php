@@ -53,12 +53,13 @@ class TreatmentEventController extends Controller
         // Lấy treatment_id từ link (VD: /api/events?treatment_id=1)
         $treatmentId = $request->query('treatment_id');
 
-        if (!$treatmentId) {
-            return response()->json(['message' => 'Thiếu treatment_id'], 400);
+        if ($treatmentId) {
+            // Lọc theo treatment_id
+            $data = $this->eventService->getEventsByTreatment((int) $treatmentId);
+        } else {
+            // Lấy tất cả sự kiện active
+            $data = $this->eventService->getAllActive();
         }
-
-        // Gọi Service lấy dữ liệu theo đúng tên hàm mới
-        $data = $this->eventService->getEventsByTreatment((int) $treatmentId);
 
         return response()->json([
             'data' => $data

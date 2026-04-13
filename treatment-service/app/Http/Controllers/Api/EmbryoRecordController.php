@@ -15,6 +15,12 @@ class EmbryoRecordController extends Controller
     {
     }
 
+    public function index(): JsonResponse
+    {
+        $data = $this->embryoService->getAllActive();
+        return response()->json(['data' => $data], 200);
+    }
+
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([

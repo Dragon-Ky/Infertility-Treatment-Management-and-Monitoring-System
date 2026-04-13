@@ -15,6 +15,12 @@ class LabResultController extends Controller
     {
     }
 
+    public function index(): JsonResponse
+    {
+        $data = $this->labService->getAllActive();
+        return response()->json(['data' => $data], 200);
+    }
+
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([

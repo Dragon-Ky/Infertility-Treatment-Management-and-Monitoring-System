@@ -13,6 +13,12 @@ class TreatmentProtocolController extends Controller
 {
     public function __construct(protected TreatmentProtocolService $protocolService) {}
 
+    public function index(): JsonResponse
+    {
+        $data = $this->protocolService->getAllActive();
+        return response()->json(['data' => $data], 200);
+    }
+
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([

@@ -15,6 +15,12 @@ class MedicationRecordController extends Controller
     {
     }
 
+    public function index(): JsonResponse
+    {
+        $data = $this->recordService->getAllActive();
+        return response()->json(['data' => $data], 200);
+    }
+
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
