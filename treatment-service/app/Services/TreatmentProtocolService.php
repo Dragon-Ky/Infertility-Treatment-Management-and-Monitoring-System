@@ -35,6 +35,7 @@ class TreatmentProtocolService extends BaseService
                 'diagnosis'    => $dto->diagnosis,
                 'prescription' => $dto->prescription,
                 'notes'        => $dto->notes,
+                'is_active'    => true,
             ]);
             Cache::forget("embryo:all_active");
             return TreatmentProtocolResponseDTO::fromModel($protocol);

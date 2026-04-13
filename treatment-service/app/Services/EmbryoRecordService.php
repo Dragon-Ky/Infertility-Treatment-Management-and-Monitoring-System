@@ -36,6 +36,7 @@ class EmbryoRecordService extends BaseService
                 'grade'              => $dto->grade,
                 'status'             => $dto->status,
                 'notes'              => $dto->notes,
+                'is_active'         => true, // Mặc định là active khi tạo mới
             ]);
             Cache::forget("embryo:all_active");
             return EmbryoRecordResponseDTO::fromModel($embryo);

@@ -32,6 +32,7 @@ class PregnancyTrackingService extends BaseService
                 'week_number'   => $dto->week_number,
                 'status'        => $dto->status,
                 'notes'         => $dto->notes,
+                'is_active'     => true,
             ]);
                 Cache::forget("embryo:all_active");
             return PregnancyTrackingResponseDTO::fromModel($tracking);

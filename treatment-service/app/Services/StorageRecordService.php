@@ -35,6 +35,7 @@ class StorageRecordService extends BaseService
                 'expiry_date'   => $dto->expiry_date,
                 'status'        => 'active',
                 'location_code' => $dto->location_code,
+                'is_active'     => true,
             ]);
             Cache::forget("embryo:all_active");
 

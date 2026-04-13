@@ -38,6 +38,7 @@ class TreatmentEventService extends BaseService
                 'result'       => $dto->result,
                 'doctor_notes' => $dto->doctor_notes,
                 'attachments'  => $dto->attachments,
+                'is_active'    => true,
             ]);
             Cache::forget("embryo:all_active");
             return TreatmentEventResponseDTO::fromModel($event);
