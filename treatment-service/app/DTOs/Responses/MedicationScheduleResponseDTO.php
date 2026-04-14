@@ -17,7 +17,8 @@ readonly class MedicationScheduleResponseDTO
         public string $route,
         public string $status,
         public bool $is_active,
-    ) {}
+    ) {
+    }
 
     public static function fromModel(MedicationSchedule $schedule): self
     {
@@ -31,7 +32,7 @@ readonly class MedicationScheduleResponseDTO
             time_slots: $schedule->time_slots,
             route: $schedule->route,
             status: $schedule->status,
-            is_active: $schedule->is_active,
+            is_active: (bool) $schedule->is_active,
         );
     }
 

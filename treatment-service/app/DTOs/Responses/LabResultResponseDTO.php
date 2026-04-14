@@ -28,7 +28,7 @@ readonly class LabResultResponseDTO
             reference_range: $lab->reference_range,
             unit: $lab->unit,
             doctor_notes: $lab->doctor_notes,
-            is_active: $lab->is_active,
+            is_active: (bool) $lab->is_active,
         );
     }
 

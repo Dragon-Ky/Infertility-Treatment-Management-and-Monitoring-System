@@ -13,7 +13,8 @@ readonly class PregnancyTrackingResponseDTO
         public string $status_label,
         public ?string $notes,
         public bool $is_active
-    ) {}
+    ) {
+    }
 
     public static function fromModel(PregnancyTracking $tracking): self
     {
@@ -23,7 +24,7 @@ readonly class PregnancyTrackingResponseDTO
             week_number: $tracking->week_number,
             status_label: ucfirst($tracking->status),
             notes: $tracking->notes,
-            is_active: $tracking->is_active,
+            is_active: (bool) $tracking->is_active,
         );
     }
 

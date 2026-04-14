@@ -19,8 +19,15 @@ abstract class BaseService
     public function createFromDto(object $dto)
     {
         return DB::transaction(function () use ($dto) {
+            $data = (array) $dto;
+            
+            // Mặc định is_active = true khi tạo mới nếu không được truyền từ DTO
+            if (!key_exists('is_active', $data)) {
+                $data['is_active'] = true;
+            }
+
             // Ghi dữ liệu vào Database thông qua Repository
-            $model = $this->repository->create((array) $dto);
+            $model = $this->repository->create($data);
             
             // Xóa cache danh sách để dữ liệu mới được cập nhật ngay lập tức
             $this->clearCache($model->id);

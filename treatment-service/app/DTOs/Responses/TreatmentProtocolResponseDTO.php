@@ -29,7 +29,7 @@ readonly class TreatmentProtocolResponseDTO
             prescription: $protocol->prescription,
             notes: $protocol->notes,
             created_at_formatted: $protocol->created_at->format('d/m/Y H:i'),
-            is_active: $protocol->is_active,
+            is_active: (bool) $protocol->is_active,
             
         );
     }

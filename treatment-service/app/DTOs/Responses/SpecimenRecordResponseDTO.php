@@ -17,7 +17,8 @@ class SpecimenRecordResponseDTO
         public string $status,
         public ?string $notes,
         public bool $is_active,
-    ) {}
+    ) {
+    }
 
     public static function fromModel(SpecimenRecord $specimen): self
     {
@@ -31,7 +32,7 @@ class SpecimenRecordResponseDTO
             grade: $specimen->grade,
             status: $specimen->status,
             notes: $specimen->notes,
-            is_active: $specimen->is_active,
+            is_active: (bool) $specimen->is_active,
         );
     }
 

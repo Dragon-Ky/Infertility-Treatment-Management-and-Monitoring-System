@@ -17,12 +17,13 @@ readonly class StorageRecordResponseDTO
         public string $location_code,
         public bool $is_near_expiry,
         public bool $is_active,
-    ) {}
+    ) {
+    }
 
     public static function fromModel(StorageRecord $storage): self
     {
         $expiry = Carbon::parse($storage->expiry_date);
-        
+
         return new self(
             id: $storage->id,
             storage_type: ucfirst($storage->storage_type),
@@ -33,7 +34,7 @@ readonly class StorageRecordResponseDTO
             location_code: $storage->location_code,
             // Cảnh báo nếu còn dưới 30 ngày là hết hạn
             is_near_expiry: $expiry->isFuture() && $expiry->diffInDays(now()) <= 30,
-            is_active: $storage->is_active,
+            is_active: (bool) $storage->is_active,
         );
     }
 
