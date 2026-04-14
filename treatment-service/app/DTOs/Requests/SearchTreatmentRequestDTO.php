@@ -14,6 +14,7 @@ readonly class SearchTreatmentRequestDTO
     public function __construct(
         public ?string $keyword = null,
         public ?int $treatment_id = null,
+        public ?int $per_page = null,
         public array $filters = []
     ) {}
 
@@ -25,6 +26,7 @@ readonly class SearchTreatmentRequestDTO
         return new self(
             keyword: $request->query('keyword'),
             treatment_id: $request->query('treatment_id') ? (int) $request->query('treatment_id') : null,
+            per_page: $request->query('per_page') ? (int) $request->query('per_page') : 15,
             // Lấy tất cả ngoại trừ từ khóa và các tham số phân trang
             filters: $request->except(['keyword', 'treatment_id', 'page', 'per_page'])
         );
@@ -38,6 +40,7 @@ readonly class SearchTreatmentRequestDTO
         return array_filter(array_merge(
             ['keyword' => $this->keyword],
             ['treatment_id' => $this->treatment_id],
+            ['per_page' => $this->per_page],
             $this->filters
         ), fn($value) => !is_null($value));
     }

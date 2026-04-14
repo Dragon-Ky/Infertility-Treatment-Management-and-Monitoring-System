@@ -30,6 +30,11 @@ abstract class BaseApiController extends Controller
     {
         $searchDto = SearchTreatmentRequestDTO::fromRequest($request);
         $data = $this->service->searchActive($searchDto->toArray());
+        
+        if (isset($data['current_page'])) {
+            return response()->json($data, 200);
+        }
+
         return response()->json(['data' => $data], 200);
     }
 

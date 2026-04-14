@@ -108,6 +108,13 @@ abstract class BaseService
         $items = $this->repository->search($searchParams, ['is_active' => true]);
         $dtoClass = $this->getResponseDtoClass();
 
+        if ($items instanceof \Illuminate\Contracts\Pagination\LengthAwarePaginator) {
+            $items->getCollection()->transform(function ($item) use ($dtoClass) {
+                return $dtoClass::fromModel($item)->toArray();
+            });
+            return $items->toArray();
+        }
+
         return array_map(fn($item) => $dtoClass::fromModel($item)->toArray(), $items->all());
     }
     protected function clearCache(int $id): void

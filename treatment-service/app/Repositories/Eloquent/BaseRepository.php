@@ -101,6 +101,10 @@ abstract class BaseRepository implements BaseRepositoryInterface
             }
         }
 
+        if (isset($searchParams['per_page'])) {
+            return $query->paginate((int) $searchParams['per_page']);
+        }
+
         return $query->get();
     }
 }
