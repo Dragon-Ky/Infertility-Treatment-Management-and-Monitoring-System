@@ -108,14 +108,16 @@ abstract class BaseService
         $items = $this->repository->search($searchParams, ['is_active' => true]);
         $dtoClass = $this->getResponseDtoClass();
 
-        if ($items instanceof \Illuminate\Contracts\Pagination\LengthAwarePaginator) {
-            $items->getCollection()->transform(function ($item) use ($dtoClass) {
-                return $dtoClass::fromModel($item)->toArray();
-            });
+        // Check against the concrete class to satisfy IDE static analysis
+        if ($items instanceof \Illuminate\Pagination\LengthAwarePaginator) {
+            $items->setCollection(
+                $items->getCollection()->map(fn($item) => $dtoClass::fromModel($item)->toArray())
+            );
             return $items->toArray();
         }
 
-        return array_map(fn($item) => $dtoClass::fromModel($item)->toArray(), $items->all());
+        // Return array of DTOs from standard Eloquent Collection
+        return collect($items)->map(fn($item) => $dtoClass::fromModel($item)->toArray())->toArray();
     }
     protected function clearCache(int $id): void
     {
