@@ -16,6 +16,20 @@ abstract class BaseService
     }
     abstract protected function getCacheKeyPrefix(): string;
 
+    public function createFromDto(object $dto)
+    {
+        return DB::transaction(function () use ($dto) {
+            // Ghi dữ liệu vào Database thông qua Repository
+            $model = $this->repository->create((array) $dto);
+            
+            // Xóa cache danh sách để dữ liệu mới được cập nhật ngay lập tức
+            $this->clearCache($model->id);
+            
+            // Đóng gói vào DTO Response tương ứng
+            $dtoClass = $this->getResponseDtoClass();
+            return $dtoClass::fromModel($model);
+        });
+    }
     public function updateWithDto(int $id, object $dto)
     {
         return DB::transaction(function () use ($id, $dto) {
@@ -76,7 +90,7 @@ abstract class BaseService
     }
 
 
-    abstract protected function getResponseDtoClass(): string;
+    abstract public function getResponseDtoClass(): string;
     public function getAllActive(): array
     {
         $key = "{$this->getCacheKeyPrefix()}:all_active";
@@ -89,7 +103,13 @@ abstract class BaseService
         });
     }
 
+    public function searchActive(array $searchParams = []): array
+    {
+        $items = $this->repository->search($searchParams, ['is_active' => true]);
+        $dtoClass = $this->getResponseDtoClass();
 
+        return array_map(fn($item) => $dtoClass::fromModel($item)->toArray(), $items->all());
+    }
     protected function clearCache(int $id): void
     {
         Cache::forget("{$this->getCacheKeyPrefix()}:{$id}");

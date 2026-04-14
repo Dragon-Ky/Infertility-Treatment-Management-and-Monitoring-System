@@ -21,4 +21,7 @@ interface BaseRepositoryInterface
 
     // Tìm bản ghi theo các thuộc tính
     public function findByAttributes(array $attributes);
+
+    // Tìm thông tin chi tiết theo các điều kiện tìm kiếm
+    public function search(array $searchParams = [], array $conditions = []);
 }

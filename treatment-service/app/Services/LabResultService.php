@@ -59,4 +59,5 @@ class LabResultService extends BaseService
         return LabResultResponseDTO::fromModel($lab);
     }
     
+    
 }

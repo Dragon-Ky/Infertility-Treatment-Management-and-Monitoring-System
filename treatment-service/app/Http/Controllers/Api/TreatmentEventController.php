@@ -2,102 +2,39 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
+use App\Services\TreatmentEventService;
 use App\DTOs\Requests\CreateTreatmentEventRequestDTO;
 use App\DTOs\Requests\Update\UpdateTreatmentEventRequestDTO;
-use App\Services\TreatmentEventService;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 
-class TreatmentEventController extends Controller
+class TreatmentEventController extends BaseApiController
 {
-    public function __construct(
-        protected TreatmentEventService $eventService
-    ) {
+    public function __construct(TreatmentEventService $service)
+    {
+        parent::__construct($service);
     }
 
-    /**
-     * API: Tạo sự kiện điều trị mới
-     */
-    public function store(Request $request): JsonResponse
+    protected function getStoreRules(): array
     {
-        // 1. Lễ tân kiểm tra hồ sơ (Validation)
-        $validated = $request->validate([
+        return [
             'treatment_id' => 'required|integer',
-            'event_type' => 'required|in:egg_retrieval,embryo_transfer,insemination,ultrasound,blood_test,consultation,other',
-            'event_date' => 'required|date',
-            'description' => 'nullable|string',
-            'result' => 'nullable|string',
+            'event_type'   => 'required|in:egg_retrieval,embryo_transfer,insemination,ultrasound,blood_test,consultation,other',
+            'event_date'   => 'required|date',
+            'description'  => 'nullable|string',
+            'result'       => 'nullable|string',
             'doctor_notes' => 'nullable|string',
-            'attachments' => 'nullable|array',
-        ]);
-
-        // 2. Đóng gói hồ sơ vào khay (DTO)
-        $dto = CreateTreatmentEventRequestDTO::fromArray($validated);
-
-        // 3. Giao cho Chuyên gia (Service) xử lý lưu trữ
-        $responseDTO = $this->eventService->createEvent($dto);
-
-        // 4. Báo kết quả thành công cho React
-        return response()->json([
-            'message' => 'Ghi nhận sự kiện điều trị thành công',
-            'data' => $responseDTO->toArray()
-        ], 201);
+            'attachments'  => 'nullable|array',
+        ];
     }
 
-    /**
-     * API: Lấy danh sách sự kiện của một đợt điều trị (Timeline)
-     */
-    public function index(Request $request): JsonResponse
+    protected function getUpdateRules(): array
     {
-        // Lấy treatment_id từ link (VD: /api/events?treatment_id=1)
-        $treatmentId = $request->query('treatment_id');
-
-        if ($treatmentId) {
-            // Lọc theo treatment_id
-            $data = $this->eventService->getEventsByTreatment((int) $treatmentId);
-        } else {
-            // Lấy tất cả sự kiện active
-            $data = $this->eventService->getAllActive();
-        }
-
-        return response()->json([
-            'data' => $data
-        ], 200);
-    }
-
-    public function update(Request $request, int $id): JsonResponse
-    {
-        $validated = $request->validate([
-            'result' => 'nullable|string',
+        return [
+            'result'       => 'nullable|string',
             'doctor_notes' => 'nullable|string',
-            'attachments' => 'nullable|array',
-        ]);
+            'attachments'  => 'nullable|array',
+        ];
+    }
 
-        $dto = UpdateTreatmentEventRequestDTO::fromArray($validated);
-        $response = $this->eventService->updateEvent($id, $dto);
-        return response()->json(['message' => 'Cập nhật sự kiện thành công', 'data' => $response->toArray()]);
-    }
-    public function destroy(int $id): JsonResponse
-    {
-        $this->eventService->deleteEvent($id);
-        return response()->json([
-            'message' => 'Xóa sự kiện điều trị thành công'
-        ], 200);
-    }
-    public function show(int $id): JsonResponse
-    {
-        try {
-            $event = $this->eventService->getEventById($id);
-            return response()->json([
-                'success' => true,
-                'data' => $event->toArray()
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 404);
-        }
-    }
+    protected function getCreateDtoClass(): string { return CreateTreatmentEventRequestDTO::class; }
+    protected function getUpdateDtoClass(): string { return UpdateTreatmentEventRequestDTO::class; }
 }
