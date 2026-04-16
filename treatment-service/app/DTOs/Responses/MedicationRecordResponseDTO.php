@@ -17,7 +17,8 @@ readonly class MedicationRecordResponseDTO
         public int $recorded_by,
         public ?string $notes,
         public bool $is_active,
-    ) {}
+    ) {
+    }
 
     public static function fromModel(MedicationRecord $record): self
     {
@@ -30,7 +31,7 @@ readonly class MedicationRecordResponseDTO
             status: $record->status,
             recorded_by: $record->recorded_by,
             notes: $record->notes,
-            is_active: $record->is_active,
+            is_active: (bool) $record->is_active,
         );
     }
 

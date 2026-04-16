@@ -16,6 +16,27 @@ abstract class BaseService
     }
     abstract protected function getCacheKeyPrefix(): string;
 
+    public function createFromDto(object $dto)
+    {
+        return DB::transaction(function () use ($dto) {
+            $data = (array) $dto;
+            
+            // Mặc định is_active = true khi tạo mới nếu không được truyền từ DTO
+            if (!key_exists('is_active', $data)) {
+                $data['is_active'] = true;
+            }
+
+            // Ghi dữ liệu vào Database thông qua Repository
+            $model = $this->repository->create($data);
+            
+            // Xóa cache danh sách để dữ liệu mới được cập nhật ngay lập tức
+            $this->clearCache($model->id);
+            
+            // Đóng gói vào DTO Response tương ứng
+            $dtoClass = $this->getResponseDtoClass();
+            return $dtoClass::fromModel($model);
+        });
+    }
     public function updateWithDto(int $id, object $dto)
     {
         return DB::transaction(function () use ($id, $dto) {
@@ -76,7 +97,7 @@ abstract class BaseService
     }
 
 
-    abstract protected function getResponseDtoClass(): string;
+    abstract public function getResponseDtoClass(): string;
     public function getAllActive(): array
     {
         $key = "{$this->getCacheKeyPrefix()}:all_active";
@@ -89,7 +110,22 @@ abstract class BaseService
         });
     }
 
+    public function searchActive(array $searchParams = []): array
+    {
+        $items = $this->repository->search($searchParams, ['is_active' => true]);
+        $dtoClass = $this->getResponseDtoClass();
 
+        // Check against the concrete class to satisfy IDE static analysis
+        if ($items instanceof \Illuminate\Pagination\LengthAwarePaginator) {
+            $items->setCollection(
+                $items->getCollection()->map(fn($item) => $dtoClass::fromModel($item)->toArray())
+            );
+            return $items->toArray();
+        }
+
+        // Return array of DTOs from standard Eloquent Collection
+        return collect($items)->map(fn($item) => $dtoClass::fromModel($item)->toArray())->toArray();
+    }
     protected function clearCache(int $id): void
     {
         Cache::forget("{$this->getCacheKeyPrefix()}:{$id}");

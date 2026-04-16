@@ -51,4 +51,60 @@ abstract class BaseRepository implements BaseRepositoryInterface
     {
         return $this->model->where($attributes)->get();
     }
+
+     public function search(array $searchParams = [], array $conditions = [])
+    {
+        $query = $this->model->newQuery();
+
+        if (!empty($conditions)) {
+            $query->where($conditions);
+        }
+
+        // Xử lý tìm kiếm keyword
+        if (!empty($searchParams['keyword'])) {
+            $keyword = $searchParams['keyword'];
+            
+            $query->where(function ($q) use ($keyword) {
+                if (property_exists($this->model, 'searchable') && is_array($this->model->searchable)) {
+                    foreach ($this->model->searchable as $index => $field) {
+                        if ($index === 0) {
+                            $q->where($field, 'LIKE', "%{$keyword}%");
+                        } else {
+                            $q->orWhere($field, 'LIKE', "%{$keyword}%");
+                        }
+                    }
+                } else {
+                    $fillable = $this->model->getFillable();
+                    $first = true;
+                    foreach ($fillable as $field) {
+                        if (in_array($field, ['id', 'is_active']) || str_ends_with($field, '_id') || str_ends_with($field, '_at') || str_ends_with($field, '_date')) {
+                            continue;
+                        }
+                        
+                        if ($first) {
+                            $q->where($field, 'LIKE', "%{$keyword}%");
+                            $first = false;
+                        } else {
+                            $q->orWhere($field, 'LIKE', "%{$keyword}%");
+                        }
+                    }
+                }
+            });
+        }
+
+        // Lọc theo các trường cố định
+        foreach ($searchParams as $key => $value) {
+            if (!in_array($key, ['keyword', 'page', 'per_page'])) {
+                if (in_array($key, $this->model->getFillable()) || $key === 'id') {
+                    $query->where($key, $value);
+                }
+            }
+        }
+
+        if (isset($searchParams['per_page'])) {
+            return $query->paginate((int) $searchParams['per_page']);
+        }
+
+        return $query->get();
+    }
 }

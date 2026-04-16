@@ -2,69 +2,37 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
+use App\Services\PregnancyTrackingService;
 use App\DTOs\Requests\CreatePregnancyTrackingRequestDTO;
 use App\DTOs\Requests\Update\UpdatePregnancyTrackingRequestDTO;
-use App\Services\PregnancyTrackingService;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 
-class PregnancyTrackingController extends Controller
+class PregnancyTrackingController extends BaseApiController
 {
-    public function __construct(protected PregnancyTrackingService $trackingService)
+    public function __construct(PregnancyTrackingService $service)
     {
+        parent::__construct($service);
     }
 
-    public function store(Request $request): JsonResponse
+    protected function getStoreRules(): array
     {
-        $validated = $request->validate([
-            'treatment_id' => 'required|integer',
+        return [
+            'treatment_id'  => 'required|integer',
             'tracking_date' => 'required|date',
-            'week_number' => 'required|integer|min:0|max:42', // Thai kỳ thường tối đa 42 tuần
-            'status' => 'required|in:ongoing,delivered,miscarried',
-            'notes' => 'nullable|string',
-        ]);
-
-        $dto = CreatePregnancyTrackingRequestDTO::fromArray($validated);
-        $responseDTO = $this->trackingService->createTracking($dto);
-
-        return response()->json([
-            'message' => 'Lưu hồ sơ theo dõi thai kỳ thành công',
-            'data' => $responseDTO->toArray()
-        ], 201);
+            'week_number'   => 'required|integer|min:0|max:42',
+            'status'        => 'required|in:ongoing,delivered,miscarried',
+            'notes'         => 'nullable|string',
+        ];
     }
-    public function update(Request $request, int $id): JsonResponse
+
+    protected function getUpdateRules(): array
     {
-        $validated = $request->validate([
+        return [
             'week_number' => 'nullable|integer|min:0',
-            'status' => 'nullable|in:ongoing,delivered,miscarried',
-            'notes' => 'nullable|string',
-        ]);
+            'status'      => 'nullable|in:ongoing,delivered,miscarried',
+            'notes'       => 'nullable|string',
+        ];
+    }
 
-        $dto = UpdatePregnancyTrackingRequestDTO::fromArray($validated);
-        $response = $this->trackingService->updateTracking($id, $dto);
-        return response()->json(['message' => 'Cập nhật theo dõi thành công', 'data' => $response->toArray()]);
-    }
-    public function destroy(int $id): JsonResponse
-    {
-        $this->trackingService->deleteTracking($id);
-        return response()->json([
-            'message' => 'Xóa hồ sơ theo dõi thai kỳ thành công'
-        ], 200);
-    }
-    public function show(int $id): JsonResponse
-    {
-        try {
-            $tracking = $this->trackingService->getTrackingById($id);
-            return response()->json([
-                'success' => true,
-                'data' => $tracking->toArray()
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 404);
-        }
-    }
+    protected function getCreateDtoClass(): string { return CreatePregnancyTrackingRequestDTO::class; }
+    protected function getUpdateDtoClass(): string { return UpdatePregnancyTrackingRequestDTO::class; }
 }

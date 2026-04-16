@@ -20,9 +20,7 @@ class LabResult extends Model
         'result_data',
         'reference_range',
         'unit',
-        'notes',
         'doctor_notes',
-        'attachments',
         'is_active',
     ];
 

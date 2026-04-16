@@ -11,9 +11,7 @@ readonly class CreateLabResultRequestDTO
         public array $result_data,
         public ?string $reference_range = null,
         public ?string $unit = null,
-        public ?string $notes = null,
         public ?string $doctor_notes = null,
-        public array $attachments = [],
     ) {}
 
     public static function fromArray(array $data): self
@@ -25,9 +23,7 @@ readonly class CreateLabResultRequestDTO
             result_data: $data['result_data'],
             reference_range: $data['reference_range'] ?? null,
             unit: $data['unit'] ?? null,
-            notes: $data['notes'] ?? null,
             doctor_notes: $data['doctor_notes'] ?? null,
-            attachments: $data['attachments'] ?? [],
         );
     }
 }

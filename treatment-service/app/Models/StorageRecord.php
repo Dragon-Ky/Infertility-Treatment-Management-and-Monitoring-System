@@ -15,6 +15,7 @@ class StorageRecord extends Model
         'treatment_id',
         'storage_type',
         'item_id',
+        'item_type',
         'start_date',
         'expiry_date',
         'status',
