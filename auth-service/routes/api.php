@@ -5,7 +5,7 @@ use App\Http\Controllers\Api\UserApiController;
 use App\Http\Controllers\Api\DoctorController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PostController;
-use App\Http\Controllers\Api\TreatmentController;
+// use App\Http\Controllers\Api\TreatmentController;
 
 // API Routes
 
@@ -46,7 +46,7 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/doctor/patients/{id}', [DoctorController::class, 'show']);
 
         // Cập nhật chỉ số xét nghiệm/phác đồ điều trị
-        Route::post('/doctor/update-treatment', [DoctorController::class, 'updateTreatment']);
+        // Route::post('/doctor/update-treatment', [DoctorController::class, 'updateTreatment']);
 
         // Quản lý Blog (Chỉ bác sĩ/admin mới được đăng bài)
         Route::post('/posts', [PostController::class, 'store']);
@@ -59,10 +59,10 @@ Route::middleware('auth:api')->group(function () {
     Route::middleware('role:Patient')->group(function () {
 
         // Xem lịch trình điều trị cá nhân (Monitoring)
-        Route::get('/my-treatment', [TreatmentController::class, 'myProcess']);
+        // Route::get('/my-treatment', [TreatmentController::class, 'myProcess']);
 
         // Đặt lịch hẹn mới
-        Route::post('/appointments', [TreatmentController::class, 'bookAppointment']);
+        // Route::post('/appointments', [TreatmentController::class, 'bookAppointment']);
     });
 
 });
