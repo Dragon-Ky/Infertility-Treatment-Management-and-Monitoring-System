@@ -30,10 +30,14 @@ class SpecimenRecordController extends BaseApiController
     protected function getUpdateRules(): array
     {
         return [
-            'development_day' => 'nullable|integer|in:3,5,6',
-            'grade'           => 'nullable|string',
-            'status'          => 'nullable|in:fresh,frozen,used,discarded',
-            'notes'           => 'nullable|string',
+            'treatment_id'       => 'nullable|integer',
+            'type'               => 'nullable|in:embryo,egg,sperm',
+            'specimen_code'      => 'nullable|string',
+            'fertilization_date' => 'nullable|date',
+            'development_day'    => 'nullable|integer|in:3,5,6',
+            'grade'              => 'nullable|string',
+            'status'             => 'nullable|in:fresh,frozen,used,discarded',
+            'notes'              => 'nullable|string',
         ];
     }
 

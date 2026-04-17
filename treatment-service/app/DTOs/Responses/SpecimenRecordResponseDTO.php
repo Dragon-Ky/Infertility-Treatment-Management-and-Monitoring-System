@@ -9,6 +9,7 @@ class SpecimenRecordResponseDTO
     public function __construct(
         public int $id,
         public int $treatment_id,
+        public ?string $protocol_name,
         public string $type,
         public string $specimen_code,
         public ?string $fertilization_date,
@@ -25,6 +26,7 @@ class SpecimenRecordResponseDTO
         return new self(
             id: $specimen->id,
             treatment_id: $specimen->treatment_id,
+            protocol_name: $specimen->treatmentProtocol->protocol_name ?? 'ID: ' . $specimen->treatment_id,
             type: $specimen->type,
             specimen_code: $specimen->specimen_code,
             fertilization_date: $specimen->fertilization_date ? $specimen->fertilization_date->format('Y-m-d') : null,
@@ -41,6 +43,7 @@ class SpecimenRecordResponseDTO
         return [
             'id' => $this->id,
             'treatment_id' => $this->treatment_id,
+            'protocol_name' => $this->protocol_name,
             'type' => $this->type,
             'specimen_code' => $this->specimen_code,
             'fertilization_date' => $this->fertilization_date,
