@@ -27,9 +27,11 @@ class PregnancyTrackingController extends BaseApiController
     protected function getUpdateRules(): array
     {
         return [
-            'week_number' => 'nullable|integer|min:0',
-            'status'      => 'nullable|in:ongoing,delivered,miscarried',
-            'notes'       => 'nullable|string',
+            'treatment_id'  => 'nullable|integer',
+            'tracking_date' => 'nullable|date',
+            'week_number'   => 'nullable|integer|min:0',
+            'status'        => 'nullable|in:ongoing,delivered,miscarried',
+            'notes'         => 'nullable|string',
         ];
     }
 

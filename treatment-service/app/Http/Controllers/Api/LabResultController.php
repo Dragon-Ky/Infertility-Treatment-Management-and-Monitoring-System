@@ -29,8 +29,13 @@ class LabResultController extends BaseApiController
     protected function getUpdateRules(): array
     {
         return [
-            'result_data'  => 'nullable|array',
-            'doctor_notes' => 'nullable|string',
+            'treatment_id'    => 'nullable|integer',
+            'test_type'       => 'nullable|in:blood,ultrasound,hormone,spermogram,other',
+            'test_date'       => 'nullable|date',
+            'result_data'     => 'nullable|array',
+            'reference_range' => 'nullable|string',
+            'unit'            => 'nullable|string',
+            'doctor_notes'    => 'nullable|string',
         ];
     }
 

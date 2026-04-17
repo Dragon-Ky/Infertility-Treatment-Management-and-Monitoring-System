@@ -29,6 +29,10 @@ class StorageRecordController extends BaseApiController
     protected function getUpdateRules(): array
     {
         return [
+            'treatment_id'  => 'nullable|integer',
+            'storage_type'  => 'nullable|in:embryo,sperm,oocyte',
+            'item_id'       => 'nullable|integer',
+            'start_date'    => 'nullable|date',
             'expiry_date'   => 'nullable|date',
             'status'        => 'nullable|in:active,expired,released',
             'location_code' => 'nullable|string',

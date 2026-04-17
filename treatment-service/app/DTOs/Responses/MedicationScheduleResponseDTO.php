@@ -8,6 +8,8 @@ readonly class MedicationScheduleResponseDTO
 {
     public function __construct(
         public int $id,
+        public int $treatment_id,
+        public ?string $protocol_name,
         public string $medication_name,
         public string $dosage,
         public string $frequency,
@@ -24,6 +26,8 @@ readonly class MedicationScheduleResponseDTO
     {
         return new self(
             id: $schedule->id,
+            treatment_id: (int) $schedule->treatment_id,
+            protocol_name: $schedule->treatmentProtocol->protocol_name ?? 'ID: ' . $schedule->treatment_id,
             medication_name: $schedule->medication_name,
             dosage: $schedule->dosage,
             frequency: $schedule->frequency,
@@ -40,6 +44,8 @@ readonly class MedicationScheduleResponseDTO
     {
         return [
             'id' => $this->id,
+            'treatment_id' => $this->treatment_id,
+            'protocol_name' => $this->protocol_name,
             'medication_name' => $this->medication_name,
             'dosage' => $this->dosage,
             'frequency' => $this->frequency,

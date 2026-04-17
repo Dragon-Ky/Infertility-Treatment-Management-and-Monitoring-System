@@ -30,6 +30,7 @@ class MedicationScheduleController extends BaseApiController
     protected function getUpdateRules(): array
     {
         return [
+            'treatment_id'    => 'nullable|integer',
             'medication_name' => 'nullable|string',
             'dosage'          => 'nullable|string',
             'frequency'       => 'nullable|string',

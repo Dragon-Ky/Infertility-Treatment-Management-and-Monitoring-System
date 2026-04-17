@@ -29,6 +29,10 @@ class TreatmentEventController extends BaseApiController
     protected function getUpdateRules(): array
     {
         return [
+            'treatment_id' => 'nullable|integer',
+            'event_type'   => 'nullable|in:egg_retrieval,embryo_transfer,insemination,ultrasound,blood_test,consultation,other',
+            'event_date'   => 'nullable|date',
+            'description'  => 'nullable|string',
             'result'       => 'nullable|string',
             'doctor_notes' => 'nullable|string',
             'attachments'  => 'nullable|array',
