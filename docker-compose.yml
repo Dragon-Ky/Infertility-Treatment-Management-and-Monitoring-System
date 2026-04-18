@@ -2,6 +2,60 @@ version: '3.8'
 
 services:
   # ============================================
+  # SHARED INFRASTRUCTURE
+  # ============================================
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-secret}
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "3306:3306"
+    networks:
+      - app-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - app-network
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
+    ports:
+      - "${RABBITMQ_PORT:-5672}:5672"
+      - "${RABBITMQ_UI_PORT:-15672}:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - app-network
+
+  nifi:
+    image: apache/nifi:latest
+    container_name: nifi
+    restart: unless-stopped
+    ports:
+      - "${NIFI_PORT:-8443}:8443"
+    environment:
+      - NIFI_WEB_HTTP_PORT=8080
+    networks:
+      - app-network
+
+  # ============================================
   # AUTH SERVICE
   # ============================================
   auth-service:
@@ -18,19 +72,18 @@ services:
       - APP_DEBUG=${AUTH_APP_DEBUG:-true}
       - APP_KEY=${AUTH_APP_KEY}
       - DB_CONNECTION=mysql
-      - DB_HOST=mysql-auth
+      - DB_HOST=mysql
       - DB_PORT=3306
       - DB_DATABASE=${AUTH_DB_DATABASE:-auth_db}
       - DB_USERNAME=${AUTH_DB_USERNAME:-root}
       - DB_PASSWORD=${AUTH_DB_PASSWORD:-secret}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - CACHE_DRIVER=redis
-      - SESSION_DRIVER=redis
-      - QUEUE_CONNECTION=redis
+      - RABBITMQ_HOST=rabbitmq
     depends_on:
-      - mysql-auth
+      - mysql
       - redis
+      - rabbitmq
     networks:
       - app-network
 
@@ -45,20 +98,6 @@ services:
       - ./nginx/auth-service.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - auth-service
-    networks:
-      - app-network
-
-  mysql-auth:
-    image: mysql:8.0
-    container_name: mysql-auth
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: ${AUTH_DB_PASSWORD:-secret}
-      MYSQL_DATABASE: ${AUTH_DB_DATABASE:-auth_db}
-    volumes:
-      - mysql-auth-data:/var/lib/mysql
-    ports:
-      - "${AUTH_DB_PORT:-33061}:3306"
     networks:
       - app-network
 
@@ -79,18 +118,15 @@ services:
       - APP_DEBUG=${CATALOG_APP_DEBUG:-true}
       - APP_KEY=${CATALOG_APP_KEY}
       - DB_CONNECTION=mysql
-      - DB_HOST=mysql-catalog
+      - DB_HOST=mysql
       - DB_PORT=3306
       - DB_DATABASE=${CATALOG_DB_DATABASE:-catalog_db}
       - DB_USERNAME=${CATALOG_DB_USERNAME:-root}
       - DB_PASSWORD=${CATALOG_DB_PASSWORD:-secret}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - CACHE_DRIVER=redis
-      - SESSION_DRIVER=redis
-      - QUEUE_CONNECTION=redis
     depends_on:
-      - mysql-catalog
+      - mysql
       - redis
     networks:
       - app-network
@@ -109,45 +145,195 @@ services:
     networks:
       - app-network
 
-  mysql-catalog:
-    image: mysql:8.0
-    container_name: mysql-catalog
+  # ============================================
+  # APPOINTMENT SERVICE
+  # ============================================
+  appointment-service:
+    build:
+      context: ./appointment-service
+      dockerfile: Dockerfile
+    container_name: appointment-service
     restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./appointment-service:/var/www
     environment:
-      MYSQL_ROOT_PASSWORD: ${CATALOG_DB_PASSWORD:-secret}
-      MYSQL_DATABASE: ${CATALOG_DB_DATABASE:-catalog_db}
-    volumes:
-      - mysql-catalog-data:/var/lib/mysql
-    ports:
-      - "${CATALOG_DB_PORT:-33062}:3306"
+      - APP_ENV=${APPOINTMENT_APP_ENV:-local}
+      - APP_DEBUG=${APPOINTMENT_APP_DEBUG:-true}
+      - APP_KEY=${APPOINTMENT_APP_KEY}
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=${APPOINTMENT_DB_DATABASE:-appointment_db}
+      - DB_USERNAME=${APPOINTMENT_DB_USERNAME:-root}
+      - DB_PASSWORD=${APPOINTMENT_DB_PASSWORD:-secret}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - mysql
+      - redis
     networks:
       - app-network
 
-  # ============================================
-  # REDIS (Shared Cache)
-  # ============================================
-  redis:
-    image: redis:7-alpine
-    container_name: redis
+  appointment-nginx:
+    image: nginx:alpine
+    container_name: appointment-nginx
     restart: unless-stopped
     ports:
-      - "${REDIS_PORT:-6379}:6379"
+      - "${APPOINTMENT_PORT:-8003}:80"
     volumes:
-      - redis-data:/data
+      - ./appointment-service:/var/www
+      - ./nginx/appointment-service.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - appointment-service
+    networks:
+      - app-network
+
+  # ============================================
+  # NOTIFICATION SERVICE
+  # ============================================
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    container_name: notification-service
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./notification-service:/var/www
+    environment:
+      - APP_ENV=${NOTIFICATION_APP_ENV:-local}
+      - APP_DEBUG=${NOTIFICATION_APP_DEBUG:-true}
+      - APP_KEY=${NOTIFICATION_APP_KEY}
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=${NOTIFICATION_DB_DATABASE:-notification_db}
+      - DB_USERNAME=${NOTIFICATION_DB_USERNAME:-root}
+      - DB_PASSWORD=${NOTIFICATION_DB_PASSWORD:-secret}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - mysql
+      - redis
+      - rabbitmq
+    networks:
+      - app-network
+
+  notification-nginx:
+    image: nginx:alpine
+    container_name: notification-nginx
+    restart: unless-stopped
+    ports:
+      - "${NOTIFICATION_PORT:-8004}:80"
+    volumes:
+      - ./notification-service:/var/www
+      - ./nginx/notification-service.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - notification-service
+    networks:
+      - app-network
+
+  # ============================================
+  # TREATMENT SERVICE
+  # ============================================
+  treatment-service:
+    build:
+      context: ./treatment-service
+      dockerfile: Dockerfile
+    container_name: treatment-service
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./treatment-service:/var/www
+    environment:
+      - APP_ENV=${TREATMENT_APP_ENV:-local}
+      - APP_DEBUG=${TREATMENT_APP_DEBUG:-true}
+      - APP_KEY=${TREATMENT_APP_KEY}
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=${TREATMENT_DB_DATABASE:-treatment_db}
+      - DB_USERNAME=${TREATMENT_DB_USERNAME:-root}
+      - DB_PASSWORD=${TREATMENT_DB_PASSWORD:-secret}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - app-network
+
+  treatment-nginx:
+    image: nginx:alpine
+    container_name: treatment-nginx
+    restart: unless-stopped
+    ports:
+      - "${TREATMENT_PORT:-8005}:80"
+    volumes:
+      - ./treatment-service:/var/www
+      - ./nginx/treatment-service.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - treatment-service
+    networks:
+      - app-network
+
+  # ============================================
+  # REPORT SERVICE
+  # ============================================
+  report-service:
+    build:
+      context: ./report-service
+      dockerfile: Dockerfile
+    container_name: report-service
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./report-service:/var/www
+    environment:
+      - APP_ENV=${REPORT_APP_ENV:-local}
+      - APP_DEBUG=${REPORT_APP_DEBUG:-true}
+      - APP_KEY=${REPORT_APP_KEY}
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=${REPORT_DB_DATABASE:-report_db}
+      - DB_USERNAME=${REPORT_DB_USERNAME:-root}
+      - DB_PASSWORD=${REPORT_DB_PASSWORD:-secret}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - app-network
+
+  report-nginx:
+    image: nginx:alpine
+    container_name: report-nginx
+    restart: unless-stopped
+    ports:
+      - "${REPORT_PORT:-8006}:80"
+    volumes:
+      - ./report-service:/var/www
+      - ./nginx/report-service.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - report-service
     networks:
       - app-network
 
 # ============================================
-  # VOLUMES
-  # ============================================
+# VOLUMES
+# ============================================
 volumes:
-  mysql-auth-data:
-  mysql-catalog-data:
+  mysql-data:
   redis-data:
+  rabbitmq-data:
 
 # ============================================
-  # NETWORKS
-  # ============================================
+# NETWORKS
+# ============================================
 networks:
   app-network:
     driver: bridge
