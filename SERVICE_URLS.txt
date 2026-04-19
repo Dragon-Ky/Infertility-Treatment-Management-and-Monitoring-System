@@ -1,0 +1,20 @@
+# 🏥 INFERTILITY MANAGEMENT SYSTEM - SERVICE URLS
+
+## 🚀 Giao diện quản lý & Dịch vụ chính
+- NiFi UI: https://localhost:8443/nifi (User: admin / Pass: reportservice)
+- RabbitMQ UI: http://localhost:15672 (User: guest / Pass: guest)
+
+## 🛠 Databases (Kết nối từ Database Tool: Navicat, DBeaver, ...)
+- MySQL Host Port: 3310 (Thay vì 3306 để tránh xung đột)
+- Redis Host Port: 6379
+
+## 🔌 Microservices APIs (Dùng cho Postman hoặc Frontend)
+- Auth Service: http://localhost:8001
+- Catalog Service: http://localhost:8002
+- Appointment Service: http://localhost:8003
+- Notification Service: http://localhost:8004
+- Treatment Service: http://localhost:8005
+- Report Service: http://localhost:8006
+
+---
+Ghi chú: Luôn dùng https://localhost:8443 cho NiFi. Trình duyệt sẽ báo lỗi bảo mật (Warning), bạn hãy nhấn "Advanced" -> "Proceed to localhost" để vào.
