@@ -14,7 +14,7 @@ services:
       - mysql-data:/var/lib/mysql
       - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
-      - "3306:3306"
+      - "3310:3306"
     networks:
       - app-network
 
@@ -51,7 +51,8 @@ services:
     ports:
       - "${NIFI_PORT:-8443}:8443"
     environment:
-      - NIFI_WEB_HTTP_PORT=8080
+      - SINGLE_USER_CREDENTIALS_USERNAME=${NIFI_USERNAME:-admin}
+      - SINGLE_USER_CREDENTIALS_PASSWORD=${NIFI_PASSWORD:-reportservice}
     networks:
       - app-network
 

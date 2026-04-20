@@ -15,10 +15,12 @@ class NiFiService
 
     public function __construct()
     {
-        $this->client = new Client();
-        $this->baseUrl = env('NIFI_BASE_URL', 'http://nifi:8443');
+        $this->client = new Client([
+            'verify' => false, // Skip SSL verification for NiFi's self-signed cert
+        ]);
+        $this->baseUrl = env('NIFI_BASE_URL', 'https://nifi:8443');
         $this->username = env('NIFI_USERNAME', 'admin');
-        $this->password = env('NIFI_PASSWORD', 'admin');
+        $this->password = env('NIFI_PASSWORD', 'reportservice');
     }
 
     /**
