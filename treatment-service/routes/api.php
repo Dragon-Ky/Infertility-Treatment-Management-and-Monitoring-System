@@ -9,12 +9,15 @@ use App\Http\Controllers\Api\MedicationScheduleController;
 use App\Http\Controllers\Api\MedicationRecordController;
 use App\Http\Controllers\Api\PregnancyTrackingController;
 use App\Http\Controllers\Api\StorageRecordController;
+use App\Http\Controllers\Api\DashboardController;
 
 
 //API Routes - Treatment Service
 
-
 Route::prefix('v1/treatment')->group(function () {
+    // Dashboard Stats
+    Route::get('dashboard/summary', [DashboardController::class, 'getDoctorDashboard']);
+
 
     // 1. Quản lý Phác đồ (Protocols)
     Route::apiResource('protocols', TreatmentProtocolController::class);
