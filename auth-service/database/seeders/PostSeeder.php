@@ -11,19 +11,25 @@ class PostSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Tìm tác giả (Ưu tiên Doctor, nếu không có lấy Admin, không có lấy User bất kỳ)
-        $doctor = User::whereHas('roles', function($q) {
+        // 1. Tìm tác giả theo thứ tự ưu tiên: Doctor -> Manager -> Admin
+        $author = User::whereHas('roles', function($q) {
             $q->where('name', 'Doctor');
-        })->first() ?: User::whereHas('roles', function($q) {
+        })->first()
+        ?: User::whereHas('roles', function($q) {
+            $q->where('name', 'Manager');
+        })->first()
+        ?: User::whereHas('roles', function($q) {
             $q->where('name', 'Admin');
-        })->first() ?: User::first();
+        })->first()
+        ?: User::first();
 
-        if (!$doctor) {
+        if (!$author) {
             $this->command->error("Lỗi: Không tìm thấy bất kỳ User nào để gán quyền tác giả!");
             return;
         }
 
-        $doctorId = $doctor->id;
+        $authorId = $author->id;
+        $this->command->info("Tác giả mặc định cho bài viết: " . $author->name . " (ID: $authorId)");
 
         $posts = [
             [
@@ -76,16 +82,16 @@ class PostSeeder extends Seeder
         ];
 
         foreach ($posts as $item) {
-            if (!Post::where('slug', $item['slug'])->exists()) {
-                Post::create([
+            Post::updateOrCreate(
+                ['slug' => $item['slug']],
+                [
                     'title'   => $item['title'],
-                    'slug'    => $item['slug'],
                     'content' => $item['content'],
-                    'user_id' => $doctorId,
+                    'user_id' => $authorId,
                     'image'   => $item['image'],
-                ]);
-                $this->command->info("Đã tạo: " . $item['title']);
-            }
+                ]
+            );
+            $this->command->info("Đã xử lý bài viết: " . $item['title']);
         }
     }
 }

@@ -14,9 +14,7 @@ class User extends Authenticatable implements JWTSubject
     use HasFactory, Notifiable, HasRoles;
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
+     * Các thuộc tính có thể gán hàng loạt (Mass Assignment)
      */
     protected $fillable = [
         'name',
@@ -28,9 +26,7 @@ class User extends Authenticatable implements JWTSubject
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
+     * Các thuộc tính nên được ẩn đi khi trả về JSON (Bảo mật)
      */
     protected $hidden = [
         'password',
@@ -38,9 +34,7 @@ class User extends Authenticatable implements JWTSubject
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Ép kiểu dữ liệu (Casting)
      */
     protected function casts(): array
     {
@@ -52,6 +46,14 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
+     * --- CÁC HÀM TIỆN ÍCH CHECK ROLE NHANH ---
+     */
+    public function isAdmin() { return $this->hasRole('Admin'); }
+    public function isManager() { return $this->hasRole('Manager'); }
+    public function isDoctor() { return $this->hasRole('Doctor'); }
+    public function isCustomer() { return $this->hasRole('Customer'); }
+
+    /**
      * --- JWT METHODS ---
      */
 
@@ -60,8 +62,12 @@ class User extends Authenticatable implements JWTSubject
         return $this->getKey();
     }
 
+    /**
+     * Truyền Role vào trong Token
+     */
     public function getJWTCustomClaims()
     {
+        // Trả về role đầu tiên của User (Admin, Manager, Doctor hoặc Customer)
         return [
             'role' => $this->getRoleNames()->first(),
         ];

@@ -9,9 +9,13 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
+use Exception;
 
 class AuthController extends Controller
 {
+    /**
+     * Đăng nhập hệ thống
+     */
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
@@ -23,7 +27,7 @@ class AuthController extends Controller
             ], 401);
         }
 
-        // Lấy thông tin user kèm theo roles
+        // Lấy thông tin user kèm theo roles mới (4 tầng)
         $user = User::with('roles')->find(auth('api')->user()->id);
 
         return response()->json([
@@ -34,6 +38,9 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Đăng ký tài khoản (Mặc định là Customer)
+     */
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -53,43 +60,60 @@ class AuthController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Dữ liệu không hợp lệ',
+                'message' => 'Dữ liệu đăng ký không hợp lệ',
                 'errors' => $validator->errors()
             ], 422);
         }
 
-        $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'phone'    => $request->phone,
-            'password' => Hash::make($request->password),
-            'status'   => 1,
-            'avatar'   => null,
-        ]);
+        try {
+            $user = User::create([
+                'name'     => $request->name,
+                'email'    => $request->email,
+                'phone'    => $request->phone,
+                'password' => Hash::make($request->password),
+                'status'   => 1,
+                'avatar'   => null,
+            ]);
 
-        // Gán role mặc định cho khách hàng
-        if (method_exists($user, 'assignRole')) {
-            $user->assignRole('Customer');
+            // Gán role mặc định cho khách hàng là 'Customer' (đúng cấu trúc mới)
+            if (method_exists($user, 'assignRole')) {
+                $user->assignRole('Customer');
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Đăng ký tài khoản khách hàng thành công!',
+                'user' => $user->load('roles')
+            ], 201);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Lỗi hệ thống trong quá trình đăng ký',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $user->load('roles');
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Đăng ký tài khoản thành công!',
-            'user' => $user
-        ], 201);
     }
 
+    /**
+     * Lấy thông tin cá nhân
+     */
     public function me()
     {
-        $user = User::with('roles')->find(auth('api')->user()->id);
-        return response()->json([
-            'status' => 'success',
-            'data' => $user
-        ]);
+        try {
+            $user = User::with('roles')->find(auth('api')->user()->id);
+            return response()->json([
+                'status' => 'success',
+                'data' => $user
+            ]);
+        } catch (Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
+        }
     }
 
+    /**
+     * Đăng xuất
+     */
     public function logout()
     {
         auth('api')->logout();
@@ -99,9 +123,13 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Cập nhật thông tin cá nhân
+     */
     public function updateProfile(Request $request)
     {
         $user = auth('api')->user();
+        if (!$user) return response()->json(['message' => 'Unauthorized'], 401);
 
         $validator = Validator::make($request->all(), [
             'name'  => 'required|string|max:255',
@@ -109,25 +137,21 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'errors' => $validator->errors()
-            ], 422);
+            return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
         }
 
-        // Cập nhật Database
-        $user->update([
-            'name'  => $request->name,
-            'phone' => $request->phone,
-        ]);
+        $user->update($request->only('name', 'phone'));
 
         return response()->json([
             'status'  => 'success',
             'message' => 'Cập nhật hồ sơ thành công!',
-            'user'    => $user
+            'user'    => $user->fresh('roles')
         ]);
     }
 
+    /**
+     * Thay đổi mật khẩu
+     */
     public function changePassword(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -136,23 +160,16 @@ class AuthController extends Controller
                 'required',
                 'string',
                 'confirmed',
-                Password::min(8)
-                    ->mixedCase()
-                    ->numbers()
-                    ->symbols(),
+                Password::min(8)->mixedCase()->numbers()->symbols(),
             ],
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'errors' => $validator->errors()
-            ], 422);
+            return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
         }
 
         $user = auth('api')->user();
 
-        // Kiểm tra mật khẩu cũ
         if (!Hash::check($request->old_password, $user->password)) {
             return response()->json([
                 'status' => 'error',
@@ -160,10 +177,7 @@ class AuthController extends Controller
             ], 400);
         }
 
-        // Cập nhật mật khẩu mới
-        $user->update([
-            'password' => Hash::make($request->new_password)
-        ]);
+        $user->update(['password' => Hash::make($request->new_password)]);
 
         return response()->json([
             'status'  => 'success',
