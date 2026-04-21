@@ -6,6 +6,6 @@ export const getDoctors = async () => {
 };
 
 export const getPatientsForDoctor = async () => {
-  const response = await api.get("/doctor/patients");
+  const response = await api.get("/doctor/customers");
   return response.data;
 };

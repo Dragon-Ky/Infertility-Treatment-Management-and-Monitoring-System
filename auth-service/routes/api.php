@@ -40,10 +40,10 @@ Route::middleware('auth:api')->group(function () {
     Route::middleware('role:Doctor|Admin')->group(function () {
 
         // Lấy danh sách bệnh nhân đang phụ trách (Phục vụ Doctor Dashboard)
-        Route::get('/doctor/patients', [DoctorController::class, 'index']);
+        Route::get('/doctor/customers', [DoctorController::class, 'index']);
 
         // Xem chi tiết hồ sơ bệnh án của một bệnh nhân
-        Route::get('/doctor/patients/{id}', [DoctorController::class, 'show']);
+        Route::get('/doctor/customers/{id}', [DoctorController::class, 'show']);
 
         // Cập nhật chỉ số xét nghiệm/phác đồ điều trị
         Route::post('/doctor/update-treatment', [DoctorController::class, 'updateTreatment']);
@@ -55,8 +55,8 @@ Route::middleware('auth:api')->group(function () {
     });
 
 
-    // --- NHÓM DÀNH RIÊNG CHO BỆNH NHÂN (Patient Roles) ---
-    Route::middleware('role:Patient')->group(function () {
+    // --- NHÓM DÀNH RIÊNG CHO KHÁCH HÀNG (Customer Roles) ---
+    Route::middleware('role:Customer')->group(function () {
 
         // Xem lịch trình điều trị cá nhân (Monitoring)
         Route::get('/my-treatment', [TreatmentController::class, 'myProcess']);

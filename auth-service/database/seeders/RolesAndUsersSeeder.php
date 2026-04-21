@@ -14,7 +14,7 @@ class RolesAndUsersSeeder extends Seeder
         // 1. Tạo Roles
         $adminRole   = Role::updateOrCreate(['name' => 'Admin', 'guard_name' => 'api']);
         $doctorRole  = Role::updateOrCreate(['name' => 'Doctor', 'guard_name' => 'api']);
-        $patientRole = Role::updateOrCreate(['name' => 'Patient', 'guard_name' => 'api']);
+        $customerRole = Role::updateOrCreate(['name' => 'Customer', 'guard_name' => 'api']);
 
         // 2. Tạo Admin
         $admin = User::updateOrCreate(
@@ -40,16 +40,16 @@ class RolesAndUsersSeeder extends Seeder
         );
         $doctor->syncRoles($doctorRole);
 
-        // 4. Tạo Bệnh nhân
-        $patient = User::updateOrCreate(
-            ['email' => 'patient@gmail.com'],
+        // 4. Tạo Khách hàng
+        $customer = User::updateOrCreate(
+            ['email' => 'customer@gmail.com'],
             [
                 'name'     => 'Nguyễn Văn Khách',
-                'password' => Hash::make('Patient@123456'),
+                'password' => Hash::make('Customer@123456'),
                 'phone'    => '0900112233',
                 'status'   => 1,
             ]
         );
-        $patient->syncRoles($patientRole);
+        $customer->syncRoles($customerRole);
     }
 }

@@ -5,60 +5,60 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Exception; 
+use Exception;
 
 class DoctorController extends Controller
 {
     /**
-     * Lấy danh sách tất cả bệnh nhân (Dành cho Dashboard Bác sĩ)
+     * Lấy danh sách tất cả khách hàng (Dành cho Dashboard Bác sĩ)
      */
     public function index()
     {
         try {
-            $patients = User::role('Patient')
+            $customers = User::role('Customer')
                 ->select('id', 'name', 'email', 'phone', 'created_at')
                 ->orderBy('created_at', 'desc')
                 ->get();
 
             return response()->json([
                 'status' => 'success',
-                'count'  => $patients->count(),
-                'data'   => $patients
+                'count'  => $customers->count(),
+                'data'   => $customers
             ], 200);
 
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Lỗi hệ thống khi lấy danh sách bệnh nhân',
+                'message' => 'Lỗi hệ thống khi lấy danh sách khách hàng',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Xem chi tiết hồ sơ một bệnh nhân
+     * Xem chi tiết hồ sơ một khách hàng
      */
     public function show($id)
     {
         try {
-            $patient = User::role('Patient')->find($id);
+            $customers = User::role('Customer')->find($id);
 
-            if (!$patient) {
+            if (!$customers) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Không tìm thấy bệnh nhân hoặc người dùng không có quyền bệnh nhân'
+                    'message' => 'Không tìm thấy khách hàng hoặc người dùng không có quyền khách hàng'
                 ], 404);
             }
 
             return response()->json([
                 'status' => 'success',
-                'data' => $patient
+                'data' => $customers
             ], 200);
 
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Lỗi khi truy xuất thông tin bệnh nhân',
+                'message' => 'Lỗi khi truy xuất thông tin khách hàng',
                 'error' => $e->getMessage()
             ], 500);
         }

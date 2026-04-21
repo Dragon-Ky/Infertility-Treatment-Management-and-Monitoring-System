@@ -67,9 +67,9 @@ class AuthController extends Controller
             'avatar'   => null,
         ]);
 
-        // Gán role mặc định cho bệnh nhân
+        // Gán role mặc định cho khách hàng
         if (method_exists($user, 'assignRole')) {
-            $user->assignRole('Patient');
+            $user->assignRole('Customer');
         }
 
         $user->load('roles');

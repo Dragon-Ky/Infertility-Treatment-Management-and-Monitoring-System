@@ -70,12 +70,12 @@ export const routes = [
     ],
   },
 
-  // Protect Patient
+  // Protect Customer
   {
-    element: <PrivateRoutes allowRoles={["Patient"]} />,
+    element: <PrivateRoutes allowRoles={["Customer"]} />,
     children: [
       {
-        path: "/patient",
+        path: "/customer",
         element: <LayoutDefault />,
         children: [
           { path: "my-treatment", element: <div>Trang lộ trình điều trị</div> },
@@ -85,7 +85,7 @@ export const routes = [
   },
 
   {
-    element: <PrivateRoutes allowRoles={["Admin", "Doctor", "Patient"]} />,
+    element: <PrivateRoutes allowRoles={["Admin", "Doctor", "Customer"]} />,
     children: [
       {
         path: "/profile",
