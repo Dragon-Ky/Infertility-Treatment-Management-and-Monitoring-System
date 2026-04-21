@@ -36,7 +36,7 @@ function Header() {
     <header className="sticky top-0 left-0 z-900 w-full bg-white/80 shadow-[0px_3px_8px_rgba(0,0,0,0.12)] backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-[1vw] text-[1.1vw]">
         <Link
-          to={`${userRole === "Doctor" ? "/doctor/dashboard" : "/"}`}
+          to={`${userRole === "Admin" ? "/admin/dashboard" : userRole === "Manager" ? "/manager/dashboard" : userRole === "Doctor" ? "/doctor/dashboard" : "/"}`}
           className="shrink-0 transition-transform hover:scale-105 active:scale-95"
         >
           <img src={medicen} alt="Logo" className="w-[12vw] object-cover" />

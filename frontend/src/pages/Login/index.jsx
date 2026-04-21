@@ -38,18 +38,21 @@ function Login() {
       if (data && data.access_token) {
         localStorage.setItem("access_token", data.access_token);
         localStorage.setItem("user", JSON.stringify(data.user));
+
+        // Lấy Role đầu tiên từ mảng roles
         const userRole = data.user.roles?.[0]?.name;
 
         if (userRole === "Admin") {
           navigate("/admin/dashboard");
-          window.location.reload();
+        } else if (userRole === "Manager") {
+          navigate("/manager/dashboard");
         } else if (userRole === "Doctor") {
           navigate("/doctor/dashboard");
-          window.location.reload();
         } else {
           navigate("/");
-          window.location.reload();
         }
+
+        window.location.reload();
       }
     } catch (err) {
       if (err.response?.status === 401) {
@@ -122,6 +125,7 @@ function Login() {
                 />
               </div>
             </div>
+
             <div className="space-y-3">
               <Label
                 htmlFor="password"
@@ -154,6 +158,7 @@ function Login() {
                 </button>
               </div>
             </div>
+
             <div className="flex items-center justify-between px-1 pt-2">
               <div className="flex items-center space-x-2">
                 <Checkbox
@@ -182,6 +187,7 @@ function Login() {
                 </div>
               )}
             </div>
+
             <Button
               type="submit"
               disabled={loading}

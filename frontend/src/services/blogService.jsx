@@ -1,4 +1,4 @@
-import api from "../utils/api";
+import api from "../utils/auth-service/api";
 
 // Lấy danh sách toàn bộ bài viết (Mục 4 & 5)
 export const getAllPosts = async () => {
@@ -12,7 +12,7 @@ export const getPostDetail = async (id) => {
   return response.data;
 };
 
-// Đăng bài viết mới (Dành cho Doctor/Admin)
+// Đăng bài viết mới (Dành cho Admin/Manager/Doctor)
 export const createPost = async (postData) => {
   const response = await api.post("posts", postData);
   return response.data;

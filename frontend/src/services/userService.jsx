@@ -1,4 +1,4 @@
-import api from "@/utils/api";
+import api from "@/utils/auth-service/api";
 
 export const updateProfileApi = async (data) => {
   const response = await api.post("/update-profile", data);

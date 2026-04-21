@@ -8,69 +8,88 @@ import Profile from "../pages/Profile";
 import BlogDetail from "@/pages/BlogDetail";
 import AdminDashboard from "../pages/Admin/Dashboard";
 import DoctorDashboard from "../pages/Doctor/Dashboard";
+import ManagerDashboard from "../pages/Manager/Dashboard";
 import Error404 from "@/pages/Error404";
 import BlogList from "@/pages/BlogList";
 
 export const routes = [
-  //Public routes
+  // --- PUBLIC ROUTES ---
   {
     path: "/",
     element: <LayoutDefault />,
     children: [
-      {
-        path: "/",
-        element: <Home />,
-      },
-
-      {
-        path: "/blog",
-        element: <BlogList />,
-      },
-
+      { path: "/", element: <Home /> },
+      { path: "/blog", element: <BlogList /> },
       { path: "/blog/:id", element: <BlogDetail /> },
-
-      {
-        path: "/403",
-        element: <Error403 />,
-      },
+      { path: "/403", element: <Error403 /> },
     ],
   },
 
-  {
-    path: "/login",
-    element: <Login />,
-  },
+  { path: "/login", element: <Login /> },
+  { path: "/register", element: <Register /> },
 
-  {
-    path: "/register",
-    element: <Register />,
-  },
+  // --- PRIVATE ROUTES ---
 
-  // Protect Admin
+  // 1. DÀNH CHO ADMIN (Tối cao - Quản lý Manager)
   {
     element: <PrivateRoutes allowRoles={["Admin"]} />,
     children: [
       {
         path: "/admin",
         element: <LayoutDefault />,
-        children: [{ path: "dashboard", element: <AdminDashboard /> }],
+        children: [
+          { path: "dashboard", element: <AdminDashboard /> },
+          {
+            path: "manage-managers",
+            element: <div>Trang Admin quản lý Manager</div>,
+          },
+        ],
       },
     ],
   },
 
-  // Protect Doctor
+  // 2. DÀNH CHO MANAGER (Quản lý Doctor và Customer)
+  // Admin cũng có quyền vào Manager
   {
-    element: <PrivateRoutes allowRoles={["Doctor"]} />,
+    element: <PrivateRoutes allowRoles={["Admin", "Manager"]} />,
+    children: [
+      {
+        path: "/manager",
+        element: <LayoutDefault />,
+        children: [
+          {
+            path: "dashboard",
+            element: <ManagerDashboard />,
+          },
+          {
+            path: "manage-doctors",
+            element: <div>Trang Manager quản lý Doctor</div>,
+          },
+        ],
+      },
+    ],
+  },
+
+  // 3. DÀNH CHO BÁC SĨ (Chăm sóc Customer)
+  // Admin và Manager có quyền vào giám sát
+  {
+    element: <PrivateRoutes allowRoles={["Admin", "Manager", "Doctor"]} />,
     children: [
       {
         path: "/doctor",
         element: <LayoutDefault />,
-        children: [{ path: "dashboard", element: <DoctorDashboard /> }],
+        children: [
+          { path: "dashboard", element: <DoctorDashboard /> },
+          {
+            path: "customers",
+            element: <div>Trang danh sách khách hàng của Bác sĩ</div>,
+          },
+        ],
       },
     ],
   },
 
-  // Protect Customer
+  // 4. DÀNH CHO KHÁCH HÀNG (Customer)
   {
     element: <PrivateRoutes allowRoles={["Customer"]} />,
     children: [
@@ -84,8 +103,11 @@ export const routes = [
     ],
   },
 
+  // 5. TRANG CHUNG (Profile)
   {
-    element: <PrivateRoutes allowRoles={["Admin", "Doctor", "Customer"]} />,
+    element: (
+      <PrivateRoutes allowRoles={["Admin", "Manager", "Doctor", "Customer"]} />
+    ),
     children: [
       {
         path: "/profile",

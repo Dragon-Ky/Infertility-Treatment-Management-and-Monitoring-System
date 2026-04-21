@@ -17,7 +17,7 @@ import {
   HiOutlineSearch,
 } from "react-icons/hi";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import { getPatientsForDoctor } from "@/services/doctorService";
+import { getPatientsForDoctor } from "@/services/doctor/doctorService";
 
 function DoctorDashboard() {
   const [patients, setPatients] = useState([]);

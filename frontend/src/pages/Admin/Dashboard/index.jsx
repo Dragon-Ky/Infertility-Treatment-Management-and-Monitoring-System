@@ -1,37 +1,37 @@
+import { getAllManagers } from "@/services/admin/adminService";
 import { useEffect, useState } from "react";
-import { getDoctors } from "../../../services/doctorService";
 
-const AdminDashboard = () => {
-  const [doctors, setDoctors] = useState([]);
+function AdminDashboard() {
+  const [managers, setManagers] = useState([]);
 
   useEffect(() => {
-    const fetchDoctors = async () => {
+    const fetchManagers = async () => {
       try {
-        const res = await getDoctors();
-        setDoctors(res.data);
+        const res = await getAllManagers();
+        setManagers(res.data);
       } catch (error) {
-        console.error("Lỗi lấy danh sách bác sĩ:", error);
+        console.error("Lỗi lấy danh sách quản lí:", error);
       }
     };
-    fetchDoctors();
+    fetchManagers();
   }, []);
 
   return (
     <div className="p-6">
-      <h1 className="mb-4 text-2xl font-bold">Quản lý Đội ngũ Bác sĩ</h1>
+      <h1 className="mb-4 text-2xl font-bold">Quản lí đội ngũ Managers</h1>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        {doctors.map((doc) => (
+        {managers.map((man) => (
           <div
-            key={doc.id}
+            key={man.id}
             className="rounded-lg border bg-white p-4 shadow-sm"
           >
-            <h3 className="font-bold text-blue-600">{doc.name}</h3>
-            <p className="text-gray-600">{doc.email}</p>
+            <h3 className="font-bold text-blue-600">{man.name}</h3>
+            <p className="text-gray-600">{man.email}</p>
           </div>
         ))}
       </div>
     </div>
   );
-};
+}
 
 export default AdminDashboard;
