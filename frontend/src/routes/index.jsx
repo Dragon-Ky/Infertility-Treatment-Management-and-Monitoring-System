@@ -12,6 +12,7 @@ import ManagerDashboard from "@/pages/Manager/Dashboard";
 import Error404 from "@/pages/Error404";
 import BlogList from "@/pages/BlogList";
 import ProtocolManagement from "@/pages/Doctor/ProtocolManagement";
+import ProtocolDetail from "@/pages/Doctor/ProtocolDetail";
 
 export const routes = [
   // --- PUBLIC ROUTES ---
@@ -82,6 +83,7 @@ export const routes = [
         children: [
           { path: "dashboard", element: <DoctorDashboard /> },
           { path: "protocols", element: <ProtocolManagement /> },
+          { path: "protocols/details/:id", element: <ProtocolDetail /> },
         ],
       },
     ],
