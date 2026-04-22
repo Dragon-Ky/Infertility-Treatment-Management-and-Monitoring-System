@@ -1,4 +1,4 @@
-import { getAllManagers } from "@/services/admin/adminService";
+import { getAllManagers } from "@/services/adminService";
 import { useEffect, useState } from "react";
 
 function AdminDashboard() {

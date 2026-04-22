@@ -1,16 +1,18 @@
-import PrivateRoutes from "../components/PrivateRoutes";
-import LayoutDefault from "../layout/LayoutDefault";
-import Home from "../pages/Home";
-import Login from "../pages/Login";
-import Register from "../pages/Register";
+import PrivateRoutes from "@/components/PrivateRoutes";
+import LayoutDefault from "@/layout/LayoutDefault";
+import Home from "@/pages/Home";
+import Login from "@/pages/Login";
+import Register from "@/pages/Register";
 import Error403 from "@/pages/Error403";
-import Profile from "../pages/Profile";
+import Profile from "@/pages/Profile";
 import BlogDetail from "@/pages/BlogDetail";
-import AdminDashboard from "../pages/Admin/Dashboard";
-import DoctorDashboard from "../pages/Doctor/Dashboard";
-import ManagerDashboard from "../pages/Manager/Dashboard";
+import AdminDashboard from "@/pages/Admin/Dashboard";
+import DoctorDashboard from "@/pages/Doctor/Dashboard";
+import ManagerDashboard from "@/pages/Manager/Dashboard";
 import Error404 from "@/pages/Error404";
 import BlogList from "@/pages/BlogList";
+import ProtocolManagement from "@/pages/Doctor/ProtocolManagement";
+import ProtocolDetail from "@/pages/Doctor/ProtocolDetail";
 
 export const routes = [
   // --- PUBLIC ROUTES ---
@@ -80,10 +82,8 @@ export const routes = [
         element: <LayoutDefault />,
         children: [
           { path: "dashboard", element: <DoctorDashboard /> },
-          {
-            path: "customers",
-            element: <div>Trang danh sách khách hàng của Bác sĩ</div>,
-          },
+          { path: "protocols", element: <ProtocolManagement /> },
+          { path: "protocols/details/:id", element: <ProtocolDetail /> },
         ],
       },
     ],

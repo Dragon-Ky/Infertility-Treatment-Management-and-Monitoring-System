@@ -17,16 +17,16 @@ import {
   HiOutlineSearch,
 } from "react-icons/hi";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import { getPatientsForDoctor } from "@/services/doctor/doctorService";
+import { getCustomers } from "@/services/doctorService";
 
 function DoctorDashboard() {
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchPatients = async () => {
+    const fetchCustomers = async () => {
       try {
-        const result = await getPatientsForDoctor();
+        const result = await getCustomers();
         if (result.status === "success") {
           setPatients(result.data);
         }
@@ -36,7 +36,7 @@ function DoctorDashboard() {
         setLoading(false);
       }
     };
-    fetchPatients();
+    fetchCustomers();
   }, []);
 
   return (

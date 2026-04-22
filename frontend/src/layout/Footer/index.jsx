@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import bocongthuong from "../../assets/Images/bocongthuong.svg";
+import logoWhite from "../../assets/Images/logo-white.png";
 
 function Footer() {
   return (
@@ -10,7 +11,7 @@ function Footer() {
             <Link to="/">
               <img
                 className="mb-4 w-[12vw] object-cover"
-                src="https://medicen.peacefulqode.co.in/wp-content/uploads/2024/05/logo-white.webp"
+                src={logoWhite}
                 atl="Image Logo"
               />
             </Link>

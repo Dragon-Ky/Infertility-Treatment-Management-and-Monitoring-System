@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getDoctors } from "../../../services/manager/managerService";
+import { getDoctors } from "@/services/managerService";
 
 function ManagerDashboard() {
   const [doctors, setDoctors] = useState([]);
