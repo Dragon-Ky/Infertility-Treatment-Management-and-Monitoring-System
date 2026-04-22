@@ -86,14 +86,16 @@ abstract class BaseService
     }
     public function update(int $id, array $data)
     {
-        // 1. Repository đã dùng findOrFail, nên nếu không có ID, nó sẽ văng lỗi ngay tại đây.
-        
+        // 1. Thực hiện cập nhật trong DB thông qua Repository
         $this->repository->update($id, $data);
 
+        // 2. Xóa các cache liên quan (cả cache item và cache list)
         $this->clearCache($id);
 
-        // 2. Trả về item đã được cập nhật bằng cách gọi hàm tìm kiếm có sẵn
-        return $this->findById($id);
+        // 3. Trả về dữ liệu mới nhất trực tiếp từ Repository
+        // Lưu ý: Không dùng findById($id) ở đây vì nó sẽ thực hiện Cache::remember ngay lập tức.
+        // Nếu đang trong Transaction, việc cache lại ngay có thể dẫn đến dữ liệu không nhất quán.
+        return $this->repository->find($id);
     }
 
 
