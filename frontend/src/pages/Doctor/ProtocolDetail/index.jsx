@@ -3,9 +3,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getProtocolDetail } from "@/services/protocolService";
 import { getCustomers } from "@/services/doctorService";
 import { getEventsByProtocol } from "@/services/eventService";
-import { getLabResults } from "@/services/labService"; // Import service Lab
+import { getLabResults } from "@/services/labService";
 import AddEventModal from "@/components/AddEventModal";
-import HormoneChart from "@/components/HormoneChart"; // Import Chart
+import HormoneChart from "@/components/HormoneChart";
 import { getMedicationSchedules } from "@/services/scheduleService";
 
 import {
@@ -33,6 +33,8 @@ import {
   TableRow,
 } from "@/components/ui/table"; // Import Table cho Lab
 import toast from "react-hot-toast";
+import AddLabResultModal from "@/components/AddLabResultModal";
+import AddScheduleModal from "@/components/AddScheduleModal";
 
 const ProtocolDetail = () => {
   const { id } = useParams();
@@ -40,7 +42,7 @@ const ProtocolDetail = () => {
   const [protocol, setProtocol] = useState(null);
   const [customer, setCustomer] = useState(null);
   const [events, setEvents] = useState([]);
-  const [labResults, setLabResults] = useState([]); // State cho xét nghiệm
+  const [labResults, setLabResults] = useState([]);
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -50,6 +52,24 @@ const ProtocolDetail = () => {
       setEvents(res.data || []);
     } catch (error) {
       console.error("Lỗi tải sự kiện:", error);
+    }
+  };
+
+  const fetchLabResults = async () => {
+    try {
+      const res = await getLabResults(id);
+      setLabResults(res.data || []);
+    } catch (error) {
+      console.error("Lỗi tải kết quả xét nghiệm:", error);
+    }
+  };
+
+  const fetchSchedules = async () => {
+    try {
+      const res = await getMedicationSchedules(id);
+      setSchedules(res.data || []);
+    } catch (error) {
+      console.error("Lỗi tải lịch thuốc:", error);
     }
   };
 
@@ -359,9 +379,7 @@ const ProtocolDetail = () => {
             <h3 className="text-2xl font-black tracking-tighter text-slate-800 uppercase">
               Phân tích kết quả xét nghiệm
             </h3>
-            <Button className="h-12 rounded-2xl bg-blue-600 px-6 text-[10px] font-black tracking-widest text-white uppercase shadow-lg shadow-blue-100">
-              NHẬP KẾT QUẢ MỚI
-            </Button>
+            <AddLabResultModal protocol={protocol} onAdded={fetchLabResults} />
           </div>
 
           <Card className="rounded-[32px] border-none bg-white p-6 shadow-sm">
@@ -446,9 +464,10 @@ const ProtocolDetail = () => {
             <h3 className="text-2xl font-black tracking-tighter text-slate-800 uppercase">
               Kế hoạch dùng thuốc
             </h3>
-            <Button className="h-12 rounded-2xl bg-slate-900 px-6 text-[10px] font-black tracking-widest text-white uppercase shadow-xl">
-              THÊM LỊCH MỚI
-            </Button>
+            <AddScheduleModal
+              protocolId={protocol?.id}
+              onAdded={fetchSchedules}
+            />
           </div>
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
