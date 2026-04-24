@@ -124,18 +124,14 @@ class AppointmentController extends Controller
 
     private function sendFirebaseNotification($userId, $title, $body)
     {
-        $userToken = Cache::get("user_fcm_token_{$userId}");
-        if (!$userToken) return;
-
-        Http::withHeaders([
-            'Authorization' => 'Bearer ' . env('FIREBASE_SERVER_KEY'),
-            'Content-Type'  => 'application/json',
-        ])->post('https://fcm.googleapis.com/fcm/send', [
-            'to' => $userToken,
-            'notification' => [
+        // Gửi thông báo qua RabbitMQ để NotificationService xử lý (FCM HTTP v1)
+        // Điều này giúp tránh sử dụng Legacy FCM API đã bị Google khai tử
+        $this->rabbitmq->publish('notification_queue', [
+            'userId' => $userId,
+            'templateName' => 'APPOINTMENT_EVENT', 
+            'variables' => [
                 'title' => $title,
-                'body'  => $body,
-                'sound' => 'default'
+                'body'  => $body
             ]
         ]);
     }
