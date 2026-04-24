@@ -24,13 +24,18 @@ class MedicationSchedule extends Model
         'is_active',
     ];
 
+    protected $attributes = [
+        'status' => 'active',
+        'is_active' => true,
+    ];
+
     protected $casts = [
         'is_active'  => 'boolean',
         'start_date' => 'date',
         'end_date' => 'date',
         'time_slots' => 'array', // Để lưu danh sách giờ uống thuốc dưới dạng JSON
     ];
-    
+
     public function medicationRecords()
     {
         // "Một lịch trình thuốc sẽ có nhiều lần uống (bản ghi) thuốc"
