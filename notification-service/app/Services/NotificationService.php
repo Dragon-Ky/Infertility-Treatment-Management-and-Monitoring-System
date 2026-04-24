@@ -76,4 +76,37 @@ class NotificationService
             default => true
         };
     }
+
+    public function sendStoredNotification(int $userId, string $templateName, array $variables = []): bool
+    {
+        $template = \App\Models\NotificationTemplate::where('name', $templateName)->first();
+        
+        if (!$template) {
+            // Fallback: If no template, we might want to log or send a generic one
+            \Illuminate\Support\Facades\Log::warning("Notification template not found: {$templateName}");
+            return false;
+        }
+
+        $title = $template->title;
+        $body = $template->body;
+
+        foreach ($variables as $key => $value) {
+            $title = str_replace("{{$key}}", $value, $title);
+            $body = str_replace("{{$key}}", $value, $body);
+        }
+
+        $notification = $this->createNotification($userId, [
+            'title' => $title,
+            'body' => $body,
+            'type' => $template->type ?? 'system',
+        ]);
+
+        $this->sendNotification($notification);
+        return true;
+    }
+
+    public function sendPushNotification(int $userId, string $templateKey, array $data = []): bool
+    {
+        return $this->sendStoredNotification($userId, $templateKey, $data);
+    }
 }

@@ -38,6 +38,6 @@ class FirebaseService
             ])
             ->withData($message['data'] ?? []);
 
-        return $this->messaging->sendMulticast($cloudMessage, $tokens);
+        return $this->messaging->sendEachForMulticast($cloudMessage, $tokens);
     }
 }
