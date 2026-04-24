@@ -17,8 +17,6 @@ const AddLabResultModal = ({ protocol, onAdded }) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  console.log(protocol);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
