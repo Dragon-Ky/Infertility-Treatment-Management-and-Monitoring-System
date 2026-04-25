@@ -11,3 +11,8 @@ export const createEvent = async (data) => {
   const response = await treatmentApi.post(`/events`, data);
   return response.data;
 };
+
+export const deleteEvent = async (id) => {
+  const response = await treatmentApi.delete(`/events/${id}`);
+  return response.data;
+};

@@ -11,3 +11,8 @@ export const createMedicationSchedule = async (data) => {
   const response = await treatmentApi.post("/schedules", data);
   return response.data;
 };
+
+export const deleteMedicationSchedule = async (id) => {
+  const response = await treatmentApi.delete(`/schedules/${id}`);
+  return response.data;
+};
