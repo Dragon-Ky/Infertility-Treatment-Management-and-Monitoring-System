@@ -8,6 +8,7 @@ readonly class TreatmentProtocolResponseDTO
 {
     public function __construct(
         public int $id,              
+        public ?string $protocol_code,
         public int $treatment_id,
         public int $doctor_id,
         public string $protocol_name,
@@ -22,6 +23,7 @@ readonly class TreatmentProtocolResponseDTO
     {
         return new self(
             id: $protocol->id,
+            protocol_code: $protocol->protocol_code,
             treatment_id: $protocol->treatment_id,
             doctor_id: $protocol->doctor_id,
             protocol_name: $protocol->protocol_name,
@@ -38,6 +40,7 @@ readonly class TreatmentProtocolResponseDTO
     {
         return [
             'id' => $this->id,
+            'protocol_code' => $this->protocol_code,
             'treatment_id' => $this->treatment_id,
             'doctor_id' => $this->doctor_id,
             'protocol_name' => $this->protocol_name,

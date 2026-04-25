@@ -13,6 +13,7 @@ class TreatmentProtocol extends Model
 
     protected $fillable = [
         'treatment_id',
+        'protocol_code',
         'doctor_id',
         'protocol_name',
         'diagnosis',
