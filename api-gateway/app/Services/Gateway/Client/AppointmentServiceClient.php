@@ -17,4 +17,15 @@ class AppointmentServiceClient extends BaseServiceClient
         $data = $response->json();
         return $data['data'] ?? $data;
     }
+
+    /**
+     * Lấy danh sách đợt điều trị theo ID
+     */
+    public function getTreatmentsByIds(array $ids)
+    {
+        $response = $this->get("treatments/internal/bulk", ['ids' => $ids]);
+        if (!$response->successful()) return [];
+        
+        return $response->json('data') ?? [];
+    }
 }

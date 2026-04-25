@@ -114,4 +114,21 @@ class TreatmentController extends Controller
 
         return response()->json($treatments);
     }
+    public function getTreatmentsByIds(Request $request)
+    {
+        $ids = $request->input('ids');
+        if (!$ids || !is_array($ids)) {
+            return response()->json(['status' => 'error', 'message' => 'IDs are required'], 400);
+        }
+
+        $treatments = Treatment::whereIn('id', $ids)
+            ->select('id', 'user_id', 'doctor_id', 'treatment_type', 'status')
+            ->get()
+            ->keyBy('id');
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $treatments
+        ]);
+    }
 }

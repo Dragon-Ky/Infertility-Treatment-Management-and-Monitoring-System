@@ -19,13 +19,10 @@ class DataHydrator
      */
     public function hydrate(string $service, string $path, array $data): array
     {
-        // 1. Chỉ xử lý nếu là service treatment
         if ($service !== 'treatment') {
             return $data;
         }
 
-        // 2. Kiểm tra xem route có cần hydrate không
-        // Các route cần tên bệnh nhân: dashboard summary và danh sách protocols
         if (str_contains($path, 'dashboard/summary') || str_contains($path, 'protocols')) {
             return $this->hydrateTreatmentData($data);
         }
@@ -34,84 +31,105 @@ class DataHydrator
     }
 
     /**
-     * Thực hiện nối dữ liệu cho Treatment Service
+     * Thực hiện nối dữ liệu cho Treatment Service (Tối ưu Bulk Fetch)
      */
     protected function hydrateTreatmentData(array $data): array
     {
         try {
-            // Nếu là response từ dashboard summary, dữ liệu nằm trong 'data'
-            // và có các phần như 'upcoming_queue'
+            // 1. Xác định danh sách items cần hydrate
+            $items = [];
+            $isDashboard = false;
+
             if (isset($data['upcoming_queue'])) {
-                $data['upcoming_queue'] = $this->hydrateList($data['upcoming_queue']);
+                $items = &$data['upcoming_queue'];
+                $isDashboard = true;
+            } elseif (isset($data['data']) && is_array($data['data'])) {
+                $items = &$data['data'];
+            } else {
+                // Trường hợp item đơn (chi tiết)
+                $data = $this->hydrateSingleItem($data);
                 return $data;
             }
 
-            // Nếu là response list (phân trang hoặc mảng đơn)
-            if (isset($data['data']) && is_array($data['data'])) {
-                // Nếu là danh sách đã phân trang
-                if (isset($data['current_page'])) {
-                    $data['data'] = $this->hydrateList($data['data']);
-                } else {
-                    // Nếu là mảng data thuần túy (GET chi tiết hoặc GET all không phân trang)
-                    $data['data'] = $this->hydrateItemOrList($data['data']);
+            if (empty($items)) return $data;
+
+            // 2. Thu thập tất cả ID cần thiết
+            $treatmentIds = [];
+            $doctorIds = [];
+            foreach ($items as $item) {
+                if (isset($item['treatment_id'])) $treatmentIds[] = $item['treatment_id'];
+                if (isset($item['doctor_id'])) $doctorIds[] = $item['doctor_id'];
+            }
+
+            $treatmentIds = array_unique($treatmentIds);
+            $doctorIds = array_unique($doctorIds);
+
+            // 3. Truy vấn Bulk từ các service khác
+            /** @var \App\Services\Gateway\Client\AppointmentServiceClient $appointmentClient */
+            $appointmentClient = $this->factory->make('appointment');
+            /** @var \App\Services\Gateway\Client\AuthServiceClient $authClient */
+            $authClient = $this->factory->make('auth');
+
+            // Lấy thông tin đợt điều trị
+            $treatmentsMap = $appointmentClient->getTreatmentsByIds($treatmentIds);
+            
+            // Thu thập User ID của bệnh nhân từ treatmentsMap
+            $patientIds = [];
+            foreach ($treatmentsMap as $t) {
+                if (isset($t['user_id'])) $patientIds[] = $t['user_id'];
+            }
+
+            // Lấy thông tin tất cả User (Bệnh nhân + Bác sĩ)
+            $allUserIds = array_unique(array_merge($patientIds, $doctorIds));
+            $usersMap = $authClient->getUsersByIds($allUserIds);
+
+            // 4. Map ngược lại vào danh sách items ban đầu
+            foreach ($items as &$item) {
+                $tId = $item['treatment_id'] ?? null;
+                $dId = $item['doctor_id'] ?? null;
+
+                // Gắn thông tin bệnh nhân
+                if ($tId && isset($treatmentsMap[$tId])) {
+                    $uId = $treatmentsMap[$tId]['user_id'];
+                    $item['customer_id'] = $uId;
+                    if (isset($usersMap[$uId])) {
+                        $item['customer_name'] = $usersMap[$uId]['name'] ?? 'Unknown';
+                    }
+                }
+
+                // Gắn thông tin bác sĩ
+                if ($dId && isset($usersMap[$dId])) {
+                    $item['doctor_name'] = $usersMap[$dId]['name'] ?? 'Unknown';
                 }
             }
 
             return $data;
         } catch (\Exception $e) {
-            Log::error("Hydration Error: " . $e->getMessage());
-            return $data; // Trả về dữ liệu gốc nếu lỗi để không làm chết Gateway
+            Log::error("Hydration Bulk Error: " . $e->getMessage());
+            return $data;
         }
     }
 
-    protected function hydrateItemOrList(array $itemOrList): array
-    {
-        // Kiểm tra xem là item đơn hay list
-        if (isset($itemOrList['treatment_id'])) {
-            return $this->hydrateSingleItem($itemOrList);
-        }
-        
-        return $this->hydrateList($itemOrList);
-    }
-
-    protected function hydrateList(array $list): array
-    {
-        foreach ($list as &$item) {
-            $item = $this->hydrateSingleItem($item);
-        }
-        return $list;
-    }
-
+    /**
+     * Hydrate cho 1 item đơn lẻ (vẫn giữ để dùng khi cần)
+     */
     protected function hydrateSingleItem(array $item): array
     {
-        if (!isset($item['treatment_id'])) {
-            return $item;
-        }
+        if (!isset($item['treatment_id'])) return $item;
 
-        /** @var \App\Services\Gateway\Client\AppointmentServiceClient $appointmentClient */
         $appointmentClient = $this->factory->make('appointment');
-        /** @var \App\Services\Gateway\Client\AuthServiceClient $authClient */
         $authClient = $this->factory->make('auth');
 
-        // 1. Lấy thông tin đợt điều trị từ appointment-service để có user_id
         $treatment = $appointmentClient->getTreatmentById($item['treatment_id']);
-        
         if ($treatment && isset($treatment['user_id'])) {
             $item['customer_id'] = $treatment['user_id'];
-            
-            // 2. Lấy tên bệnh nhân từ auth-service
             $user = $authClient->getUserById($treatment['user_id']);
-            if ($user) {
-                $item['customer_name'] = $user['name'] ?? 'Unknown';
-            }
+            if ($user) $item['customer_name'] = $user['name'] ?? 'Unknown';
         }
 
-        // 3. Lấy tên bác sĩ nếu có doctor_id
         if (isset($item['doctor_id'])) {
             $doctor = $authClient->getUserById($item['doctor_id']);
-            if ($doctor) {
-                $item['doctor_name'] = $doctor['name'] ?? 'Unknown';
-            }
+            if ($doctor) $item['doctor_name'] = $doctor['name'] ?? 'Unknown';
         }
 
         return $item;

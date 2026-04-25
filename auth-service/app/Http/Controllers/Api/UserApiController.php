@@ -66,4 +66,24 @@ class UserApiController extends Controller
             ], 500);
         }
     }
+    /**
+     * API Nội bộ: Lấy thông tin nhiều User theo danh sách ID
+     */
+    public function getUsersByIds(\Illuminate\Http\Request $request)
+    {
+        $ids = $request->input('ids');
+        if (!$ids || !is_array($ids)) {
+            return response()->json(['status' => 'error', 'message' => 'IDs are required'], 400);
+        }
+
+        $users = User::whereIn('id', $ids)
+            ->select('id', 'name', 'email', 'avatar')
+            ->get()
+            ->keyBy('id');
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $users
+        ]);
+    }
 }

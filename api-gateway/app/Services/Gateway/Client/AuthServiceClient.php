@@ -17,4 +17,15 @@ class AuthServiceClient extends BaseServiceClient
         $data = $response->json();
         return $data['data'] ?? $data;
     }
+
+    /**
+     * Lấy thông tin nhiều User theo danh sách ID
+     */
+    public function getUsersByIds(array $ids)
+    {
+        $response = $this->get("internal/users", ['ids' => $ids]);
+        if (!$response->successful()) return [];
+        
+        return $response->json('data') ?? [];
+    }
 }

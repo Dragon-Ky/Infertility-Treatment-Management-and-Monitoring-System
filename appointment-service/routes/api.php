@@ -11,6 +11,8 @@ Route::prefix('treatments')->group(function () {
     Route::post('/', [TreatmentController::class, 'register'])->name('treatments.register');
     Route::put('/{id}/status', [TreatmentController::class, 'updateStatus'])->name('treatments.status');
     Route::get('/{id}/reminders', [TreatmentController::class, 'getReminders'])->name('treatments.reminders');
+    // API Nội bộ (Dùng cho API Gateway)
+    Route::get('/internal/bulk', [TreatmentController::class, 'getTreatmentsByIds']);
 });
 
 // Appointment Routes
