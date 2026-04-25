@@ -6,7 +6,7 @@ services:
   # ============================================
   mysql:
     image: mysql:8.0
-    container_name: mysql
+    container_name: infertility-mysql
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-secret}
@@ -20,7 +20,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: redis
+    container_name: infertility-redis
     restart: unless-stopped
     ports:
       - "${REDIS_PORT:-6379}:6379"
@@ -31,7 +31,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
-    container_name: rabbitmq
+    container_name: infertility-rabbitmq
     restart: unless-stopped
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
@@ -46,7 +46,7 @@ services:
 
   nifi:
     image: apache/nifi:latest
-    container_name: nifi
+    container_name: infertility-nifi
     restart: unless-stopped
     ports:
       - "${NIFI_PORT:-8443}:8443"
@@ -65,7 +65,7 @@ services:
     build:
       context: ./auth-service
       dockerfile: Dockerfile
-    container_name: auth-service
+    container_name: infertility-auth-service
     restart: unless-stopped
     working_dir: /var/www
     volumes:
@@ -92,7 +92,7 @@ services:
 
   auth-nginx:
     image: nginx:alpine
-    container_name: auth-nginx
+    container_name: infertility-auth-nginx
     restart: unless-stopped
     ports:
       - "${AUTH_PORT:-8001}:80"
@@ -111,7 +111,7 @@ services:
     build:
       context: ./catalog-service
       dockerfile: Dockerfile
-    container_name: catalog-service
+    container_name: infertility-catalog-service
     restart: unless-stopped
     working_dir: /var/www
     volumes:
@@ -136,7 +136,7 @@ services:
 
   catalog-nginx:
     image: nginx:alpine
-    container_name: catalog-nginx
+    container_name: infertility-catalog-nginx
     restart: unless-stopped
     ports:
       - "${CATALOG_PORT:-8002}:80"
@@ -155,7 +155,7 @@ services:
     build:
       context: ./appointment-service
       dockerfile: Dockerfile
-    container_name: appointment-service
+    container_name: infertility-appointment-service
     restart: unless-stopped
     working_dir: /var/www
     volumes:
@@ -180,7 +180,7 @@ services:
 
   appointment-nginx:
     image: nginx:alpine
-    container_name: appointment-nginx
+    container_name: infertility-appointment-nginx
     restart: unless-stopped
     ports:
       - "${APPOINTMENT_PORT:-8003}:80"
@@ -199,7 +199,7 @@ services:
     build:
       context: ./notification-service
       dockerfile: Dockerfile
-    container_name: notification-service
+    container_name: infertility-notification-service
     restart: unless-stopped
     working_dir: /var/www
     volumes:
@@ -226,7 +226,7 @@ services:
 
   notification-nginx:
     image: nginx:alpine
-    container_name: notification-nginx
+    container_name: infertility-notification-nginx
     restart: unless-stopped
     ports:
       - "${NOTIFICATION_PORT:-8004}:80"
@@ -245,7 +245,7 @@ services:
     build:
       context: ./treatment-service
       dockerfile: Dockerfile
-    container_name: treatment-service
+    container_name: infertility-treatment-service
     restart: unless-stopped
     working_dir: /var/www
     volumes:
@@ -270,7 +270,7 @@ services:
 
   treatment-nginx:
     image: nginx:alpine
-    container_name: treatment-nginx
+    container_name: infertility-treatment-nginx
     restart: unless-stopped
     ports:
       - "${TREATMENT_PORT:-8005}:80"
@@ -289,7 +289,7 @@ services:
     build:
       context: ./report-service
       dockerfile: Dockerfile
-    container_name: report-service
+    container_name: infertility-report-service
     restart: unless-stopped
     working_dir: /var/www
     volumes:
@@ -314,7 +314,7 @@ services:
 
   report-nginx:
     image: nginx:alpine
-    container_name: report-nginx
+    container_name: infertility-report-nginx
     restart: unless-stopped
     ports:
       - "${REPORT_PORT:-8006}:80"
