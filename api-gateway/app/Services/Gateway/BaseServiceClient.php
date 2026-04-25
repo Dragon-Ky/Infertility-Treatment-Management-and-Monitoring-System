@@ -39,6 +39,16 @@ abstract class BaseServiceClient
     }
 
     /**
+     * Gửi request GET nội bộ tới service con
+     */
+    public function get(string $path, array $query = []): Response
+    {
+        return Http::withHeaders($this->getHeaders())
+            ->timeout(5)
+            ->get("{$this->baseUrl}/api/{$path}", $query);
+    }
+
+    /**
      * Lấy danh sách headers cần thiết cho request nội bộ
      */
     protected function getHeaders(): array
