@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      * Lệnh này chạy khi bạn gõ php artisan migrate
@@ -14,23 +13,22 @@ return new class extends Migration
     {
         // Danh sách 10 bảng dữ liệu của bạn
         $tables = [
-            'treatment_protocols', 
-            'treatment_events', 
-            'treatment_phases', 
-            'treatment_notes', 
-            'embryo_records', 
-            'lab_results', 
-            'medication_schedules', 
-            'medication_records', 
-            'pregnancy_tracking', 
+            'treatment_protocols',
+            'treatment_events',
+            'treatment_phases',
+            'treatment_notes',
+            'lab_results',
+            'medication_schedules',
+            'medication_records',
+            'pregnancy_trackings',
             'storage_records'
         ];
 
         foreach ($tables as $tableName) {
             Schema::table($tableName, function (Blueprint $table) {
                 // 1. Biến kiểm tra xóa: true là còn, false là đã xóa
-                $table->boolean('is_active')->default(true)->after('id'); 
-                
+                $table->boolean('is_active')->default(true)->after('id');
+
             });
         }
     }
@@ -42,10 +40,15 @@ return new class extends Migration
     public function down(): void
     {
         $tables = [
-            'treatment_protocols', 'treatment_events', 'treatment_phases', 
-            'treatment_notes', 'embryo_records', 'lab_results', 
-            'medication_schedules', 'medication_records', 
-            'pregnancy_tracking', 'storage_records'
+            'treatment_protocols',
+            'treatment_events',
+            'treatment_phases',
+            'treatment_notes',
+            'lab_results',
+            'medication_schedules',
+            'medication_records',
+            'pregnancy_trackings',
+            'storage_records'
         ];
 
         foreach ($tables as $tableName) {
