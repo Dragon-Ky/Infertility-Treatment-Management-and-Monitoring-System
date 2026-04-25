@@ -53,6 +53,8 @@ services:
     environment:
       - SINGLE_USER_CREDENTIALS_USERNAME=${NIFI_USERNAME:-admin}
       - SINGLE_USER_CREDENTIALS_PASSWORD=${NIFI_PASSWORD:-reportservice}
+    volumes:
+      - ./nifi-drivers:/opt/nifi/nifi-current/lib/drivers
     networks:
       - app-network
 
