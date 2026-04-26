@@ -39,7 +39,6 @@ function ProtocolManagement() {
 
   const navigate = useNavigate();
 
-  // Hàm xử lý hiển thị thời gian"
   const formatDateDisplay = (dateString) => {
     if (!dateString) return "---";
     return dateString.substring(0, 10);
@@ -75,7 +74,7 @@ function ProtocolManagement() {
   const handleDelete = async (id) => {
     try {
       await deleteProtocol(id);
-      toast.success(`Đã xóa phác đồ #${id} thành công!`);
+      toast.success(`Đã xóa phác đồ thành công!`);
       loadInitialData();
       // eslint-disable-next-line no-unused-vars
     } catch (error) {
@@ -138,7 +137,7 @@ function ProtocolManagement() {
                 Mã Phác Đồ
               </TableHead>
               <TableHead className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                Bệnh Nhân
+                Khách Hàng
               </TableHead>
               <TableHead className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
                 Nội Dung
@@ -166,10 +165,14 @@ function ProtocolManagement() {
               </TableRow>
             ) : (
               protocols
-                .filter((p) =>
-                  (usersMap[String(p.treatment_id)] || "")
-                    .toLowerCase()
-                    .includes(searchTerm.toLowerCase()),
+                .filter(
+                  (p) =>
+                    (usersMap[String(p.treatment_id)] || "")
+                      .toLowerCase()
+                      .includes(searchTerm.toLowerCase()) ||
+                    (p.protocol_code || "")
+                      .toLowerCase()
+                      .includes(searchTerm.toLowerCase()),
                 )
                 .map((protocol) => (
                   <TableRow
@@ -182,7 +185,7 @@ function ProtocolManagement() {
                         navigate(`/doctor/protocols/details/${protocol.id}`)
                       }
                     >
-                      #{protocol.id}
+                      {protocol.protocol_code || `#${protocol.id}`}
                     </TableCell>
                     <TableCell>
                       <div
@@ -194,7 +197,7 @@ function ProtocolManagement() {
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 font-black text-blue-600 italic transition-colors group-hover:bg-blue-100">
                           {usersMap[String(protocol.treatment_id)]?.[0] || "U"}
                         </div>
-                        <span className="text-sm font-black text-slate-800 uppercase">
+                        <span className="text-sm font-black text-slate-800 uppercase hover:text-(--primaryCustom)">
                           {usersMap[String(protocol.treatment_id)] ||
                             `Bệnh nhân #${protocol.treatment_id}`}
                         </span>
@@ -223,7 +226,7 @@ function ProtocolManagement() {
                     <TableCell className="pr-6 text-right">
                       <div className="flex items-center justify-end gap-3">
                         <DeleteConfirm
-                          description={`phác đồ #${protocol.id}`}
+                          description={`phác đồ ${protocol.protocol_code || protocol.id}`}
                           onConfirm={() => handleDelete(protocol.id)}
                         />
 
