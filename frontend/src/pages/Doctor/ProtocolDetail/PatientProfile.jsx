@@ -8,6 +8,17 @@ import {
 } from "react-icons/hi";
 
 function PatientProfile({ protocol, customer }) {
+  // Lấy thông tin bác sĩ
+  const userStr = localStorage.getItem("user");
+  const currentUser = userStr ? JSON.parse(userStr) : null;
+
+  // Ưu tiên: Từ API trả về > Tên user đang login > "Bác sĩ #[ID]"
+  const doctorName =
+    protocol.doctor_name ||
+    (currentUser?.id === protocol.doctor_id
+      ? currentUser.name
+      : `BS. #${protocol.doctor_id}`);
+
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <Card className="overflow-hidden rounded-[32px] border-none bg-white shadow-sm lg:col-span-2">
@@ -38,14 +49,15 @@ function PatientProfile({ protocol, customer }) {
               </Badge>
             </div>
             <p className="text-sm font-bold text-slate-400">
-              {customer?.email || "N/A"} • {customer?.phone || "N/A"}
+              {customer?.email || "N/A"} - {customer?.phone || "N/A"}
             </p>
             <div className="flex items-center gap-2 pt-2">
               <div className="flex items-center gap-1.5 rounded-full bg-slate-50 px-3 py-1 text-[10px] font-black text-blue-500 uppercase">
                 <HiOutlineHashtag size={14} /> ID: {protocol.treatment_id}
               </div>
+
               <div className="flex items-center gap-1.5 rounded-full bg-slate-50 px-3 py-1 text-[10px] font-black text-slate-400 uppercase">
-                <HiOutlineUser size={14} /> BS. {protocol.doctor_id}
+                <HiOutlineUser size={14} /> {doctorName}
               </div>
             </div>
           </div>
