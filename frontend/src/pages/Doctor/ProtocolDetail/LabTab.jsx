@@ -96,10 +96,18 @@ function LabTab() {
                     {lab.doctor_notes || "---"}
                   </TableCell>
                   <TableCell className="pr-8 text-right">
-                    <DeleteConfirm
-                      description="kết quả xét nghiệm"
-                      onConfirm={() => handleDeleteLab(lab.id)}
-                    />
+                    <div className="flex items-center justify-end gap-3">
+                      <AddLabResultModal
+                        protocol={protocol}
+                        onAdded={fetchLabResults}
+                        editData={lab}
+                      />
+
+                      <DeleteConfirm
+                        description="kết quả xét nghiệm"
+                        onConfirm={() => handleDeleteLab(lab.id)}
+                      />
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
