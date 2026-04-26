@@ -165,7 +165,7 @@ const ProtocolDetail = () => {
   return (
     <ProtocolProvider value={contextValue}>
       <div className="animate-in fade-in zoom-in-95 min-h-screen space-y-6 bg-slate-50 p-6 duration-500">
-        <ProtocolHeader protocol={protocol} />
+        <ProtocolHeader protocol={protocol} onUpdated={fetchFullData} />
         <PatientProfile protocol={protocol} customer={customer} />
 
         <Tabs defaultValue="medical" className="space-y-6">

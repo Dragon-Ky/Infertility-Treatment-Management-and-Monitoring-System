@@ -102,7 +102,7 @@ function ProtocolManagement() {
           </p>
         </div>
 
-        <AddProtocolModal onAdded={loadInitialData} />
+        <AddProtocolModal onAdded={loadInitialData} triggerType="menuItem" />
       </div>
 
       {/* Filter Bar */}
@@ -257,6 +257,7 @@ function ProtocolManagement() {
                             <AddProtocolModal
                               editData={protocol}
                               onAdded={loadInitialData}
+                              triggerType="menuItem"
                             />
 
                             <DropdownMenuItem className="focus:bg-primary cursor-pointer rounded-xl p-3">

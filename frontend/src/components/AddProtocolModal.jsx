@@ -18,17 +18,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { HiOutlinePlus, HiOutlineDocumentAdd } from "react-icons/hi";
+import {
+  HiOutlinePlus,
+  HiOutlineDocumentAdd,
+  HiOutlinePencilAlt,
+} from "react-icons/hi";
 import { createProtocol, updateProtocol } from "@/services/protocolService";
 import { getCustomers } from "@/services/doctorService";
 import toast from "react-hot-toast";
 
-function AddProtocolModal({ onAdded, editData = null }) {
+function AddProtocolModal({
+  onAdded,
+  editData = null,
+  triggerType = "button",
+}) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [customers, setCustomers] = useState([]);
 
-  // Biến kiểm tra chế độ: Nếu có editData truyền vào thì là chế độ SỬA
+  // Biến kiểm tra chế độ: Nếu có editData truyền vào thì là chế độ sửa
   const isEdit = !!editData;
 
   const [formData, setFormData] = useState({
@@ -90,24 +98,28 @@ function AddProtocolModal({ onAdded, editData = null }) {
     setLoading(true);
     try {
       if (isEdit) {
+        // SỬ DỤNG PHƯƠNG THỨC PATCH ĐỂ CẬP NHẬT
         await updateProtocol(editData.id, dataToSend);
         toast.success("Cập nhật phác đồ thành công!");
       } else {
+        // PHƯƠNG THỨC POST ĐỂ TẠO MỚI
         await createProtocol(dataToSend);
         toast.success("Khởi tạo phác đồ thành công!");
       }
 
       setOpen(false);
 
-      // Reset form
-      setFormData({
-        treatment_id: "",
-        protocol_name: "",
-        diagnosis: "",
-        prescription: "",
-        notes: "",
-        is_active: true,
-      });
+      if (!isEdit) {
+        // Reset form chỉ khi tạo mới
+        setFormData({
+          treatment_id: "",
+          protocol_name: "",
+          diagnosis: "",
+          prescription: "",
+          notes: "",
+          is_active: true,
+        });
+      }
 
       if (onAdded) onAdded();
     } catch (error) {
@@ -122,12 +134,19 @@ function AddProtocolModal({ onAdded, editData = null }) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {isEdit ? (
-          <DropdownMenuItem
-            onSelect={(e) => e.preventDefault()}
-            className="cursor-pointer rounded-xl p-3 font-bold text-amber-600 focus:bg-amber-600 focus:text-white"
-          >
-            Chỉnh sửa phác đồ
-          </DropdownMenuItem>
+          triggerType === "menuItem" ? (
+            <DropdownMenuItem
+              onSelect={(e) => e.preventDefault()}
+              className="cursor-pointer rounded-xl p-3 font-bold text-amber-600 focus:bg-amber-600 focus:text-white"
+            >
+              Chỉnh sửa phác đồ
+            </DropdownMenuItem>
+          ) : (
+            <Button className="flex h-12 items-center gap-2 rounded-2xl bg-amber-500 px-6 text-[10px] font-black tracking-widest text-white uppercase shadow-lg shadow-amber-100 transition-all hover:bg-amber-600 active:scale-95">
+              <HiOutlinePencilAlt size={18} />
+              CHỈNH SỬA HỒ SƠ
+            </Button>
+          )
         ) : (
           <Button className="h-14 rounded-2xl bg-slate-900 px-8 font-black text-white shadow-xl transition-all hover:bg-slate-800 active:scale-95">
             <HiOutlinePlus size={20} className="mr-2" />
@@ -138,7 +157,9 @@ function AddProtocolModal({ onAdded, editData = null }) {
 
       <DialogContent className="z-[9999] max-h-[90vh] max-w-2xl overflow-y-auto rounded-[32px] border-none p-8 shadow-2xl [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <DialogHeader>
-          <div className="mb-2 flex items-center gap-3 text-blue-600">
+          <div
+            className={`mb-2 flex items-center gap-3 ${isEdit ? "text-amber-600" : "text-blue-600"}`}
+          >
             <HiOutlineDocumentAdd size={28} />
             <DialogTitle className="text-2xl font-black tracking-tighter text-slate-800 uppercase">
               {isEdit ? "Cập nhật phác đồ" : "Khởi tạo phác đồ điều trị"}
@@ -222,7 +243,11 @@ function AddProtocolModal({ onAdded, editData = null }) {
           <Button
             onClick={handleSubmit}
             disabled={loading}
-            className="h-14 w-full rounded-2xl bg-slate-900 font-black tracking-[0.2em] text-white uppercase shadow-xl transition-all hover:bg-blue-600 active:scale-95"
+            className={`h-14 w-full rounded-2xl font-black tracking-[0.2em] text-white uppercase shadow-xl transition-all active:scale-95 ${
+              isEdit
+                ? "bg-amber-500 hover:bg-amber-600"
+                : "bg-slate-900 hover:bg-blue-600"
+            }`}
           >
             {loading ? "ĐANG XỬ LÝ..." : isEdit ? "CẬP NHẬT NGAY" : "XÁC NHẬN"}
           </Button>

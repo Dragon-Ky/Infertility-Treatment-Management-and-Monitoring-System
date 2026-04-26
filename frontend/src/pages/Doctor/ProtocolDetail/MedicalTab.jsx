@@ -4,7 +4,7 @@ import { HiOutlineBeaker, HiOutlineClipboardCheck } from "react-icons/hi";
 import AddMedicalProtocolModal from "@/components/AddProtocolModal";
 
 function MedicalTab() {
-  const { protocol } = useProtocolData();
+  const { protocol, fetchFullData } = useProtocolData();
 
   return (
     <>
@@ -12,6 +12,8 @@ function MedicalTab() {
         <h3 className="text-2xl font-black tracking-tighter text-slate-800 uppercase">
           Thông tin hồ sơ y tế
         </h3>
+
+        <AddMedicalProtocolModal editData={protocol} onAdded={fetchFullData} />
       </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
