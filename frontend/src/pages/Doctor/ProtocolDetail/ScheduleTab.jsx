@@ -98,6 +98,12 @@ function ScheduleTab() {
                     </span>
                   </div>
                   <div className="flex items-center gap-4">
+                    <AddScheduleModal
+                      protocolId={protocol?.id}
+                      onAdded={fetchSchedules}
+                      editData={item}
+                    />
+
                     <DeleteConfirm
                       description="lịch dùng thuốc"
                       onConfirm={() => handleDeleteSchedule(item.id)}

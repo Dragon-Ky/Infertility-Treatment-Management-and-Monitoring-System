@@ -12,6 +12,11 @@ export const createMedicationSchedule = async (data) => {
   return response.data;
 };
 
+export const updateMedicationSchedule = async (id, data) => {
+  const response = await treatmentApi.patch(`/schedules/${id}`, data);
+  return response.data;
+};
+
 export const deleteMedicationSchedule = async (id) => {
   const response = await treatmentApi.delete(`/schedules/${id}`);
   return response.data;
