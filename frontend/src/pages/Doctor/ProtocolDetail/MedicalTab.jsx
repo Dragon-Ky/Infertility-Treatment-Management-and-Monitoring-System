@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { useProtocolData } from "@/contexts/ProtocolContext";
 import { HiOutlineBeaker, HiOutlineClipboardCheck } from "react-icons/hi";
-import AddMedicalProtocolModal from "@/components/AddMedicalProtocolModal";
+import AddMedicalProtocolModal from "@/components/AddProtocolModal";
 
 function MedicalTab() {
   const { protocol } = useProtocolData();

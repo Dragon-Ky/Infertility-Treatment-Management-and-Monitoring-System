@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import AddProtocolModal from "@/components/AddMedicalProtocolModal";
+import AddProtocolModal from "@/components/AddProtocolModal";
 import DeleteConfirm from "@/components/DeleteConfirm";
 
 function ProtocolManagement() {
@@ -253,6 +253,12 @@ function ProtocolManagement() {
                             >
                               Chi tiết phác đồ
                             </DropdownMenuItem>
+
+                            <AddProtocolModal
+                              editData={protocol}
+                              onAdded={loadInitialData}
+                            />
+
                             <DropdownMenuItem className="focus:bg-primary cursor-pointer rounded-xl p-3">
                               In đơn thuốc
                             </DropdownMenuItem>
