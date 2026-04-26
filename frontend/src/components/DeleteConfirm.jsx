@@ -14,8 +14,10 @@ import { HiOutlineTrash } from "react-icons/hi";
 function DeleteConfirm({ onConfirm, description }) {
   return (
     <AlertDialog>
+      {/* */}
+
       <AlertDialogTrigger asChild>
-        <button className="text-slate-300 transition-all hover:text-red-500 active:scale-90">
+        <button className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-50 text-red-500 shadow-sm transition-colors hover:bg-red-600 hover:text-white">
           <HiOutlineTrash size={18} />
         </button>
       </AlertDialogTrigger>

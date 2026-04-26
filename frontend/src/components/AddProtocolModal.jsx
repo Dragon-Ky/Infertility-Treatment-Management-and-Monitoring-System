@@ -142,9 +142,9 @@ function AddProtocolModal({
               Chỉnh sửa phác đồ
             </DropdownMenuItem>
           ) : (
-            <Button className="flex h-12 items-center gap-2 rounded-2xl bg-amber-500 px-6 text-[10px] font-black tracking-widest text-white uppercase shadow-lg shadow-amber-100 transition-all hover:bg-amber-600 active:scale-95">
+            <Button className="flex h-12 items-center gap-2 rounded-2xl bg-amber-500 px-6 text-[10px] font-black tracking-widest text-white shadow-lg shadow-amber-100 transition-all hover:bg-amber-600 active:scale-95">
               <HiOutlinePencilAlt size={18} />
-              CHỈNH SỬA HỒ SƠ
+              Chỉnh sửa hồ sơ
             </Button>
           )
         ) : (

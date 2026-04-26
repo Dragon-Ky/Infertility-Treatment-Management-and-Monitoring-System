@@ -12,6 +12,11 @@ export const createEvent = async (data) => {
   return response.data;
 };
 
+export const updateEvent = async (id, data) => {
+  const response = await treatmentApi.patch(`/events/${id}`, data);
+  return response.data;
+};
+
 export const deleteEvent = async (id) => {
   const response = await treatmentApi.delete(`/events/${id}`);
   return response.data;

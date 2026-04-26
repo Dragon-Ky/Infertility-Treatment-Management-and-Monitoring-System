@@ -41,6 +41,13 @@ function HistoryTab() {
                     <Badge className="border-none bg-slate-900 px-3 text-[9px] font-black text-white uppercase">
                       {event.event_type}
                     </Badge>
+
+                    <AddEventModal
+                      protocolId={id}
+                      onEventAdded={fetchEvents}
+                      editData={event}
+                    />
+
                     <DeleteConfirm
                       description="sự kiện nhật ký"
                       onConfirm={() => handleDeleteEvent(event.id)}
