@@ -6,6 +6,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,20 +28,16 @@ const AddEventModal = ({ protocolId, onEventAdded, editData = null }) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Chế độ Sửa nếu có editData
   const isEdit = !!editData;
 
-  // Sử dụng state cho form để dễ kiểm soát khi Edit
   const [formData, setFormData] = useState({
     event_type: "consultation",
     event_date: "",
     description: "",
   });
 
-  // Đổ dữ liệu cũ vào form khi mở Modal Sửa
   useEffect(() => {
     if (open && editData) {
-      // Chuyển định dạng ngày từ DB (Y-m-d H:i:s) sang định dạng input datetime-local (Y-m-dTH:i)
       const dateForInput = editData.event_date
         ? editData.event_date.replace(" ", "T").substring(0, 16)
         : "";
@@ -45,7 +48,6 @@ const AddEventModal = ({ protocolId, onEventAdded, editData = null }) => {
         description: editData.description,
       });
     } else if (open && !isEdit) {
-      // Reset form khi tạo mới
       setFormData({
         event_type: "consultation",
         event_date: "",
@@ -71,11 +73,9 @@ const AddEventModal = ({ protocolId, onEventAdded, editData = null }) => {
     setLoading(true);
     try {
       if (isEdit) {
-        // Gọi Patch tại đây
         await updateEvent(editData.id, data);
         toast.success("Đã cập nhật sự kiện!");
       } else {
-        // Gọi Post tại đây
         await createEvent(data);
         toast.success("Đã ghi nhận sự kiện thành công!");
       }
@@ -121,26 +121,60 @@ const AddEventModal = ({ protocolId, onEventAdded, editData = null }) => {
             <label className="ml-1 text-[10px] font-black tracking-widest text-slate-400 uppercase">
               Loại sự kiện
             </label>
-            <select
+            <Select
               value={formData.event_type}
-              onChange={(e) =>
-                setFormData({ ...formData, event_type: e.target.value })
+              onValueChange={(val) =>
+                setFormData({ ...formData, event_type: val })
               }
-              required
-              className="h-12 w-full cursor-pointer rounded-xl border-none bg-slate-50 px-3 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="ultrasound">Siêu âm (Ultrasound)</option>
-              <option value="blood_test">Xét nghiệm máu (Blood Test)</option>
-              <option value="egg_retrieval">
-                Chọc hút trứng (Egg Retrieval)
-              </option>
-              <option value="embryo_transfer">
-                Chuyển phôi (Embryo Transfer)
-              </option>
-              <option value="insemination">Thụ tinh (Insemination)</option>
-              <option value="consultation">Thăm khám/Tư vấn</option>
-              <option value="other">Khác (Other)</option>
-            </select>
+              <SelectTrigger className="h-12 w-full rounded-xl border-none bg-slate-50 px-4 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500">
+                <SelectValue placeholder="Chọn loại sự kiện..." />
+              </SelectTrigger>
+              <SelectContent className="z-[10001] rounded-xl border-none bg-white p-2 shadow-2xl">
+                <SelectItem
+                  value="ultrasound"
+                  className="cursor-pointer rounded-lg font-bold focus:bg-blue-600 focus:text-white"
+                >
+                  Siêu âm
+                </SelectItem>
+                <SelectItem
+                  value="blood_test"
+                  className="cursor-pointer rounded-lg font-bold focus:bg-blue-600 focus:text-white"
+                >
+                  Xét nghiệm máu
+                </SelectItem>
+                <SelectItem
+                  value="egg_retrieval"
+                  className="cursor-pointer rounded-lg font-bold focus:bg-blue-600 focus:text-white"
+                >
+                  Chọc hút trứng
+                </SelectItem>
+                <SelectItem
+                  value="embryo_transfer"
+                  className="cursor-pointer rounded-lg font-bold focus:bg-blue-600 focus:text-white"
+                >
+                  Chuyển phôi
+                </SelectItem>
+                <SelectItem
+                  value="insemination"
+                  className="cursor-pointer rounded-lg font-bold focus:bg-blue-600 focus:text-white"
+                >
+                  Thụ tinh
+                </SelectItem>
+                <SelectItem
+                  value="consultation"
+                  className="cursor-pointer rounded-lg font-bold focus:bg-blue-600 focus:text-white"
+                >
+                  Thăm khám/Tư vấn
+                </SelectItem>
+                <SelectItem
+                  value="other"
+                  className="cursor-pointer rounded-lg font-bold focus:bg-blue-600 focus:text-white"
+                >
+                  Khác
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">

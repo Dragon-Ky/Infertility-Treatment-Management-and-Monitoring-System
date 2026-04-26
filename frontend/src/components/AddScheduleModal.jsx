@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,7 +6,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import {
   createMedicationSchedule,
@@ -15,6 +21,7 @@ import {
 import { HiOutlinePlus, HiOutlinePencilAlt } from "react-icons/hi";
 import { FaCapsules } from "react-icons/fa6";
 import toast from "react-hot-toast";
+import { Button } from "./ui/button";
 
 const AddScheduleModal = ({ protocolId, onAdded, editData = null }) => {
   const [open, setOpen] = useState(false);
@@ -104,11 +111,11 @@ const AddScheduleModal = ({ protocolId, onAdded, editData = null }) => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {isEdit ? (
-          <button className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50 text-amber-600 shadow-sm transition-colors hover:bg-amber-600 hover:text-white">
+          <button className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg bg-amber-50 text-amber-600 shadow-sm transition-colors hover:bg-amber-600 hover:text-white">
             <HiOutlinePencilAlt size={16} />
           </button>
         ) : (
-          <Button className="h-12 cursor-pointer rounded-2xl bg-blue-600 px-6 text-[10px] font-black tracking-widest text-white shadow-lg shadow-blue-100">
+          <Button className="h-12 cursor-pointer rounded-2xl bg-blue-600 px-6 text-[10px] font-black tracking-widest text-white uppercase shadow-lg shadow-blue-100 transition-all hover:bg-blue-700 active:scale-95">
             <HiOutlinePlus className="mr-2" size={18} /> Lên lịch thuốc
           </Button>
         )}
@@ -138,7 +145,7 @@ const AddScheduleModal = ({ protocolId, onAdded, editData = null }) => {
               }
               placeholder="Gonal-F, Progynova..."
               required
-              className="h-12 rounded-xl border-none bg-slate-50"
+              className="h-12 rounded-xl border-none bg-slate-50 font-bold focus-visible:ring-2 focus-visible:ring-blue-500"
             />
           </div>
 
@@ -154,26 +161,49 @@ const AddScheduleModal = ({ protocolId, onAdded, editData = null }) => {
                 }
                 placeholder="225 UI, 2mg..."
                 required
-                className="h-12 rounded-xl border-none bg-slate-50"
+                className="h-12 rounded-xl border-none bg-slate-50 font-bold focus-visible:ring-2 focus-visible:ring-blue-500"
               />
             </div>
             <div className="space-y-2">
               <label className="ml-1 text-[10px] font-black text-slate-400 uppercase">
                 Đường dùng (Route)
               </label>
-              <select
+              <Select
                 value={formData.route}
-                onChange={(e) =>
-                  setFormData({ ...formData, route: e.target.value })
+                onValueChange={(val) =>
+                  setFormData({ ...formData, route: val })
                 }
-                required
-                className="h-12 w-full cursor-pointer rounded-xl border-none bg-slate-50 px-3 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="oral">Đường uống (Oral)</option>
-                <option value="injection">Đường tiêm (Injection)</option>
-                <option value="vaginal">Đặt âm đạo (Vaginal)</option>
-                <option value="other">Khác (Other)</option>
-              </select>
+                <SelectTrigger className="h-12 w-full rounded-xl border-none bg-slate-50 px-3 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500">
+                  <SelectValue placeholder="Chọn đường dùng..." />
+                </SelectTrigger>
+                <SelectContent className="z-[10001] rounded-xl border-none bg-white p-2 shadow-2xl">
+                  <SelectItem
+                    value="oral"
+                    className="cursor-pointer rounded-lg font-bold focus:bg-blue-600 focus:text-white"
+                  >
+                    Đường uống (Oral)
+                  </SelectItem>
+                  <SelectItem
+                    value="injection"
+                    className="cursor-pointer rounded-lg font-bold focus:bg-blue-600 focus:text-white"
+                  >
+                    Đường tiêm (Injection)
+                  </SelectItem>
+                  <SelectItem
+                    value="vaginal"
+                    className="cursor-pointer rounded-lg font-bold focus:bg-blue-600 focus:text-white"
+                  >
+                    Đặt âm đạo (Vaginal)
+                  </SelectItem>
+                  <SelectItem
+                    value="other"
+                    className="cursor-pointer rounded-lg font-bold focus:bg-blue-600 focus:text-white"
+                  >
+                    Khác (Other)
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -189,7 +219,7 @@ const AddScheduleModal = ({ protocolId, onAdded, editData = null }) => {
                   setFormData({ ...formData, start_date: e.target.value })
                 }
                 required
-                className="h-12 rounded-xl border-none bg-slate-50"
+                className="h-12 rounded-xl border-none bg-slate-50 font-bold"
               />
             </div>
             <div className="space-y-2">
@@ -203,7 +233,7 @@ const AddScheduleModal = ({ protocolId, onAdded, editData = null }) => {
                   setFormData({ ...formData, end_date: e.target.value })
                 }
                 required
-                className="h-12 rounded-xl border-none bg-slate-50"
+                className="h-12 rounded-xl border-none bg-slate-50 font-bold"
               />
             </div>
           </div>
@@ -220,7 +250,7 @@ const AddScheduleModal = ({ protocolId, onAdded, editData = null }) => {
                 }
                 placeholder="3 lần/ngày..."
                 required
-                className="h-12 rounded-xl border-none bg-slate-50"
+                className="h-12 rounded-xl border-none bg-slate-50 font-bold focus-visible:ring-2 focus-visible:ring-blue-500"
               />
             </div>
             <div className="space-y-2">
@@ -234,7 +264,7 @@ const AddScheduleModal = ({ protocolId, onAdded, editData = null }) => {
                 }
                 placeholder="08:00, 20:00"
                 required
-                className="h-12 rounded-xl border-none bg-slate-50"
+                className="h-12 rounded-xl border-none bg-slate-50 font-bold focus-visible:ring-2 focus-visible:ring-blue-500"
               />
             </div>
           </div>
@@ -242,7 +272,7 @@ const AddScheduleModal = ({ protocolId, onAdded, editData = null }) => {
           <Button
             type="submit"
             disabled={loading}
-            className={`mt-4 h-14 w-full rounded-2xl font-black tracking-widest text-white uppercase shadow-xl transition-all ${
+            className={`mt-4 h-14 w-full cursor-pointer rounded-2xl font-black tracking-widest text-white uppercase shadow-xl transition-all active:scale-95 ${
               isEdit
                 ? "bg-amber-500 hover:bg-amber-600"
                 : "bg-blue-600 hover:bg-blue-700"

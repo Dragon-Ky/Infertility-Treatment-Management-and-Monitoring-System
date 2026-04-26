@@ -6,6 +6,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -119,20 +126,48 @@ const AddLabResultModal = ({ protocol, onAdded, editData = null }) => {
               <label className="ml-1 text-[10px] font-black text-slate-400 uppercase">
                 Loại xét nghiệm
               </label>
-              <select
+              <Select
                 value={formData.test_type}
-                onChange={(e) =>
-                  setFormData({ ...formData, test_type: e.target.value })
+                onValueChange={(val) =>
+                  setFormData({ ...formData, test_type: val })
                 }
-                required
-                className="h-12 w-full cursor-pointer rounded-xl border-none bg-slate-50 px-3 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="blood">Máu (Blood)</option>
-                <option value="hormone">Nội tiết (Hormone)</option>
-                <option value="ultrasound">Siêu âm (Ultrasound)</option>
-                <option value="spermogram">Tinh dịch đồ</option>
-                <option value="other">Khác (Other)</option>
-              </select>
+                <SelectTrigger className="h-12 w-full cursor-pointer rounded-xl border-none bg-slate-50 px-3 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500">
+                  <SelectValue placeholder="Chọn loại..." />
+                </SelectTrigger>
+                <SelectContent className="z-[10001] rounded-xl border-none bg-white p-2 shadow-2xl">
+                  <SelectItem
+                    value="blood"
+                    className="cursor-pointer rounded-lg font-bold focus:bg-blue-600 focus:text-white"
+                  >
+                    Máu (Blood)
+                  </SelectItem>
+                  <SelectItem
+                    value="hormone"
+                    className="cursor-pointer rounded-lg font-bold focus:bg-blue-600 focus:text-white"
+                  >
+                    Nội tiết (Hormone)
+                  </SelectItem>
+                  <SelectItem
+                    value="ultrasound"
+                    className="cursor-pointer rounded-lg font-bold focus:bg-blue-600 focus:text-white"
+                  >
+                    Siêu âm (Ultrasound)
+                  </SelectItem>
+                  <SelectItem
+                    value="spermogram"
+                    className="cursor-pointer rounded-lg font-bold focus:bg-blue-600 focus:text-white"
+                  >
+                    Tinh dịch đồ
+                  </SelectItem>
+                  <SelectItem
+                    value="other"
+                    className="cursor-pointer rounded-lg font-bold focus:bg-blue-600 focus:text-white"
+                  >
+                    Khác (Other)
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <label className="ml-1 text-[10px] font-black text-slate-400 uppercase">
