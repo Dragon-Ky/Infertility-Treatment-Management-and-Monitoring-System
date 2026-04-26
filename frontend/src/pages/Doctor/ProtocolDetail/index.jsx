@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { getProtocolDetail } from "@/services/protocolService";
 import { getCustomers } from "@/services/doctorService";
@@ -27,7 +27,37 @@ const ProtocolDetail = () => {
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // --- LOGIC FETCH DATA ---
+  // ĐƯA FETCH FULL DATA RA NGOÀI
+  const fetchFullData = useCallback(async () => {
+    try {
+      const [protocolRes, eventsRes, customerRes, labRes, scheduleRes] =
+        await Promise.all([
+          getProtocolDetail(id),
+          getEventsByProtocol(id),
+          getCustomers(),
+          getLabResults(id),
+          getMedicationSchedules(id),
+        ]);
+
+      const pData = protocolRes.data;
+      setProtocol(pData);
+      setEvents(eventsRes.data || []);
+      setLabResults(labRes.data || []);
+      setSchedules(scheduleRes.data || []);
+
+      if (pData) {
+        const targetId = pData.treatment_id || pData.customer_id;
+        const foundCustomer = customerRes.data.find(
+          (c) => String(c.id) === String(targetId),
+        );
+        setCustomer(foundCustomer);
+      }
+    } catch (error) {
+      console.error("Lỗi đồng bộ:", error);
+      toast.error("Lỗi đồng bộ Medicen!");
+    }
+  }, [id]);
+
   const fetchEvents = async () => {
     try {
       const res = await getEventsByProtocol(id);
@@ -55,7 +85,7 @@ const ProtocolDetail = () => {
     }
   };
 
-  // --- HÀM XỬ LÝ XÓA  ---
+  //HÀM XỬ LÝ XÓA
   const handleDeleteEvent = async (eventId) => {
     try {
       await deleteEvent(eventId);
@@ -89,41 +119,15 @@ const ProtocolDetail = () => {
     }
   };
 
+  //KHỞI TẠO DỮ LIỆU LẦN ĐẦU
   useEffect(() => {
-    const fetchFullData = async () => {
+    const init = async () => {
       setLoading(true);
-      try {
-        const [protocolRes, eventsRes, customerRes, labRes, scheduleRes] =
-          await Promise.all([
-            getProtocolDetail(id),
-            getEventsByProtocol(id),
-            getCustomers(),
-            getLabResults(id),
-            getMedicationSchedules(id),
-          ]);
-
-        const pData = protocolRes.data;
-        setProtocol(pData);
-        setEvents(eventsRes.data || []);
-        setLabResults(labRes.data || []);
-        setSchedules(scheduleRes.data || []);
-
-        if (pData) {
-          const targetId = pData.treatment_id || pData.customer_id;
-          const foundCustomer = customerRes.data.find(
-            (c) => String(c.id) === String(targetId),
-          );
-          setCustomer(foundCustomer);
-        }
-        // eslint-disable-next-line no-unused-vars
-      } catch (error) {
-        toast.error("Lỗi đồng bộ Medicen!");
-      } finally {
-        setTimeout(() => setLoading(false), 600);
-      }
+      await fetchFullData();
+      setTimeout(() => setLoading(false), 600);
     };
-    fetchFullData();
-  }, [id]);
+    init();
+  }, [fetchFullData]);
 
   if (loading)
     return (
@@ -152,6 +156,7 @@ const ProtocolDetail = () => {
     fetchEvents,
     fetchLabResults,
     fetchSchedules,
+    fetchFullData,
     handleDeleteEvent,
     handleDeleteLab,
     handleDeleteSchedule,
@@ -160,10 +165,7 @@ const ProtocolDetail = () => {
   return (
     <ProtocolProvider value={contextValue}>
       <div className="animate-in fade-in zoom-in-95 min-h-screen space-y-6 bg-slate-50 p-6 duration-500">
-        {/* Header Bar */}
         <ProtocolHeader protocol={protocol} />
-
-        {/* Profile & Progress*/}
         <PatientProfile protocol={protocol} customer={customer} />
 
         <Tabs defaultValue="medical" className="space-y-6">

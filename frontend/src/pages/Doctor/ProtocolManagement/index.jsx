@@ -1,15 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { getAllProtocols } from "@/services/protocolService";
+import { useEffect, useState } from "react";
+import { getAllProtocols, deleteProtocol } from "@/services/protocolService";
 import { getCustomers } from "@/services/doctorService";
 
 import {
-  HiOutlinePlus,
   HiOutlineSearch,
   HiOutlineFilter,
   HiOutlineDotsVertical,
   HiOutlineClipboardList,
-  HiOutlineCalendar,
-  HiOutlineUser,
 } from "react-icons/hi";
 import {
   Table,
@@ -31,6 +28,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import AddProtocolModal from "@/components/AddMedicalProtocolModal";
+import DeleteConfirm from "@/components/DeleteConfirm";
 
 function ProtocolManagement() {
   const [protocols, setProtocols] = useState([]);
@@ -40,43 +39,56 @@ function ProtocolManagement() {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const loadInitialData = async () => {
-      setLoading(true);
-      try {
-        const [protocolRes, customerRes] = await Promise.all([
-          getAllProtocols(),
-          getCustomers(),
-        ]);
+  // Hàm xử lý hiển thị thời gian"
+  const formatDateDisplay = (dateString) => {
+    if (!dateString) return "---";
+    return dateString.substring(0, 10);
+  };
 
-        //MAPPING TÊN BỆNH NHÂN (Auth Service)
-        const mappedUsers = {};
-        if (customerRes && customerRes.data) {
-          customerRes.data.forEach((user) => {
-            if (user.id) {
-              mappedUsers[String(user.id)] = user.name;
-            }
-          });
-        }
-        setUsersMap(mappedUsers);
+  const loadInitialData = async () => {
+    setLoading(true);
+    try {
+      const [protocolRes, customerRes] = await Promise.all([
+        getAllProtocols(),
+        getCustomers(),
+      ]);
 
-        //DANH SÁCH PHÁC ĐỒ (TREATMENT-SERVICE)
-        if (protocolRes && protocolRes.data) {
-          setProtocols(protocolRes.data);
-        }
-      } catch (error) {
-        toast.error("Lỗi đồng bộ dữ liệu giữa Auth và Treatment Service!");
-        console.error("Chi tiết lỗi:", error);
-      } finally {
-        setLoading(false);
+      const mappedUsers = {};
+      if (customerRes && customerRes.data) {
+        customerRes.data.forEach((user) => {
+          if (user.id) mappedUsers[String(user.id)] = user.name;
+        });
       }
-    };
+      setUsersMap(mappedUsers);
 
+      if (protocolRes && protocolRes.data) {
+        setProtocols(protocolRes.data);
+      }
+      // eslint-disable-next-line no-unused-vars
+    } catch (error) {
+      toast.error("Lỗi đồng bộ dữ liệu!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteProtocol(id);
+      toast.success(`Đã xóa phác đồ #${id} thành công!`);
+      loadInitialData();
+      // eslint-disable-next-line no-unused-vars
+    } catch (error) {
+      toast.error("Không thể xóa dữ liệu này!");
+    }
+  };
+
+  useEffect(() => {
     loadInitialData();
   }, []);
 
   return (
-    <div className="min-h-screen space-y-6 bg-slate-50 p-6">
+    <div className="animate-in fade-in min-h-screen space-y-6 bg-slate-50 p-6 duration-500">
       {/* Header */}
       <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
         <div>
@@ -90,10 +102,8 @@ function ProtocolManagement() {
             Hệ thống điều trị vô sinh Medicen Clinic
           </p>
         </div>
-        <Button className="h-14 rounded-2xl bg-slate-900 px-8 font-black text-white shadow-xl transition-all hover:bg-slate-800 active:scale-95">
-          <HiOutlinePlus size={20} className="mr-2" />
-          TẠO PHÁC ĐỒ MỚI
-        </Button>
+
+        <AddProtocolModal onAdded={loadInitialData} />
       </div>
 
       {/* Filter Bar */}
@@ -112,7 +122,7 @@ function ProtocolManagement() {
           </div>
           <Button
             variant="outline"
-            className="h-12 rounded-2xl border-slate-200 px-6 font-bold text-slate-600"
+            className="h-12 rounded-2xl border-slate-200 px-6 font-bold text-slate-600 shadow-sm"
           >
             <HiOutlineFilter size={20} className="mr-2" /> LỌC DỮ LIỆU
           </Button>
@@ -123,20 +133,20 @@ function ProtocolManagement() {
       <Card className="overflow-hidden rounded-[32px] border-none bg-white shadow-sm">
         <Table>
           <TableHeader className="bg-slate-50/50">
-            <TableRow className="border-b border-slate-100 hover:bg-transparent">
-              <TableHead className="p-6 text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase">
+            <TableRow className="border-b border-slate-100">
+              <TableHead className="p-6 text-[10px] font-black tracking-widest text-slate-400 uppercase">
                 Mã Phác Đồ
               </TableHead>
-              <TableHead className="text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase">
+              <TableHead className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
                 Bệnh Nhân
               </TableHead>
-              <TableHead className="text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase">
-                Nội Dung Điều Trị
+              <TableHead className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                Nội Dung
               </TableHead>
-              <TableHead className="text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase">
+              <TableHead className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
                 Thời Gian
               </TableHead>
-              <TableHead className="text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase">
+              <TableHead className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
                 Trạng Thái
               </TableHead>
               <TableHead></TableHead>
@@ -154,26 +164,13 @@ function ProtocolManagement() {
                   </div>
                 </TableCell>
               </TableRow>
-            ) : protocols.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={6}
-                  className="py-20 text-center font-bold text-slate-400 uppercase italic"
-                >
-                  Không tìm thấy dữ liệu
-                </TableCell>
-              </TableRow>
             ) : (
               protocols
-                .filter((p) => {
-                  const patientName = usersMap[String(p.treatment_id)] || "";
-                  return (
-                    patientName
-                      .toLowerCase()
-                      .includes(searchTerm.toLowerCase()) ||
-                    p.treatment_id.toString().includes(searchTerm)
-                  );
-                })
+                .filter((p) =>
+                  (usersMap[String(p.treatment_id)] || "")
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase()),
+                )
                 .map((protocol) => (
                   <TableRow
                     key={protocol.id}
@@ -194,78 +191,71 @@ function ProtocolManagement() {
                           navigate(`/doctor/protocols/details/${protocol.id}`)
                         }
                       >
-                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-blue-600 transition-colors group-hover:bg-blue-100">
-                          <HiOutlineUser size={24} />
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 font-black text-blue-600 italic transition-colors group-hover:bg-blue-100">
+                          {usersMap[String(protocol.treatment_id)]?.[0] || "U"}
                         </div>
-                        <div className="flex flex-col">
-                          <span className="mb-1 text-sm leading-none font-black text-slate-800 uppercase">
-                            {usersMap[String(protocol.treatment_id)] ||
-                              `Bệnh nhân #${protocol.treatment_id}`}
-                          </span>
-                          <span className="w-fit rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-bold text-slate-400">
-                            ID Auth: {protocol.treatment_id}
-                          </span>
-                        </div>
+                        <span className="text-sm font-black text-slate-800 uppercase">
+                          {usersMap[String(protocol.treatment_id)] ||
+                            `Bệnh nhân #${protocol.treatment_id}`}
+                        </span>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col">
-                        <span className="mb-1 text-sm font-black text-blue-600">
+                        <span className="text-sm font-black text-blue-600">
                           {protocol.protocol_name}
                         </span>
-                        <span className="line-clamp-1 text-xs text-slate-500 italic">
+                        <span className="line-clamp-1 text-xs text-slate-400 italic">
                           {protocol.diagnosis}
                         </span>
                       </div>
                     </TableCell>
                     <TableCell className="text-[11px] font-bold text-slate-500">
-                      <div className="flex items-center gap-1.5">
-                        <HiOutlineCalendar
-                          className="text-slate-300"
-                          size={16}
-                        />
-                        {protocol.created_at}
-                      </div>
+                      {formatDateDisplay(protocol.created_at)}
                     </TableCell>
                     <TableCell>
                       <Badge
-                        className={`rounded-lg border px-3 py-1 text-[10px] font-black shadow-none ${protocol.is_active ? "border-green-200 bg-green-100 text-green-700" : "border-red-200 bg-red-100 text-red-700"}`}
+                        className={`rounded-lg border px-3 py-1 text-[10px] font-black ${protocol.is_active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
                       >
-                        {protocol.is_active ? "ĐANG CHẠY" : "KẾT THÚC"}
+                        {protocol.is_active ? "ĐANG CHẠY" : "DỪNG"}
                       </Badge>
                     </TableCell>
                     <TableCell className="pr-6 text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            className="h-10 w-10 rounded-xl p-0 hover:bg-slate-100"
+                      <div className="flex items-center justify-end gap-3">
+                        <DeleteConfirm
+                          description={`phác đồ #${protocol.id}`}
+                          onConfirm={() => handleDelete(protocol.id)}
+                        />
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              className="h-10 w-10 rounded-xl p-0 text-slate-400 hover:bg-slate-100"
+                            >
+                              <HiOutlineDotsVertical />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="end"
+                            className="min-w-[180px] rounded-2xl border-none p-2 font-bold shadow-2xl"
                           >
-                            <HiOutlineDotsVertical />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          align="end"
-                          className="min-w-[180px] rounded-2xl border-none p-2 font-bold shadow-2xl"
-                        >
-                          <DropdownMenuItem
-                            className="cursor-pointer rounded-xl p-3 text-blue-600 focus:bg-(--primaryCustom)"
-                            onClick={() =>
-                              navigate(
-                                `/doctor/protocols/details/${protocol.id}`,
-                              )
-                            }
-                          >
-                            Chi tiết phác đồ
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="focus:bg-primary cursor-pointer rounded-xl p-3">
-                            In đơn thuốc
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="cursor-pointer rounded-xl p-3 text-red-600 focus:bg-(--dangerCustom)">
-                            Xóa dữ liệu
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                            <DropdownMenuItem
+                              className="cursor-pointer rounded-xl p-3 text-blue-600 focus:bg-(--primaryCustom)"
+                              onClick={() =>
+                                navigate(
+                                  `/doctor/protocols/details/${protocol.id}`,
+                                )
+                              }
+                            >
+                              Chi tiết phác đồ
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="focus:bg-primary cursor-pointer rounded-xl p-3">
+                              In đơn thuốc
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))

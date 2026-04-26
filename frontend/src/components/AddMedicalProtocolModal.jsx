@@ -1,0 +1,199 @@
+import { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { HiOutlinePlus, HiOutlineDocumentAdd } from "react-icons/hi";
+import { createProtocol } from "@/services/protocolService";
+import { getCustomers } from "@/services/doctorService";
+import toast from "react-hot-toast";
+
+function AddProtocolModal({ onAdded }) {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [customers, setCustomers] = useState([]);
+
+  const [formData, setFormData] = useState({
+    treatment_id: "",
+    protocol_name: "",
+    diagnosis: "",
+    prescription: "",
+    notes: "",
+    is_active: true,
+  });
+
+  useEffect(() => {
+    if (open) {
+      const fetchPatients = async () => {
+        try {
+          const res = await getCustomers();
+          setCustomers(res.data || []);
+          // eslint-disable-next-line no-unused-vars
+        } catch (error) {
+          toast.error("Không thể tải danh sách bệnh nhân");
+        }
+      };
+      fetchPatients();
+    }
+  }, [open]);
+
+  const handleSubmit = async () => {
+    if (!formData.treatment_id) return toast.error("Vui lòng chọn bệnh nhân!");
+    if (!formData.protocol_name)
+      return toast.error("Vui lòng nhập tên phác đồ!");
+
+    const userStr = localStorage.getItem("user");
+    const user = userStr ? JSON.parse(userStr) : null;
+    const doctorId = user?.id;
+
+    if (!doctorId) {
+      return toast.error("Phiên đăng nhập hết hạn!");
+    }
+
+    const dataToSend = {
+      ...formData,
+      treatment_id: parseInt(formData.treatment_id),
+      doctor_id: doctorId,
+    };
+
+    setLoading(true);
+    try {
+      await createProtocol(dataToSend);
+      toast.success("Khởi tạo phác đồ thành công!");
+      setOpen(false);
+      setFormData({
+        treatment_id: "",
+        protocol_name: "",
+        diagnosis: "",
+        prescription: "",
+        notes: "",
+        is_active: true,
+      });
+      if (onAdded) onAdded();
+    } catch (error) {
+      const msg = error.response?.data?.message || "Lỗi khi tạo phác đồ!";
+      toast.error(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="h-14 rounded-2xl bg-slate-900 px-8 font-black text-white shadow-xl transition-all hover:bg-slate-800 active:scale-95">
+          <HiOutlinePlus size={20} className="mr-2" />
+          TẠO PHÁC ĐỒ MỚI
+        </Button>
+      </DialogTrigger>
+
+      <DialogContent className="z-9999 max-h-[90vh] max-w-2xl overflow-y-auto rounded-[32px] border-none p-8 shadow-2xl [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <DialogHeader>
+          <div className="mb-2 flex items-center gap-3 text-blue-600">
+            <HiOutlineDocumentAdd size={28} />
+            <DialogTitle className="text-2xl font-black tracking-tighter text-slate-800 uppercase">
+              Khởi tạo phác đồ điều trị
+            </DialogTitle>
+          </div>
+        </DialogHeader>
+
+        <div className="space-y-5 py-6">
+          <div className="space-y-2">
+            <label className="ml-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+              Bệnh nhân chỉ định
+            </label>
+            <Select
+              value={formData.treatment_id}
+              onValueChange={(val) =>
+                setFormData({ ...formData, treatment_id: val })
+              }
+            >
+              <SelectTrigger className="h-14 rounded-2xl border-none bg-slate-50 font-bold focus:ring-2 focus:ring-blue-500">
+                <SelectValue placeholder="Chọn bệnh nhân từ Auth Service..." />
+              </SelectTrigger>
+              <SelectContent className="z-10000 rounded-xl border-none bg-white p-2 shadow-2xl">
+                {customers.map((c) => (
+                  <SelectItem
+                    key={c.id}
+                    value={String(c.id)}
+                    className="cursor-pointer rounded-lg py-3 font-bold transition-colors focus:bg-blue-600 focus:text-white"
+                  >
+                    {c.name} - {c.phone}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="ml-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+              Tên phác đồ
+            </label>
+            <Input
+              placeholder="VD: Phác đồ IVF chu kỳ 1"
+              value={formData.protocol_name}
+              onChange={(e) =>
+                setFormData({ ...formData, protocol_name: e.target.value })
+              }
+              className="h-14 rounded-2xl border-none bg-slate-50 font-bold focus-visible:ring-2 focus-visible:ring-blue-500"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="ml-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+              Chẩn đoán ban đầu
+            </label>
+            <Textarea
+              placeholder="Nhập nội dung bệnh lý..."
+              value={formData.diagnosis}
+              onChange={(e) =>
+                setFormData({ ...formData, diagnosis: e.target.value })
+              }
+              className="min-h-[100px] rounded-2xl border-none bg-slate-50 font-bold focus-visible:ring-2 focus-visible:ring-blue-500"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="ml-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+              Chỉ định thuốc chính
+            </label>
+            <Input
+              placeholder="Tên thuốc và liều lượng..."
+              value={formData.prescription}
+              onChange={(e) =>
+                setFormData({ ...formData, prescription: e.target.value })
+              }
+              className="h-14 rounded-2xl border-none bg-slate-50 font-black text-blue-600 uppercase italic focus-visible:ring-2 focus-visible:ring-blue-500"
+            />
+          </div>
+        </div>
+
+        <DialogFooter className="pt-4">
+          <Button
+            onClick={handleSubmit}
+            disabled={loading}
+            className="h-14 w-full rounded-2xl bg-slate-900 font-black tracking-[0.2em] text-white uppercase shadow-xl transition-all hover:bg-blue-600 active:scale-95"
+          >
+            {loading ? "ĐANG KHỞI TẠO..." : "XÁC NHẬN "}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export default AddProtocolModal;
