@@ -108,7 +108,7 @@ const AddScheduleModal = ({ protocolId, onAdded, editData = null }) => {
             <HiOutlinePencilAlt size={16} />
           </button>
         ) : (
-          <Button className="h-12 cursor-pointer rounded-2xl bg-slate-900 px-6 text-[10px] font-black tracking-widest text-white shadow-xl transition-all hover:bg-slate-800">
+          <Button className="h-12 cursor-pointer rounded-2xl bg-blue-600 px-6 text-[10px] font-black tracking-widest text-white shadow-lg shadow-blue-100">
             <HiOutlinePlus className="mr-2" size={18} /> Lên lịch thuốc
           </Button>
         )}

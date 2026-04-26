@@ -176,7 +176,11 @@ const AddEventModal = ({ protocolId, onEventAdded, editData = null }) => {
           <Button
             type="submit"
             disabled={loading}
-            className={`mt-2 h-14 w-full cursor-pointer rounded-2xl bg-slate-900 text-xs font-black tracking-widest text-white uppercase shadow-xl transition-all hover:bg-slate-700`}
+            className={`mt-2 h-14 w-full cursor-pointer rounded-2xl bg-slate-900 text-xs font-black tracking-widest text-white uppercase shadow-xl transition-all ${
+              isEdit
+                ? "bg-amber-500 hover:bg-amber-600"
+                : "bg-blue-600 hover:bg-blue-700"
+            }`}
           >
             {loading
               ? "ĐANG XỬ LÝ..."

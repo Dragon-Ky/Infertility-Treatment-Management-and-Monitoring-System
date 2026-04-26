@@ -1,6 +1,5 @@
 import AddScheduleModal from "@/components/AddScheduleModal";
 import DeleteConfirm from "@/components/DeleteConfirm";
-
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { useProtocolData } from "@/contexts/ProtocolContext";

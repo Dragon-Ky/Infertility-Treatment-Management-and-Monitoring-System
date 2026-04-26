@@ -212,7 +212,11 @@ const AddLabResultModal = ({ protocol, onAdded, editData = null }) => {
           <Button
             type="submit"
             disabled={loading}
-            className={`h-14 w-full cursor-pointer rounded-2xl bg-slate-900 font-black text-white shadow-xl transition-all hover:bg-slate-800`}
+            className={`h-14 w-full cursor-pointer rounded-2xl bg-slate-900 font-black text-white shadow-xl transition-all ${
+              isEdit
+                ? "bg-amber-500 hover:bg-amber-600"
+                : "bg-blue-600 hover:bg-blue-700"
+            }`}
           >
             {loading
               ? "ĐANG XỬ LÝ..."
