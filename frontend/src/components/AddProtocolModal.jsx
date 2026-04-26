@@ -142,13 +142,13 @@ function AddProtocolModal({
               Chỉnh sửa phác đồ
             </DropdownMenuItem>
           ) : (
-            <Button className="flex h-12 items-center gap-2 rounded-2xl bg-amber-500 px-6 text-[10px] font-black tracking-widest text-white shadow-lg shadow-amber-100 transition-all hover:bg-amber-600 active:scale-95">
+            <Button className="flex h-12 cursor-pointer items-center gap-2 rounded-2xl bg-amber-500 px-6 text-[10px] font-black tracking-widest text-white shadow-lg shadow-amber-100 transition-all hover:bg-amber-600 active:scale-95">
               <HiOutlinePencilAlt size={18} />
               Chỉnh sửa hồ sơ
             </Button>
           )
         ) : (
-          <Button className="h-14 rounded-2xl bg-slate-900 px-8 font-black text-white shadow-xl transition-all hover:bg-slate-800 active:scale-95">
+          <Button className="h-14 cursor-pointer rounded-2xl bg-slate-900 px-8 font-black text-white shadow-xl transition-all hover:bg-slate-800 active:scale-95">
             <HiOutlinePlus size={20} className="mr-2" />
             TẠO PHÁC ĐỒ MỚI
           </Button>
@@ -243,10 +243,10 @@ function AddProtocolModal({
           <Button
             onClick={handleSubmit}
             disabled={loading}
-            className={`h-14 w-full rounded-2xl font-black tracking-[0.2em] text-white uppercase shadow-xl transition-all active:scale-95 ${
+            className={`h-14 w-full cursor-pointer rounded-2xl font-black tracking-[0.2em] text-white uppercase shadow-xl transition-all active:scale-95 ${
               isEdit
                 ? "bg-amber-500 hover:bg-amber-600"
-                : "bg-slate-900 hover:bg-blue-600"
+                : "bg-blue-600 hover:bg-blue-700"
             }`}
           >
             {loading ? "ĐANG XỬ LÝ..." : isEdit ? "CẬP NHẬT NGAY" : "XÁC NHẬN"}
