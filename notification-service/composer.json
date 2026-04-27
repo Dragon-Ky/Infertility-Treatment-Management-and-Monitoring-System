@@ -7,10 +7,11 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
+        "kreait/firebase-php": "^7.15",
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0",
         "php-amqplib/php-amqplib": "^3.7",
-        "kreait/firebase-php": "^7.15"
+        "php-open-source-saver/jwt-auth": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
