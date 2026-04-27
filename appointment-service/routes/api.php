@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TreatmentController;
 use App\Http\Controllers\AppointmentController;
 
-Route::middleware('internal.secret')->group(function () {
+Route::middleware(['internal.secret', 'auth:api'])->group(function () {
     // Treatment Routes
     Route::prefix('treatments')->group(function () {
         Route::get('/', [TreatmentController::class, 'allTreatments'])->name('treatments.all');

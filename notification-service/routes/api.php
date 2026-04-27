@@ -7,7 +7,7 @@ use App\Http\Controllers\Api\PreferenceController;
 use App\Http\Controllers\Admin\NotificationController as AdminNotificationController;
 
 Route::middleware('internal.secret')->group(function () {
-    Route::prefix('api')->middleware('auth')->group(function () {
+    Route::prefix('api')->middleware('auth:api')->group(function () {
 
         // User Notifications
         Route::get('/notifications', [NotificationController::class, 'index']);
@@ -24,7 +24,7 @@ Route::middleware('internal.secret')->group(function () {
         Route::put('/preferences', [PreferenceController::class, 'update']);
     });
 
-    Route::prefix('api/admin')->middleware(['auth', 'admin'])->group(function () {
+    Route::prefix('api/admin')->middleware(['auth:api', 'admin'])->group(function () {
         Route::post('/notifications/send', [AdminNotificationController::class, 'send']);
         Route::get('/notifications/logs', [AdminNotificationController::class, 'logs']);
     });

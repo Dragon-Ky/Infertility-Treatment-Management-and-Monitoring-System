@@ -2,5 +2,6 @@
 
 return [
     App\Providers\AppServiceProvider::class,
-    App\Providers\RepositoryServiceProvider::class, // Thêm dòng này
+    App\Providers\RepositoryServiceProvider::class,
+    App\Providers\JwtUserServiceProvider::class,
 ];

@@ -13,7 +13,7 @@ Route::middleware('internal.secret')->group(function () {
     Route::get('/dashboard/overview', [DashboardController::class, 'overview']);
 
     // --- PROTECTED ROUTES (JWT Authentication) ---
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware('auth:api')->group(function () {
 
         // --- REPORT ROUTES ---
         Route::get('/reports/treatment-success', [ReportController::class, 'treatmentSuccess']);

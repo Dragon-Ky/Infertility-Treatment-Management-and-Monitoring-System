@@ -14,7 +14,7 @@ use App\Http\Controllers\Api\DashboardController;
 
 //API Routes - Treatment Service
 
-Route::prefix('v1/treatment')->middleware('internal.secret')->group(function () {
+Route::prefix('v1/treatment')->middleware(['internal.secret', 'auth:api'])->group(function () {
     // Dashboard Stats
     Route::get('dashboard/summary', [DashboardController::class, 'getDoctorDashboard']);
 

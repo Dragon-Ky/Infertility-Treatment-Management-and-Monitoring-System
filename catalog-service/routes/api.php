@@ -12,13 +12,13 @@ use App\Http\Controllers\RatingController;
 use App\Http\Controllers\BlogCategoryController;
 use App\Http\Controllers\BlogController;
 
-// AUTH USER (Sanctum)
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+// AUTH USER (JWT)
+Route::middleware(['internal.secret', 'auth:api'])->get('/user', function (Request $request) {
     return $request->user();
 });
 
 
-Route::middleware('internal.secret')->group(function () {
+Route::middleware(['internal.secret', 'auth:api'])->group(function () {
     // =========================
     //  DOCTORS
     // =========================
