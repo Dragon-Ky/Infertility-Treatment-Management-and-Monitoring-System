@@ -77,4 +77,8 @@ return [
     'report_cache_ttl' => env('REPORT_CACHE_TTL', 3600),
     'statistics_cache_ttl' => env('STATISTICS_CACHE_TTL', 3600),
 
+    'gateway' => [
+        'internal_secret' => env('GATEWAY_INTERNAL_SECRET'),
+    ],
+
 ];
