@@ -23,7 +23,7 @@ class SpecimenRecord extends Model
     protected $casts = [
         'is_active'          => 'boolean',
         'fertilization_date' => 'date',
-        'development_day'    => 'integer',
+        'development_day'    => 'string',
         'created_at'         => 'datetime',
         'updated_at'         => 'datetime',
     ];
