@@ -8,6 +8,10 @@ import {
   getMedicationSchedules,
   deleteMedicationSchedule,
 } from "@/services/scheduleService";
+import {
+  getSpecimensByProtocol,
+  deleteSpecimen,
+} from "@/services/specimenService";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import toast from "react-hot-toast";
 import ProtocolHeader from "./ProtocolHeader";
@@ -16,6 +20,7 @@ import MedicalTab from "./MedicalTab";
 import HistoryTab from "./HistoryTab";
 import LabTab from "./LabTab";
 import ScheduleTab from "./ScheduleTab";
+import SpecimenTab from "./SpecimenTab";
 import { ProtocolProvider } from "@/contexts/ProtocolContext";
 
 const ProtocolDetail = () => {
@@ -25,25 +30,34 @@ const ProtocolDetail = () => {
   const [events, setEvents] = useState([]);
   const [labResults, setLabResults] = useState([]);
   const [schedules, setSchedules] = useState([]);
+  const [specimens, setSpecimens] = useState([]); // State cho mẫu phẩm
   const [loading, setLoading] = useState(true);
 
   // ĐƯA FETCH FULL DATA RA NGOÀI
   const fetchFullData = useCallback(async () => {
     try {
-      const [protocolRes, eventsRes, customerRes, labRes, scheduleRes] =
-        await Promise.all([
-          getProtocolDetail(id),
-          getEventsByProtocol(id),
-          getCustomers(),
-          getLabResults(id),
-          getMedicationSchedules(id),
-        ]);
+      const [
+        protocolRes,
+        eventsRes,
+        customerRes,
+        labRes,
+        scheduleRes,
+        specimenRes,
+      ] = await Promise.all([
+        getProtocolDetail(id),
+        getEventsByProtocol(id),
+        getCustomers(),
+        getLabResults(id),
+        getMedicationSchedules(id),
+        getSpecimensByProtocol(id), // Fetch thêm mẫu phẩm
+      ]);
 
       const pData = protocolRes.data;
       setProtocol(pData);
       setEvents(eventsRes.data || []);
       setLabResults(labRes.data || []);
       setSchedules(scheduleRes.data || []);
+      setSpecimens(specimenRes.data || []); // Đổ data vào state
 
       if (pData) {
         const targetId = pData.treatment_id || pData.customer_id;
@@ -85,7 +99,16 @@ const ProtocolDetail = () => {
     }
   };
 
-  //HÀM XỬ LÝ XÓA
+  const fetchSpecimens = async () => {
+    try {
+      const res = await getSpecimensByProtocol(id);
+      setSpecimens(res.data || []);
+    } catch (error) {
+      console.error("Lỗi tải mẫu phẩm:", error);
+    }
+  };
+
+  //Hàm xử lí xóa
   const handleDeleteEvent = async (eventId) => {
     try {
       await deleteEvent(eventId);
@@ -119,7 +142,18 @@ const ProtocolDetail = () => {
     }
   };
 
-  //KHỞI TẠO DỮ LIỆU LẦN ĐẦU
+  const handleDeleteSpecimen = async (specimenId) => {
+    try {
+      await deleteSpecimen(specimenId);
+      toast.success("Đã xóa mẫu phẩm!");
+      fetchSpecimens();
+      // eslint-disable-next-line no-unused-vars
+    } catch (error) {
+      toast.error("Không thể xóa mẫu phẩm!");
+    }
+  };
+
+  //Khởi tạo dữ liệu
   useEffect(() => {
     const init = async () => {
       setLoading(true);
@@ -153,13 +187,16 @@ const ProtocolDetail = () => {
     events,
     labResults,
     schedules,
+    specimens,
     fetchEvents,
     fetchLabResults,
     fetchSchedules,
+    fetchSpecimens,
     fetchFullData,
     handleDeleteEvent,
     handleDeleteLab,
     handleDeleteSchedule,
+    handleDeleteSpecimen,
   };
 
   return (
@@ -181,6 +218,13 @@ const ProtocolDetail = () => {
               className="h-full rounded-xl px-12 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
             >
               NHẬT KÝ (EVENTS)
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="specimens"
+              className="h-full rounded-xl px-12 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            >
+              MẪU PHẨM (SPECIMENS)
             </TabsTrigger>
             <TabsTrigger
               value="lab"
@@ -208,6 +252,13 @@ const ProtocolDetail = () => {
             className="animate-in slide-in-from-bottom-4 duration-500"
           >
             <HistoryTab />
+          </TabsContent>
+
+          <TabsContent
+            value="specimens"
+            className="animate-in slide-in-from-bottom-4 duration-500"
+          >
+            <SpecimenTab />
           </TabsContent>
 
           <TabsContent
