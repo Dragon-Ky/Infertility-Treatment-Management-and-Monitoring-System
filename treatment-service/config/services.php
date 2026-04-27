@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'gateway' => [
+        'internal_secret' => env('GATEWAY_INTERNAL_SECRET'),
+    ],
+
 ];
