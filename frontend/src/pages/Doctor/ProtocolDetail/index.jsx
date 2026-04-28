@@ -12,6 +12,7 @@ import {
   getSpecimensByProtocol,
   deleteSpecimen,
 } from "@/services/specimenService";
+import { getStorageByProtocol } from "@/services/storageService";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import toast from "react-hot-toast";
 import ProtocolHeader from "./ProtocolHeader";
@@ -21,6 +22,7 @@ import HistoryTab from "./HistoryTab";
 import LabTab from "./LabTab";
 import ScheduleTab from "./ScheduleTab";
 import SpecimenTab from "./SpecimenTab";
+import StorageTab from "./StorageTab";
 import { ProtocolProvider } from "@/contexts/ProtocolContext";
 
 const ProtocolDetail = () => {
@@ -30,10 +32,10 @@ const ProtocolDetail = () => {
   const [events, setEvents] = useState([]);
   const [labResults, setLabResults] = useState([]);
   const [schedules, setSchedules] = useState([]);
-  const [specimens, setSpecimens] = useState([]); // State cho mẫu phẩm
+  const [specimens, setSpecimens] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ĐƯA FETCH FULL DATA RA NGOÀI
+  // ĐƯA FETCH FULL DATA RA NGOÀI VÀ TỰ JOIN STORAGE VÀO SPECIMEN
   const fetchFullData = useCallback(async () => {
     try {
       const [
@@ -43,13 +45,15 @@ const ProtocolDetail = () => {
         labRes,
         scheduleRes,
         specimenRes,
+        storageRes, // ĐÓN DATA TỪ API STORAGE
       ] = await Promise.all([
         getProtocolDetail(id),
         getEventsByProtocol(id),
         getCustomers(),
         getLabResults(id),
         getMedicationSchedules(id),
-        getSpecimensByProtocol(id), // Fetch thêm mẫu phẩm
+        getSpecimensByProtocol(id),
+        getStorageByProtocol(id), // GỌI THÊM API STORAGE
       ]);
 
       const pData = protocolRes.data;
@@ -57,7 +61,22 @@ const ProtocolDetail = () => {
       setEvents(eventsRes.data || []);
       setLabResults(labRes.data || []);
       setSchedules(scheduleRes.data || []);
-      setSpecimens(specimenRes.data || []); // Đổ data vào state
+
+      // FRONTEND TỰ ĐỘNG JOIN DỮ LIỆU KHO VÀO MẪU PHẨM
+      const storageData = storageRes.data || storageRes || [];
+      const rawSpecimens = specimenRes.data || [];
+
+      const specimensWithStorage = rawSpecimens.map((specimen) => {
+        const matchedStorage = storageData.find(
+          (st) => String(st.item_id) === String(specimen.id),
+        );
+        return {
+          ...specimen,
+          storage: matchedStorage || null,
+        };
+      });
+
+      setSpecimens(specimensWithStorage);
 
       if (pData) {
         const targetId = pData.treatment_id || pData.customer_id;
@@ -99,10 +118,23 @@ const ProtocolDetail = () => {
     }
   };
 
+  // Cập nhật hàm Fetch Specimens để tự join dữ liệu
   const fetchSpecimens = async () => {
     try {
-      const res = await getSpecimensByProtocol(id);
-      setSpecimens(res.data || []);
+      const [specimenRes, storageRes] = await Promise.all([
+        getSpecimensByProtocol(id),
+        getStorageByProtocol(id),
+      ]);
+
+      const storageData = storageRes.data || storageRes || [];
+      const specimensWithStorage = (specimenRes.data || []).map((specimen) => {
+        const matchedStorage = storageData.find(
+          (st) => String(st.item_id) === String(specimen.id),
+        );
+        return { ...specimen, storage: matchedStorage || null };
+      });
+
+      setSpecimens(specimensWithStorage);
     } catch (error) {
       console.error("Lỗi tải mẫu phẩm:", error);
     }
@@ -206,35 +238,43 @@ const ProtocolDetail = () => {
         <PatientProfile protocol={protocol} customer={customer} />
 
         <Tabs defaultValue="medical" className="space-y-6">
-          <TabsList className="h-16 w-full gap-2 rounded-[24px] bg-white p-2 shadow-sm md:w-auto">
+          <TabsList className="h-auto min-h-[64px] w-full flex-wrap gap-2 rounded-[24px] bg-white p-2 shadow-sm md:w-auto">
             <TabsTrigger
               value="medical"
-              className="h-full rounded-xl px-12 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              className="h-12 rounded-xl px-12 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
             >
               HỒ SƠ Y TẾ
             </TabsTrigger>
             <TabsTrigger
               value="history"
-              className="h-full rounded-xl px-12 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              className="h-12 rounded-xl px-12 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
             >
               NHẬT KÝ (EVENTS)
             </TabsTrigger>
 
             <TabsTrigger
               value="specimens"
-              className="h-full rounded-xl px-12 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              className="h-12 rounded-xl px-12 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
             >
               MẪU PHẨM (SPECIMENS)
             </TabsTrigger>
+
+            <TabsTrigger
+              value="storage"
+              className="h-12 rounded-xl px-12 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            >
+              LƯU TRỮ (STORAGE)
+            </TabsTrigger>
+
             <TabsTrigger
               value="lab"
-              className="h-full rounded-xl px-12 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              className="h-12 rounded-xl px-12 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
             >
               XÉT NGHIỆM (LAB)
             </TabsTrigger>
             <TabsTrigger
               value="schedule"
-              className="h-full rounded-xl px-12 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              className="h-12 rounded-xl px-12 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
             >
               LỊCH THUỐC
             </TabsTrigger>
@@ -259,6 +299,13 @@ const ProtocolDetail = () => {
             className="animate-in slide-in-from-bottom-4 duration-500"
           >
             <SpecimenTab />
+          </TabsContent>
+
+          <TabsContent
+            value="storage"
+            className="animate-in slide-in-from-bottom-4 duration-500"
+          >
+            <StorageTab />
           </TabsContent>
 
           <TabsContent

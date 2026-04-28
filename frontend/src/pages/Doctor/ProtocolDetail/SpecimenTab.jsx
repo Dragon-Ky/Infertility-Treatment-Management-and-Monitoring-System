@@ -1,14 +1,15 @@
 import { useProtocolData } from "@/contexts/ProtocolContext";
 import AddSpecimenModal from "@/components/AddSpecimenModal";
+import AddStorageModal from "@/components/AddStorageModal";
 import DeleteConfirm from "@/components/DeleteConfirm";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { HiOutlineDatabase, HiOutlineBeaker } from "react-icons/hi";
+import { HiOutlineDatabase, HiOutlineLocationMarker } from "react-icons/hi";
 import { LuZap, LuCircleDot, LuDna } from "react-icons/lu";
 
 function SpecimenTab() {
-  const { id, specimens, fetchSpecimens, handleDeleteSpecimen } =
-    useProtocolData();
+  const { id, specimens, fetchSpecimens, fetchFullData, handleDeleteSpecimen } =
+    useProtocolData(); // BỔ SUNG fetchFullData
 
   const getSpecimenIcon = (type) => {
     switch (type) {
@@ -103,6 +104,29 @@ function SpecimenTab() {
                   </p>
                 </div>
               </div>
+
+              {/* Chỉ hiện thị khối lưu trữ nếu status là frozen */}
+              {item.status === "frozen" && (
+                <div className="mt-4 flex items-center justify-between rounded-2xl bg-blue-50/50 p-3">
+                  <div className="flex items-center gap-2">
+                    <HiOutlineLocationMarker
+                      size={16}
+                      className="text-blue-600"
+                    />
+                    <span className="text-[10px] font-black text-slate-600 uppercase">
+                      {item.storage
+                        ? item.storage.location_code
+                        : "CHƯA GÁN VỊ TRÍ"}
+                    </span>
+                  </div>
+
+                  <AddStorageModal
+                    onAdded={fetchFullData}
+                    editData={item.storage}
+                    defaultItemId={item.id}
+                  />
+                </div>
+              )}
 
               <div className="mt-6 flex items-center justify-between border-t border-slate-50 pt-4">
                 <div className="flex gap-2">
