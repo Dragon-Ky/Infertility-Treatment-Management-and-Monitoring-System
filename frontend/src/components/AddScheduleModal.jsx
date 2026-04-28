@@ -241,9 +241,10 @@ const AddScheduleModal = ({ protocolId, onAdded, editData = null }) => {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="ml-1 text-[10px] font-black text-slate-400 uppercase">
-                Tần suất
+                Tần suất (Số lần/ngày)
               </label>
               <Input
+                type="number"
                 value={formData.frequency}
                 onChange={(e) =>
                   setFormData({ ...formData, frequency: e.target.value })

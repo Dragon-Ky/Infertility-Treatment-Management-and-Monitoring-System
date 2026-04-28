@@ -238,8 +238,8 @@ const ProtocolDetail = () => {
         <PatientProfile protocol={protocol} customer={customer} />
 
         <Tabs defaultValue="medical" className="space-y-6">
-          <div className="w-full overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden">
-            <TabsList className="inline-flex h-auto min-h-[64px] w-max gap-2 rounded-[24px] bg-white p-2 shadow-sm">
+          <div className="flex w-full overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden">
+            <TabsList className="mx-auto inline-flex h-auto min-h-[64px] w-max gap-2 rounded-[24px] bg-white p-2 shadow-sm">
               <TabsTrigger
                 value="medical"
                 className="h-12 rounded-xl px-8 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
