@@ -38,7 +38,7 @@ readonly class StorageRecordResponseDTO
             expiry_date: $storage->expiry_date->format('Y-m-d'),
             start_date_formatted: $storage->start_date->format('d/m/Y'),
             expiry_date_formatted: $expiry->format('d/m/Y'),
-            status: $storage->status,
+            status: $storage->status ?? 'active',
             location_code: $storage->location_code,
             // Cảnh báo nếu còn dưới 30 ngày là hết hạn
             is_near_expiry: $expiry->isFuture() && $expiry->diffInDays(now()) <= 30,

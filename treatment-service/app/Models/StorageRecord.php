@@ -23,6 +23,11 @@ class StorageRecord extends Model
         'is_active',
     ];
 
+    protected $attributes = [
+        'status' => 'active',
+        'is_active' => true,
+    ];
+
     protected $casts = [
         'is_active'  => 'boolean',
         'start_date'  => 'date',
