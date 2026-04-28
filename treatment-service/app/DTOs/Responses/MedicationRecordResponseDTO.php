@@ -28,10 +28,10 @@ readonly class MedicationRecordResponseDTO
             schedule: $record->medicationSchedule ? MedicationScheduleResponseDTO::fromModel($record->medicationSchedule) : null,
             scheduled_time_formatted: Carbon::parse($record->scheduled_time)->format('d/m/Y H:i'),
             actual_time_formatted: Carbon::parse($record->actual_time)->format('d/m/Y H:i'),
-            status: $record->status,
             recorded_by: $record->recorded_by,
             notes: $record->notes,
-            is_active: (bool) $record->is_active,
+            status: $record->status ?? 'taken',
+            is_active: (bool) ($record->is_active ?? true),
         );
     }
 
