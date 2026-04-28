@@ -8,13 +8,14 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('pregnancy_trackings', function (Blueprint $table) {
+        Schema::create('pregnancy_tracking', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('treatment_id')->constrained('treatment_protocols'); 
+            $table->foreignId('treatment_id')->constrained('treatment_protocols');
             $table->date('tracking_date'); // Ngày ghi nhận
             $table->integer('week_number'); // Thai nhi được bao nhiêu tuần
             $table->enum('status', ['ongoing', 'delivered', 'miscarried']); // Trạng thái: Đang phát triển, Đã sinh, Sảy thai
-            $table->text('notes')->nullable(); 
+            $table->text('notes')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }
