@@ -284,7 +284,7 @@ const ProtocolDetail = () => {
 
               <TabsTrigger
                 value="history"
-                className="h-12 rounded-xl px-8 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-slate-800 data-[state=active]:text-white"
+                className="h-12 rounded-xl px-8 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
               >
                 NHẬT KÝ (EVENTS)
               </TabsTrigger>
