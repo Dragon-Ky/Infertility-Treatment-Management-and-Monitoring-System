@@ -23,6 +23,7 @@ import LabTab from "./LabTab";
 import ScheduleTab from "./ScheduleTab";
 import SpecimenTab from "./SpecimenTab";
 import StorageTab from "./StorageTab";
+import PregnancyTab from "./PregnancyTab";
 import { ProtocolProvider } from "@/contexts/ProtocolContext";
 
 const ProtocolDetail = () => {
@@ -35,7 +36,6 @@ const ProtocolDetail = () => {
   const [specimens, setSpecimens] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ĐƯA FETCH FULL DATA RA NGOÀI VÀ TỰ JOIN STORAGE VÀO SPECIMEN
   const fetchFullData = useCallback(async () => {
     try {
       const [
@@ -45,7 +45,7 @@ const ProtocolDetail = () => {
         labRes,
         scheduleRes,
         specimenRes,
-        storageRes, // ĐÓN DATA TỪ API STORAGE
+        storageRes,
       ] = await Promise.all([
         getProtocolDetail(id),
         getEventsByProtocol(id),
@@ -53,7 +53,7 @@ const ProtocolDetail = () => {
         getLabResults(id),
         getMedicationSchedules(id),
         getSpecimensByProtocol(id),
-        getStorageByProtocol(id), // GỌI THÊM API STORAGE
+        getStorageByProtocol(id),
       ]);
 
       const pData = protocolRes.data;
@@ -62,7 +62,7 @@ const ProtocolDetail = () => {
       setLabResults(labRes.data || []);
       setSchedules(scheduleRes.data || []);
 
-      // FRONTEND TỰ ĐỘNG JOIN DỮ LIỆU KHO VÀO MẪU PHẨM
+      //Tự động Join dữ liệu vào storage
       const storageData = storageRes.data || storageRes || [];
       const rawSpecimens = specimenRes.data || [];
 
@@ -238,47 +238,58 @@ const ProtocolDetail = () => {
         <PatientProfile protocol={protocol} customer={customer} />
 
         <Tabs defaultValue="medical" className="space-y-6">
-          <TabsList className="h-auto min-h-[64px] w-full flex-wrap gap-2 rounded-[24px] bg-white p-2 shadow-sm md:w-auto">
-            <TabsTrigger
-              value="medical"
-              className="h-12 rounded-xl px-12 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-            >
-              HỒ SƠ Y TẾ
-            </TabsTrigger>
-            <TabsTrigger
-              value="history"
-              className="h-12 rounded-xl px-12 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-            >
-              NHẬT KÝ (EVENTS)
-            </TabsTrigger>
+          <div className="w-full overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden">
+            <TabsList className="inline-flex h-auto min-h-[64px] w-max gap-2 rounded-[24px] bg-white p-2 shadow-sm">
+              <TabsTrigger
+                value="medical"
+                className="h-12 rounded-xl px-8 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              >
+                HỒ SƠ Y TẾ
+              </TabsTrigger>
 
-            <TabsTrigger
-              value="specimens"
-              className="h-12 rounded-xl px-12 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-            >
-              MẪU PHẨM (SPECIMENS)
-            </TabsTrigger>
+              <TabsTrigger
+                value="schedule"
+                className="h-12 rounded-xl px-8 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              >
+                LỊCH THUỐC
+              </TabsTrigger>
 
-            <TabsTrigger
-              value="storage"
-              className="h-12 rounded-xl px-12 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-            >
-              LƯU TRỮ (STORAGE)
-            </TabsTrigger>
+              <TabsTrigger
+                value="lab"
+                className="h-12 rounded-xl px-8 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              >
+                XÉT NGHIỆM (LAB)
+              </TabsTrigger>
 
-            <TabsTrigger
-              value="lab"
-              className="h-12 rounded-xl px-12 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-            >
-              XÉT NGHIỆM (LAB)
-            </TabsTrigger>
-            <TabsTrigger
-              value="schedule"
-              className="h-12 rounded-xl px-12 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-            >
-              LỊCH THUỐC
-            </TabsTrigger>
-          </TabsList>
+              <TabsTrigger
+                value="specimens"
+                className="h-12 rounded-xl px-8 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              >
+                MẪU PHẨM (SPECIMENS)
+              </TabsTrigger>
+
+              <TabsTrigger
+                value="storage"
+                className="h-12 rounded-xl px-8 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              >
+                LƯU TRỮ (STORAGE)
+              </TabsTrigger>
+
+              <TabsTrigger
+                value="pregnancy"
+                className="h-12 rounded-xl px-8 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-pink-500 data-[state=active]:text-white"
+              >
+                THAI KỲ (PREGNANCY)
+              </TabsTrigger>
+
+              <TabsTrigger
+                value="history"
+                className="h-12 rounded-xl px-8 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-slate-800 data-[state=active]:text-white"
+              >
+                NHẬT KÝ (EVENTS)
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent
             value="medical"
@@ -288,10 +299,17 @@ const ProtocolDetail = () => {
           </TabsContent>
 
           <TabsContent
-            value="history"
-            className="animate-in slide-in-from-bottom-4 duration-500"
+            value="schedule"
+            className="animate-in slide-in-from-bottom-4 space-y-6 duration-500"
           >
-            <HistoryTab />
+            <ScheduleTab />
+          </TabsContent>
+
+          <TabsContent
+            value="lab"
+            className="animate-in slide-in-from-bottom-4 space-y-6 duration-500"
+          >
+            <LabTab />
           </TabsContent>
 
           <TabsContent
@@ -309,17 +327,17 @@ const ProtocolDetail = () => {
           </TabsContent>
 
           <TabsContent
-            value="lab"
-            className="animate-in slide-in-from-bottom-4 space-y-6 duration-500"
+            value="pregnancy"
+            className="animate-in slide-in-from-bottom-4 duration-500"
           >
-            <LabTab />
+            <PregnancyTab />
           </TabsContent>
 
           <TabsContent
-            value="schedule"
-            className="animate-in slide-in-from-bottom-4 space-y-6 duration-500"
+            value="history"
+            className="animate-in slide-in-from-bottom-4 duration-500"
           >
-            <ScheduleTab />
+            <HistoryTab />
           </TabsContent>
         </Tabs>
       </div>
