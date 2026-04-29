@@ -41,8 +41,8 @@ function PatientProfile({ protocol, customer }) {
               <Badge
                 className={
                   protocol.is_active
-                    ? "border-none bg-green-100 px-3 py-1 text-[10px] font-black text-green-700"
-                    : "border-none bg-slate-100 text-[10px] font-black text-slate-500"
+                    ? "rounded-xl border-none bg-green-100 px-3 py-1 text-[10px] font-black text-green-700"
+                    : "rounded-xl border-none bg-slate-100 text-[10px] font-black text-slate-500"
                 }
               >
                 {protocol.is_active ? "ĐANG ĐIỀU TRỊ" : "ĐÃ ĐÓNG"}

@@ -2,7 +2,7 @@ import treatmentApi from "@/utils/treatment-service/treatmentApi";
 
 export const getSpecimensByProtocol = async (protocolId) => {
   const response = await treatmentApi.get(`/specimens`, {
-    params: { protocol_id: protocolId },
+    params: { treatment_id: protocolId },
   });
   return response.data;
 };
