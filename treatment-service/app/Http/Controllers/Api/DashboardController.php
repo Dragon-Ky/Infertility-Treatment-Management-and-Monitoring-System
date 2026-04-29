@@ -15,12 +15,6 @@ class DashboardController extends Controller
         $this->dashboardService = $dashboardService;
     }
 
-    /**
-     * Lấy dữ liệu tổng quan cho Dashboard của Bác sĩ
-     * 
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function getDoctorDashboard(Request $request)
     {
         // Lấy doctor ID từ user đã authenticate
