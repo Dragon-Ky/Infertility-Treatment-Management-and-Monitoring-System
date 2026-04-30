@@ -94,11 +94,24 @@ function Header() {
                   </Link>
                 </DropdownMenuItem>
 
-                <DropdownMenuItem className="group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 transition-all focus:bg-(--primaryCustom)">
-                  <HiOutlineCalendar className="text-xl opacity-70 group-focus:opacity-100" />
-                  <span className="text-[0.9vw] font-semibold">
-                    Lịch hẹn của tôi
-                  </span>
+                <DropdownMenuItem
+                  asChild
+                  className="group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 transition-all focus:bg-(--primaryCustom)"
+                >
+                  <Link
+                    to={
+                      userRole === "Doctor"
+                        ? "/doctor/appointments"
+                        : userRole === "Manager"
+                          ? "/manager/appointments"
+                          : "/customer/appointments" // Mặc định là khách hàng
+                    }
+                  >
+                    <HiOutlineCalendar className="text-xl opacity-70 group-focus:opacity-100" />
+                    <span className="text-[0.9vw] font-semibold">
+                      Lịch hẹn của tôi
+                    </span>
+                  </Link>
                 </DropdownMenuItem>
 
                 <DropdownMenuItem className="group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 transition-all focus:bg-(--primaryCustom)">

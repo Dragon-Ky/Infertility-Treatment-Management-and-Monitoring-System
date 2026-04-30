@@ -13,6 +13,8 @@ import Error404 from "@/pages/Error404";
 import BlogList from "@/pages/BlogList";
 import ProtocolManagement from "@/pages/Doctor/ProtocolManagement";
 import ProtocolDetail from "@/pages/Doctor/ProtocolDetail";
+import DoctorAppointments from "@/pages/Doctor/DoctorAppointments";
+import CustomerAppointments from "@/pages/Customer/CustomerAppointments";
 
 export const routes = [
   // --- PUBLIC ROUTES ---
@@ -84,6 +86,7 @@ export const routes = [
           { path: "dashboard", element: <DoctorDashboard /> },
           { path: "protocols", element: <ProtocolManagement /> },
           { path: "protocols/details/:id", element: <ProtocolDetail /> },
+          { path: "appointments", element: <DoctorAppointments /> },
         ],
       },
     ],
@@ -96,9 +99,7 @@ export const routes = [
       {
         path: "/customer",
         element: <LayoutDefault />,
-        children: [
-          { path: "my-treatment", element: <div>Trang lộ trình điều trị</div> },
-        ],
+        children: [{ path: "appointments", element: <CustomerAppointments /> }],
       },
     ],
   },
