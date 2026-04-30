@@ -19,20 +19,22 @@ class AppointmentController extends Controller
 
     public function index(Request $request)
     {
-       $userId = $request->user_id;
+       // 1. Lấy tham số tìm kiếm
+        $userId = $request->user_id;
         $doctorId = $request->doctor_id;
-        $cacheKey = "appointments_u{$userId}_d{$doctorId}";
 
-        // Lấy dữ liệu từ Cache
-        $data = Cache::remember($cacheKey, 3600, function () use ($userId, $doctorId) {
-            $query = Appointment::query();
-            if ($userId) $query->where('user_id', $userId);
-            if ($doctorId) $query->where('doctor_id', $doctorId);
-            return $query->get();
-        });
+        // 2. Truy vấn trực tiếp từ Database
+        $query = Appointment::query();
 
-        // Ép trả về chuẩn JSON để không bị lỗi Response nữa
-        return response()->json($data);
+        if ($userId) {
+            $query->where('user_id', $userId);
+        }
+        if ($doctorId) {
+            $query->where('doctor_id', $doctorId);
+        }
+
+        // 3. Ép kiểu trả về JSON chuẩn
+        return response()->json($query->get());
     }
 
     public function store(Request $request)
