@@ -19,16 +19,20 @@ class AppointmentController extends Controller
 
     public function index(Request $request)
     {
-        $userId = $request->user_id;
+       $userId = $request->user_id;
         $doctorId = $request->doctor_id;
         $cacheKey = "appointments_u{$userId}_d{$doctorId}";
 
-        return Cache::remember($cacheKey, 3600, function () use ($userId, $doctorId) {
+        // Lấy dữ liệu từ Cache
+        $data = Cache::remember($cacheKey, 3600, function () use ($userId, $doctorId) {
             $query = Appointment::query();
             if ($userId) $query->where('user_id', $userId);
             if ($doctorId) $query->where('doctor_id', $doctorId);
-            return $query->get(); // Trả về collection để Cache lưu trữ tốt hơn
+            return $query->get();
         });
+
+        // Ép trả về chuẩn JSON để không bị lỗi Response nữa
+        return response()->json($data);
     }
 
     public function store(Request $request)
@@ -128,7 +132,7 @@ class AppointmentController extends Controller
         // Điều này giúp tránh sử dụng Legacy FCM API đã bị Google khai tử
         $this->rabbitmq->publish('notification_queue', [
             'userId' => $userId,
-            'templateName' => 'APPOINTMENT_EVENT', 
+            'templateName' => 'APPOINTMENT_EVENT',
             'variables' => [
                 'title' => $title,
                 'body'  => $body
