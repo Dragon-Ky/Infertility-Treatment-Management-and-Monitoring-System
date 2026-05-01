@@ -20,6 +20,13 @@ export const confirmAppointment = async (id) => {
   return response.data;
 };
 
+export const getTreatmentReminders = async (treatmentId) => {
+  const response = await appointmentApi.get(
+    `/treatments/${treatmentId}/reminders`,
+  );
+  return response.data;
+};
+
 export const deleteAppointment = async (id) => {
   const response = await appointmentApi.delete(`/appointments/${id}`);
   return response.data;
