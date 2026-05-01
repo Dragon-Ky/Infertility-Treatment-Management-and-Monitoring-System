@@ -23,9 +23,11 @@ Route::middleware('auth:api')->group(function () {
 
     // Lấy thông tin cá nhân
     Route::get('/me', [AuthController::class, 'me']);
-    
+
     // API Nội bộ (Dùng cho API Gateway)
     Route::get('/internal/users', [UserApiController::class, 'getUsersByIds']);
+
+    Route::get('/doctors', [ManagerController::class, 'getDoctors']);
 
     // Đăng xuất
     Route::post('/logout', [AuthController::class, 'logout']);
