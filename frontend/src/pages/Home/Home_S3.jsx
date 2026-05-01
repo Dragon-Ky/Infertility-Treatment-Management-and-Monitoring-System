@@ -50,7 +50,7 @@ function Home_S3() {
               />
               <p className="mb-2 text-center font-bold">{info.name}</p>
               <p className="min-h-[8vh] text-center">{info.role}</p>
-              <Link>
+              <Link to="/customer/appointments">
                 <button className="hv-transition mx-auto flex cursor-pointer rounded-lg border bg-(--primary-bold) px-[1vw] py-[0.8vh] font-semibold text-white hover:border-(--primary-bold) hover:bg-transparent hover:text-(--primary-bold)">
                   Đặt lịch khám
                 </button>
