@@ -109,6 +109,22 @@ class AppointmentController extends Controller
         return response()->json(['message' => 'Cancelled successfully', 'data' => $appointment]);
     }
 
+    public function confirm($id)
+    {
+        $appointment = Appointment::find($id);
+        if (!$appointment) return response()->json(['message' => 'Not found'], 404);
+
+        // Đổi trạng thái thành confirmed
+        $appointment->update(['status' => 'confirmed']);
+
+        $this->clearAppointmentCache($appointment->user_id, $appointment->doctor_id);
+
+        // Notify cho Khách hàng biết lịch đã được duyệt (nếu có RabbitMQ)
+        $this->rabbitmq->publish('appointment.confirmed', $appointment->toArray());
+
+        return response()->json(['message' => 'Confirmed successfully', 'data' => $appointment]);
+    }
+
     public function destroy($id)
     {
         $appointment = Appointment::find($id);
