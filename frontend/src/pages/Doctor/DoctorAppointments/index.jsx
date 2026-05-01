@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   HiOutlineCalendar,
   HiOutlineClock,
@@ -31,7 +32,6 @@ import {
   getAllAppointments,
   confirmAppointment,
   cancelAppointment,
-  // completeAppointment
 } from "@/services/appointmentService";
 import { getCustomers } from "@/services/doctorService";
 import { getDoctors } from "@/services/managerService";
@@ -39,9 +39,11 @@ import { getAllProtocols } from "@/services/protocolService";
 import { getEventsByProtocol } from "@/services/eventService";
 
 function DoctorAppointments() {
+  const navigate = useNavigate();
   const [combinedSchedules, setCombinedSchedules] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [customers, setCustomers] = useState([]);
+  const [protocols, setProtocols] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const [viewMode, setViewMode] = useState("grid");
@@ -67,7 +69,13 @@ function DoctorAppointments() {
       const rawCustomers = cusRes?.data ? cusRes.data : cusRes;
       setCustomers(Array.isArray(rawCustomers) ? rawCustomers : []);
 
-      // 1. Map Lịch Hẹn (Appointment)
+      const rawProtocols = protocolsRes?.data
+        ? protocolsRes.data
+        : protocolsRes;
+      const protocolsArray = Array.isArray(rawProtocols) ? rawProtocols : [];
+      setProtocols(protocolsArray);
+
+      // Map Lịch Hẹn (Appointment)
       const rawAppointments = appRes?.data ? appRes.data : appRes;
       const mappedAppointments = (
         Array.isArray(rawAppointments) ? rawAppointments : []
@@ -84,13 +92,8 @@ function DoctorAppointments() {
         notes: app.notes,
       }));
 
-      // 2. Map Sự kiện Điều trị (Treatment Events)
-      const rawProtocols = protocolsRes?.data
-        ? protocolsRes.data
-        : protocolsRes;
-      const protocolsArray = Array.isArray(rawProtocols) ? rawProtocols : [];
+      // Map Sự kiện Điều trị (Treatment Events)
       let mappedEvents = [];
-
       for (const protocol of protocolsArray) {
         const evRes = await getEventsByProtocol(protocol.id);
         const eventsData = evRes?.data || evRes || [];
@@ -118,7 +121,7 @@ function DoctorAppointments() {
         mappedEvents = [...mappedEvents, ...evts];
       }
 
-      // 3. Gộp và Sắp xếp (Ưu tiên lịch mới nhất lên trên)
+      // Gộp và Sắp xếp (Ưu tiên lịch mới nhất lên trên)
       const combined = [...mappedAppointments, ...mappedEvents].sort(
         (a, b) =>
           new Date(`${b.date}T${b.time}`) - new Date(`${a.date}T${a.time}`),
@@ -153,26 +156,6 @@ function DoctorAppointments() {
       },
       error: <b>Lỗi hệ thống. Vui lòng thử lại!</b>,
     });
-  };
-
-  // TÍNH NĂNG ĐIỂM DANH (CHECK-IN)
-  const handleCheckIn = async (item) => {
-    toast.success(
-      `Đã xác nhận bệnh nhân ${getCustomerName(item.userId)} tới phòng khám!`,
-    );
-    // Khi Backend xong API complete
-    /*
-    try {
-      if (item.source === 'appointment') {
-        await completeAppointment(item.originalId); 
-      } else {
-        // await updateEventResult(item.originalId, "Bệnh nhân đã đến khám");
-      }
-      fetchData(); 
-    } catch (error) {
-      toast.error("Lỗi xác nhận đến khám!");
-    }
-    */
   };
 
   const formatToDDMMYYYY = (dateString) => {
@@ -374,14 +357,42 @@ function DoctorAppointments() {
           )}
 
           <div className="mt-auto w-full pt-4">
+            {/* THIẾT KẾ MỚI KÈM NÚT HỒ SƠ ĐÃ SỬA LỖI ĐIỀU HƯỚNG */}
             {isConfirmed && (
-              <Button
-                onClick={() => handleCheckIn(item)}
-                className="h-11 w-full cursor-pointer rounded-xl bg-green-500 text-[10px] font-black tracking-widest text-white uppercase shadow-md shadow-green-200 transition-colors hover:bg-green-600 active:scale-95"
-              >
-                <FaCheckCircle className="mr-2" size={14} /> XÁC NHẬN ĐÃ TỚI
-                KHÁM
-              </Button>
+              <div className="flex items-center justify-between rounded-xl border border-green-100 bg-green-50/50 p-3">
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-3 w-3">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex h-3 w-3 rounded-full bg-green-500"></span>
+                  </span>
+                  <span className="text-[9px] font-black tracking-widest text-green-700 uppercase">
+                    Sẵn sàng đón tiếp
+                  </span>
+                </div>
+                <Button
+                  onClick={() => {
+                    // Dùng logic xịn từ Dashboard để dò đúng phác đồ
+                    const patientProtocol = protocols.find(
+                      (p) =>
+                        String(p.user_id) === String(item.userId) ||
+                        String(p.treatment_id) === String(item.userId) ||
+                        String(p.customer_id) === String(item.userId),
+                    );
+
+                    if (patientProtocol) {
+                      navigate(
+                        `/doctor/protocols/details/${patientProtocol.id}`,
+                      );
+                    } else {
+                      toast.error("Bệnh nhân này chưa có Phác đồ điều trị!");
+                    }
+                  }}
+                  variant="outline"
+                  className="h-8 cursor-pointer rounded-lg border-green-200 bg-white px-3 text-[9px] font-black text-green-600 uppercase shadow-none transition-colors hover:bg-green-100 hover:text-green-700 active:scale-95"
+                >
+                  Hồ sơ
+                </Button>
+              </div>
             )}
 
             {isPendingAppt && (
@@ -491,7 +502,7 @@ function DoctorAppointments() {
         <>
           {viewMode === "grid" && (
             <div className="space-y-12">
-              {/* Gender theo khách hàng */}
+              {/* Render theo khách hàng */}
               {Object.entries(groupedByCustomer).map(([userId, schedules]) => (
                 <div
                   key={userId}
