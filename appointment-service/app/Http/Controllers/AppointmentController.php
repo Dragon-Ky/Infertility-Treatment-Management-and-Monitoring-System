@@ -93,6 +93,22 @@ class AppointmentController extends Controller
         return response()->json(['message' => 'Updated successfully', 'data' => $appointment]);
     }
 
+    public function cancel($id)
+    {
+        $appointment = Appointment::find($id);
+        if (!$appointment) return response()->json(['message' => 'Not found'], 404);
+
+        // Chỉ cập nhật đúng cái status thành cancelled
+        $appointment->update(['status' => 'cancelled']);
+
+        $this->clearAppointmentCache($appointment->user_id, $appointment->doctor_id);
+
+        // Báo cho RabbitMQ biết là lịch đã hủy (nếu cần)
+        $this->rabbitmq->publish('appointment.cancelled', $appointment->toArray());
+
+        return response()->json(['message' => 'Cancelled successfully', 'data' => $appointment]);
+    }
+
     public function destroy($id)
     {
         $appointment = Appointment::find($id);
