@@ -15,29 +15,33 @@ import {
   HiOutlineUserGroup,
   HiOutlineClipboardCheck,
   HiOutlineCalendar,
+  HiOutlineClock,
 } from "react-icons/hi";
 import { TbBabyCarriage } from "react-icons/tb";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import { getAllProtocols } from "@/services/protocolService";
 import toast from "react-hot-toast";
+import { getAllProtocols } from "@/services/protocolService";
 import { getCustomers, getTreatmentDashboard } from "@/services/doctorService";
+import { getAllAppointments } from "@/services/appointmentService";
 
 function DoctorDashboard() {
   const navigate = useNavigate();
   const [patients, setPatients] = useState([]);
   const [protocols, setProtocols] = useState([]);
+  const [appointments, setAppointments] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        // Gọi 3 Api để đồng bộ
-        const [customersRes, statsRes, protocolsRes] = await Promise.all([
-          getCustomers(),
-          getTreatmentDashboard(),
-          getAllProtocols(),
-        ]);
+        const [customersRes, statsRes, protocolsRes, appsRes] =
+          await Promise.all([
+            getCustomers(),
+            getTreatmentDashboard(),
+            getAllProtocols(),
+            getAllAppointments(),
+          ]);
 
         if (customersRes.status === "success") {
           setPatients(customersRes.data || []);
@@ -45,6 +49,9 @@ function DoctorDashboard() {
 
         setStats(statsRes.data || statsRes || {});
         setProtocols(protocolsRes?.data || protocolsRes || []);
+
+        const rawApps = appsRes?.data ? appsRes.data : appsRes;
+        setAppointments(Array.isArray(rawApps) ? rawApps : []);
       } catch (error) {
         console.error("Lỗi tải Dashboard:", error);
         toast.error("Không thể tải toàn bộ dữ liệu hệ thống!");
@@ -56,10 +63,58 @@ function DoctorDashboard() {
     fetchDashboardData();
   }, []);
 
+  const getLocalTodayString = () => {
+    const today = new Date();
+    return (
+      today.getFullYear() +
+      "-" +
+      String(today.getMonth() + 1).padStart(2, "0") +
+      "-" +
+      String(today.getDate()).padStart(2, "0")
+    );
+  };
+
+  const getTodayAppointmentsCount = () => {
+    const todayStr = getLocalTodayString();
+    return appointments.filter(
+      (app) =>
+        app.appointment_date?.startsWith(todayStr) &&
+        app.status === "confirmed",
+    ).length;
+  };
+
+  const getUpcomingAppointment = (userId) => {
+    const todayStr = getLocalTodayString();
+    const upcoming = appointments
+      .filter(
+        (app) =>
+          String(app.user_id) === String(userId) &&
+          app.status === "confirmed" &&
+          app.appointment_date?.substring(0, 10) >= todayStr,
+      )
+      .sort(
+        (a, b) => new Date(a.appointment_date) - new Date(b.appointment_date),
+      );
+
+    return upcoming.length > 0 ? upcoming[0] : null;
+  };
+
+  const getTypeLabel = (type) => {
+    const types = {
+      consultation: "Khám tư vấn",
+      ultrasound: "Siêu âm",
+      blood_test: "Xét nghiệm máu",
+      injection: "Tiêm thuốc",
+      egg_retrieval: "Chọc hút trứng",
+      embryo_transfer: "Chuyển phôi",
+    };
+    return types[type] || "Khám bệnh";
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-50">
-        <AiOutlineLoading3Quarters className="animate-spin text-5xl text-blue-600" />
+        <AiOutlineLoading3Quarters className="animate-spin text-5xl text-(--primaryCustom)" />
         <p className="animate-pulse text-[12px] font-black tracking-widest text-slate-400 uppercase">
           Đang đồng bộ dữ liệu Microservices...
         </p>
@@ -76,21 +131,35 @@ function DoctorDashboard() {
           </h1>
           <p className="mt-1 font-medium text-slate-500">
             Hôm nay hệ thống ghi nhận{" "}
-            <span className="font-bold text-blue-600">{patients.length}</span>{" "}
+            <span className="font-bold text-(--primaryCustom)">
+              {patients.length}
+            </span>
             bệnh nhân đăng ký.
           </p>
         </div>
-        <Button
-          className="h-12 cursor-pointer rounded-2xl bg-blue-600 px-6 font-black tracking-widest shadow-lg shadow-blue-200 transition-all hover:-translate-y-1 hover:bg-blue-700"
-          onClick={() => {
-            navigate(`/doctor/protocols`);
-          }}
-        >
-          <HiOutlineCalendar className="mr-2 h-5 w-5" /> Quản lí phác đồ
-        </Button>
+
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            className="h-12 cursor-pointer rounded-2xl border-2 border-(--primaryCustom) bg-white px-6 font-black tracking-widest text-(--primaryCustom) uppercase shadow-sm transition-all hover:-translate-y-1 hover:bg-slate-50 hover:text-(--primaryCustom)"
+            onClick={() => {
+              navigate(`/doctor/protocols`);
+            }}
+          >
+            <HiOutlineClipboardCheck className="mr-2 h-5 w-5" /> Quản lý Phác đồ
+          </Button>
+
+          <Button
+            className="h-12 cursor-pointer rounded-2xl bg-(--primaryCustom) px-6 font-black tracking-widest text-white uppercase shadow-lg shadow-blue-200 transition-all hover:-translate-y-1 hover:opacity-90"
+            onClick={() => {
+              navigate(`/doctor/appointments`);
+            }}
+          >
+            <HiOutlineCalendar className="mr-2 h-5 w-5" /> Quản lý Lịch hẹn
+          </Button>
+        </div>
       </div>
 
-      {/* STATS GRID */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card className="group rounded-[24px] border-none bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-100/50">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -133,7 +202,7 @@ function DoctorDashboard() {
         <Card className="group rounded-[24px] border-none bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-100/50">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
-              Lịch Thuốc / Tiêm
+              Lịch Hẹn Hôm Nay
             </CardTitle>
             <div className="rounded-xl bg-purple-50 p-3 text-purple-500 transition-colors group-hover:bg-purple-500 group-hover:text-white">
               <HiOutlineCalendar className="h-6 w-6" />
@@ -141,10 +210,10 @@ function DoctorDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-4xl font-black text-slate-800">
-              {stats?.today_schedules || 0}
+              {getTodayAppointmentsCount()}
             </div>
             <p className="mt-2 text-[11px] font-bold tracking-wide text-purple-500 uppercase">
-              Cần xác nhận trong ngày
+              Ca hẹn siêu âm / tiêm
             </p>
           </CardContent>
         </Card>
@@ -169,7 +238,6 @@ function DoctorDashboard() {
         </Card>
       </div>
 
-      {/* PATIENT TABLE */}
       <Card className="overflow-hidden rounded-[32px] border-none bg-white shadow-sm">
         <CardHeader className="border-b border-slate-50 p-6 px-8">
           <CardTitle className="text-xl font-black tracking-tighter text-slate-800 uppercase">
@@ -184,13 +252,13 @@ function DoctorDashboard() {
                   Bệnh nhân
                 </TableHead>
                 <TableHead className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                  Liên lạc
-                </TableHead>
-                <TableHead className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
                   Ngày tiếp nhận
                 </TableHead>
                 <TableHead className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
                   Trạng thái
+                </TableHead>
+                <TableHead className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                  Lịch hẹn tiếp theo
                 </TableHead>
                 <TableHead className="pr-8 text-right text-[10px] font-black tracking-widest text-slate-400 uppercase">
                   Thao tác
@@ -199,48 +267,48 @@ function DoctorDashboard() {
             </TableHeader>
             <TableBody>
               {patients.map((patient) => {
-                //Tìm bệnh nhân này có phác đồ bên treatment chưa
                 const patientProtocol = protocols.find(
-                  (p) => p.treatment_id === patient.id,
+                  (p) =>
+                    String(p.user_id) === String(patient.id) ||
+                    String(p.treatment_id) === String(patient.id),
                 );
-                const hasProtocol = !!patientProtocol; // true nếu tìm thấy, false nếu ko có
+                const hasProtocol = !!patientProtocol;
+
+                const upcomingApp = getUpcomingAppointment(patient.id);
 
                 return (
                   <TableRow
                     key={patient.id}
-                    className={`group cursor-pointer border-b border-slate-50 transition-colors ${
-                      hasProtocol
-                        ? "hover:bg-blue-50/30"
-                        : "hover:bg-amber-50/30"
-                    }`}
+                    className={`group cursor-pointer border-b border-slate-50 transition-colors hover:bg-slate-50`}
                     onClick={() => {
                       if (hasProtocol) {
-                        // Nếu có phác đồ -> Chuyển sang chi tiết
                         navigate(
                           `/doctor/protocols/details/${patientProtocol.id}`,
                         );
                       } else {
-                        // Chưa có -> Chuyển sang danh sách để lập mới
                         navigate(`/doctor/protocols`);
                       }
                     }}
                   >
                     <TableCell className="py-5 pl-8">
                       <div
-                        className={`font-black transition-colors ${hasProtocol ? "text-slate-800 group-hover:text-blue-600" : "text-slate-800 group-hover:text-amber-600"}`}
+                        className={`font-black text-slate-800 transition-colors group-hover:text-(--primaryCustom)`}
                       >
                         {patient.name}
                       </div>
                       <div className="text-[11px] font-bold text-slate-400">
-                        {patient.email}
+                        {patient.phone || "Chưa cập nhật SĐT"}
                       </div>
                     </TableCell>
-                    <TableCell className="font-bold text-slate-600">
-                      {patient.phone || "Chưa cập nhật"}
-                    </TableCell>
+
                     <TableCell className="text-xs font-bold text-slate-500">
-                      {new Date(patient.created_at).toLocaleDateString("vi-VN")}
+                      {patient.created_at
+                        ? new Date(patient.created_at).toLocaleDateString(
+                            "vi-VN",
+                          )
+                        : "Chưa rõ"}
                     </TableCell>
+
                     <TableCell>
                       {hasProtocol ? (
                         <Badge className="rounded-xl border-none bg-green-100 px-3 py-1 text-[10px] font-black text-green-700">
@@ -248,17 +316,39 @@ function DoctorDashboard() {
                         </Badge>
                       ) : (
                         <Badge className="rounded-lg border-none bg-amber-50 px-3 py-1 text-[10px] font-black text-amber-600 uppercase shadow-none">
-                          MỚI ĐĂNG KÝ
+                          CHỜ LẬP BỆNH ÁN
                         </Badge>
                       )}
                     </TableCell>
+
+                    <TableCell>
+                      {upcomingApp ? (
+                        <div>
+                          <p className="flex items-center gap-1 text-sm font-black text-(--primaryCustom)">
+                            <HiOutlineClock size={14} />{" "}
+                            {upcomingApp.appointment_time?.substring(0, 5)}
+                          </p>
+                          <p className="mt-0.5 text-[11px] font-bold text-slate-500">
+                            {new Date(
+                              upcomingApp.appointment_date,
+                            ).toLocaleDateString("vi-VN")}{" "}
+                            - {getTypeLabel(upcomingApp.type)}
+                          </p>
+                        </div>
+                      ) : (
+                        <span className="text-[11px] font-bold text-slate-300 italic">
+                          Không có lịch hẹn
+                        </span>
+                      )}
+                    </TableCell>
+
                     <TableCell className="pr-8 text-right">
                       <Button
                         variant="outline"
                         className={`cursor-pointer rounded-xl text-[10px] font-black tracking-widest uppercase transition-colors ${
                           hasProtocol
-                            ? "border-slate-200 text-slate-600 hover:border-blue-600 hover:bg-blue-600 hover:text-white"
-                            : "border-amber-200 text-amber-600 hover:border-amber-600 hover:bg-amber-600 hover:text-white"
+                            ? "border-slate-200 text-slate-600 hover:border-(--primaryCustom) hover:bg-(--primaryCustom) hover:text-white"
+                            : "border-(--primaryCustom) bg-(--primaryCustom) text-white hover:opacity-90"
                         }`}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -271,7 +361,7 @@ function DoctorDashboard() {
                           }
                         }}
                       >
-                        {hasProtocol ? "Hồ Sơ Bệnh Án" : "Lập Bệnh Án"}
+                        {hasProtocol ? "Hồ Sơ" : "Lập Bệnh Án"}
                       </Button>
                     </TableCell>
                   </TableRow>
