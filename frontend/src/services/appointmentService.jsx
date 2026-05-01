@@ -10,8 +10,13 @@ export const createAppointment = async (data) => {
   return response.data;
 };
 
-export const updateAppointment = async (id, data) => {
-  const response = await appointmentApi.put(`/appointments/${id}`, data);
+export const cancelAppointment = async (id) => {
+  const response = await appointmentApi.post(`/appointments/${id}/cancel`);
+  return response.data;
+};
+
+export const confirmAppointment = async (id) => {
+  const response = await appointmentApi.post(`/appointments/${id}/confirm`);
   return response.data;
 };
 
