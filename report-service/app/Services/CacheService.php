@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\ReportCache;
 use Illuminate\Support\Facades\Cache;
 
 class CacheService
@@ -12,28 +11,7 @@ class CacheService
      */
     public function remember(string $key, callable $callback, int $ttlMinutes = 15)
     {
-        // Try Redis cache first
-        $redisData = Cache::store('redis')->get($key);
-        if ($redisData !== null) {
-            return $redisData;
-        }
-
-        // Try database cache
-        $dbData = ReportCache::getByKey($key);
-        if ($dbData !== null) {
-            // Store in Redis for faster access
-            Cache::store('redis')->put($key, $dbData, now()->addMinutes($ttlMinutes));
-            return $dbData;
-        }
-
-        // Generate new data
-        $data = $callback();
-
-        // Store in both Redis and database
-        Cache::store('redis')->put($key, $data, now()->addMinutes($ttlMinutes));
-        ReportCache::setByKey($key, $data, $ttlMinutes);
-
-        return $data;
+        return Cache::remember($key, now()->addMinutes($ttlMinutes), $callback);
     }
 
     /**
@@ -41,8 +19,7 @@ class CacheService
      */
     public function forget(string $key): void
     {
-        Cache::store('redis')->forget($key);
-        ReportCache::where('cache_key', $key)->delete();
+        Cache::forget($key);
     }
 
     /**
@@ -50,8 +27,7 @@ class CacheService
      */
     public function clear(): void
     {
-        Cache::store('redis')->flush();
-        ReportCache::truncate();
+        Cache::flush();
     }
 
     /**
@@ -59,6 +35,6 @@ class CacheService
      */
     public function clearExpired(): void
     {
-        ReportCache::clearExpired();
+        // Redis handles expiration automatically! No action needed.
     }
 }

@@ -3,10 +3,10 @@
 namespace App\Services;
 
 use App\Models\Dashboard;
-use App\Models\ReportCache;
 use App\Models\TreatmentStat;
 use App\Models\RevenueStat;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class DashboardService
 {
@@ -19,15 +19,12 @@ class DashboardService
         $this->statisticsService = $statisticsService;
     }
 
-    /**
-     * Get dashboard data.
-     */
     public function getDashboardData(): array
     {
         $cacheKey = 'dashboard_data';
 
         return $this->cacheService->remember($cacheKey, function () {
-            $dashboard = Dashboard::getDefault();
+            $dashboard = Dashboard::first() ?? new Dashboard();
             $currentMonth = now()->format('Y-m');
 
             return [
@@ -35,71 +32,152 @@ class DashboardService
                 'overview' => $this->getSystemOverview(),
                 'treatment_stats' => $this->statisticsService->getTreatmentSuccessStats($currentMonth),
                 'revenue_stats' => $this->statisticsService->getRevenueStats($currentMonth),
-                'recent_reports' => \App\Models\Report::withStatus('ready')
+                'recent_reports' => \App\Models\Report::where('status', 'ready')
                     ->orderBy('created_at', 'desc')
                     ->limit(5)
                     ->get(),
             ];
-        }, config('services.dashboard_cache_ttl', 900));
+        }, 15); 
     }
 
-    /**
-     * Get system overview.
-     */
-    public function getSystemOverview(): array
+   public function getSystemOverview(): array
     {
         $cacheKey = 'system_overview';
 
         return $this->cacheService->remember($cacheKey, function () {
             $currentMonth = now()->format('Y-m');
 
+            // 1. Lấy dữ liệu tổng hợp từ Dashboard Summary
+            $treatmentSummary = $this->getTreatmentSummaryFromService();
+
+            // 2. Gọi thêm hàm đếm TỔNG SỐ PHÁC ĐỒ
+            $totalTreatments = $this->getTotalProtocols();
+
+            $treatmentStats = $this->statisticsService->getTreatmentSuccessStats($currentMonth);
+            $revenueStats = $this->statisticsService->getRevenueStats($currentMonth);
+
             return [
                 'total_patients' => $this->getTotalPatients(),
                 'total_doctors' => $this->getTotalDoctors(),
-                'active_treatments' => $this->getActiveTreatments(),
-                'completed_treatments' => $this->getCompletedTreatments(),
-                'total_revenue' => RevenueStat::getTotalRevenueForPeriod($currentMonth),
-                'success_rate' => TreatmentStat::getAverageSuccessRate($currentMonth),
+
+                // Móc dữ liệu từ Treatment
+                'total_treatments' => $totalTreatments, // Tổng tất cả các ca
+                'active_treatments' => $treatmentSummary['active_treatments'] ?? 0,
+                'completed_treatments' => $treatmentSummary['successful_pregnancies'] ?? 0,
+
+                'total_revenue' => $revenueStats['total_revenue'] ?? 0,
+                'success_rate' => $treatmentStats['success_rate'] ?? 0,
                 'period' => $currentMonth,
             ];
-        }, config('services.dashboard_cache_ttl', 900));
+        }, 15);
     }
 
     /**
-     * Get total patients count.
+     *ĐẾM TỔNG CA ĐIỀU TRỊ (TỪ PROTOCOLS)
+     */
+    protected function getTotalProtocols(): int
+    {
+        try {
+            $token = request()->bearerToken();
+            $url = env('TREATMENT_SERVICE_URL', 'http://127.0.0.1:8001') . '/api/v1/treatment/protocols?all=true';
+
+            $response = Http::withToken($token)->acceptJson()->timeout(5)->get($url);
+            $data = $response->json();
+
+            if ($response->successful()) {
+                if (isset($data['data']) && is_array($data['data'])) {
+                    return count($data['data']);
+                } elseif (is_array($data)) {
+                    return count($data);
+                }
+            }
+            return 0;
+        } catch (\Exception $e) {
+            Log::error('Lỗi lấy tổng ca điều trị: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /*
+     * GỌI QUA AUTH SERVICE ĐỂ ĐẾM SỐ KHÁCH HÀNG
      */
     protected function getTotalPatients(): int
     {
-        // This would typically call the user-service API
-        // For now, return a placeholder
-        return 0;
+        try {
+            $token = request()->bearerToken();
+            $url = env('AUTH_SERVICE_URL', 'http://127.0.0.1:8000') . '/api/doctor/customers';
+
+            $response = Http::withToken($token)->acceptJson()->timeout(5)->get($url);
+            $data = $response->json();
+
+            if ($response->successful() && isset($data['count'])) {
+                return (int) $data['count'];
+            }
+
+            Log::warning('Lỗi lấy Patient. Response từ Auth: ', $data ?? ['status' => $response->status()]);
+            return 0;
+        } catch (\Exception $e) {
+            Log::error('Lỗi mạng khi lấy số Khách hàng: ' . $e->getMessage());
+            return 0;
+        }
     }
 
     /**
-     * Get total doctors count.
+     * GỌI QUA AUTH SERVICE LẤY SỐ BÁC SĨ
      */
-    protected function getTotalDoctors(): int
+   protected function getTotalDoctors(): int
     {
-        // This would typically call the catalog-service API
-        // For now, return a placeholder
-        return 0;
+        try {
+            $token = request()->bearerToken();
+            $url = env('AUTH_SERVICE_URL', 'http://127.0.0.1:8000') . '/api/doctors';
+
+            $response = Http::withToken($token)->acceptJson()->timeout(5)->get($url);
+            $data = $response->json();
+
+            if ($response->successful()) {
+                // CHỖ NÀY NÈ: Có count thì xài count, không có thì đếm mảng data!
+                if (isset($data['count'])) {
+                    return (int) $data['count'];
+                } elseif (isset($data['data']) && is_array($data['data'])) {
+                    return count($data['data']);
+                }
+            }
+
+            Log::warning('Lỗi lấy Doctor. Response từ Auth: ', $data ?? ['status' => $response->status()]);
+            return 0;
+        } catch (\Exception $e) {
+            Log::error('Lỗi mạng khi lấy số Bác sĩ: ' . $e->getMessage());
+            return 0;
+        }
     }
 
-    /**
-     * Get active treatments count.
-     */
-    protected function getActiveTreatments(): int
-    {
-        return TreatmentStat::where('period', now()->format('Y-m'))
-            ->sum('in_progress');
-    }
 
-    /**
-     * Get completed treatments count.
-     */
-    protected function getCompletedTreatments(): int
+    /*
+     * GỌI QUA TREATMENT SERVICE ĐỂ LẤY THỐNG KÊ ĐIỀU TRỊ
+    */
+    protected function getTreatmentSummaryFromService(): array
     {
-        return TreatmentStat::where('period', now()->format('Y-m'))
-            ->sum('completed');
+        try {
+            $token = request()->bearerToken();
+
+            $url = env('TREATMENT_SERVICE_URL', 'http://127.0.0.1:8001') . '/api/v1/treatment/dashboard/summary?all=true';
+
+            $response = Http::withToken($token)->acceptJson()->timeout(5)->get($url);
+            $data = $response->json();
+
+            if ($response->successful()) {
+                if (isset($data['data']) && is_array($data['data'])) {
+                    return $data['data'];
+                } elseif (is_array($data)) {
+                    return $data;
+                }
+            }
+
+            Log::warning('Lỗi lấy Treatment Summary. Response: ', $data ?? ['status' => $response->status()]);
+            return [];
+        } catch (\Exception $e) {
+            Log::error('Lỗi mạng khi lấy Treatment Summary: ' . $e->getMessage());
+            return [];
+        }
     }
 }
