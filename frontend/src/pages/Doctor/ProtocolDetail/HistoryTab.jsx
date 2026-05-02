@@ -38,7 +38,7 @@ function HistoryTab() {
                     {new Date(event.event_date).toLocaleString("vi-VN")}
                   </time>
                   <div className="flex items-center gap-3">
-                    <Badge className="border-none bg-slate-900 px-3 text-[9px] font-black text-white uppercase">
+                    <Badge className="rounded-xl border-none bg-slate-900 px-3 text-[9px] font-black text-white uppercase">
                       {event.event_type}
                     </Badge>
 

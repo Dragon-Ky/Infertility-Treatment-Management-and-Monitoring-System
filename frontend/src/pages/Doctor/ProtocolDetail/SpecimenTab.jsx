@@ -33,7 +33,7 @@ function SpecimenTab() {
     };
     return (
       <Badge
-        className={`border-none px-2 py-0.5 text-[9px] font-black uppercase ${config[status]}`}
+        className={`rounded-xl border-none px-2 py-0.5 text-[9px] font-black uppercase ${config[status]}`}
       >
         {status}
       </Badge>

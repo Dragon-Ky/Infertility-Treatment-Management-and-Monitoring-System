@@ -182,7 +182,7 @@ function CustomerAppointments() {
   const renderStatusBadge = (item) => {
     if (item.source === "treatment_event") {
       return (
-        <Badge className="border-none bg-blue-100 px-3 py-1 text-[9px] font-black tracking-widest text-blue-700 uppercase shadow-none">
+        <Badge className="rounded-xl border-none bg-blue-100 px-3 py-1 text-[9px] font-black tracking-widest text-blue-700 uppercase shadow-none">
           <HiOutlineShieldCheck className="mr-1" size={12} /> Bác sĩ Chỉ định
         </Badge>
       );
@@ -191,25 +191,25 @@ function CustomerAppointments() {
     switch (item.status) {
       case "confirmed":
         return (
-          <Badge className="border-none bg-green-100 px-3 py-1 text-[9px] font-black tracking-widest text-green-700 uppercase shadow-none">
+          <Badge className="rounded-xl border-none bg-green-100 px-3 py-1 text-[9px] font-black tracking-widest text-green-700 uppercase shadow-none">
             Đã xác nhận
           </Badge>
         );
       case "cancelled":
         return (
-          <Badge className="border-none bg-red-100 px-3 py-1 text-[9px] font-black tracking-widest text-red-700 uppercase shadow-none">
+          <Badge className="rounded-xl border-none bg-red-100 px-3 py-1 text-[9px] font-black tracking-widest text-red-700 uppercase shadow-none">
             Đã hủy
           </Badge>
         );
       case "completed":
         return (
-          <Badge className="border-none bg-slate-200 px-3 py-1 text-[9px] font-black tracking-widest text-slate-700 uppercase shadow-none">
+          <Badge className="rounded-xl border-none bg-slate-200 px-3 py-1 text-[9px] font-black tracking-widest text-slate-700 uppercase shadow-none">
             Hoàn thành
           </Badge>
         );
       default:
         return (
-          <Badge className="border-none bg-amber-100 px-3 py-1 text-[9px] font-black tracking-widest text-amber-700 uppercase shadow-none">
+          <Badge className="rounded-xl border-none bg-amber-100 px-3 py-1 text-[9px] font-black tracking-widest text-amber-700 uppercase shadow-none">
             Chờ xác nhận
           </Badge>
         );

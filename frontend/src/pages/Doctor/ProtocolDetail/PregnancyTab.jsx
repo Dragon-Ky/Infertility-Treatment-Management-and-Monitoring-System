@@ -118,7 +118,7 @@ function PregnancyTab() {
                       </div>
                     </div>
                     <Badge
-                      className={`border-none px-4 py-1.5 text-[10px] font-black uppercase shadow-sm ${getStatusStyle(item.status)}`}
+                      className={`rounded-xl border-none px-4 py-1.5 text-[10px] font-black uppercase shadow-sm ${getStatusStyle(item.status)}`}
                     >
                       {item.status_label}
                     </Badge>

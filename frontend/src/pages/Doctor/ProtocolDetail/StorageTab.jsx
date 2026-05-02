@@ -56,7 +56,7 @@ function StorageTab() {
                     </h4>
                     <Badge
                       variant="outline"
-                      className="mt-2 border-slate-200 text-[9px] font-black text-slate-400 uppercase"
+                      className="mt-2 rounded-xl border-slate-200 text-[9px] font-black text-slate-400 uppercase"
                     >
                       {item.type.toUpperCase()} #{item.specimen_code}
                     </Badge>
