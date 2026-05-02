@@ -15,6 +15,7 @@ import ProtocolManagement from "@/pages/Doctor/ProtocolManagement";
 import ProtocolDetail from "@/pages/Doctor/ProtocolDetail";
 import DoctorAppointments from "@/pages/Doctor/DoctorAppointments";
 import CustomerAppointments from "@/pages/Customer/CustomerAppointments";
+import ReportDashboard from "@/pages/Manager/ReportDashboard";
 
 export const routes = [
   // --- PUBLIC ROUTES ---
@@ -68,6 +69,10 @@ export const routes = [
           {
             path: "manage-doctors",
             element: <div>Trang Manager quản lý Doctor</div>,
+          },
+          {
+            path: "reports",
+            element: <ReportDashboard />,
           },
         ],
       },
