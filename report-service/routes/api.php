@@ -11,6 +11,13 @@ use Illuminate\Support\Facades\Route;
 Route::get('/dashboard', [DashboardController::class, 'index']);
 Route::get('/dashboard/overview', [DashboardController::class, 'overview']);
 
+// Route nội bộ để các Service khác gọi qua yêu cầu xóa Cache
+Route::any('/clear-dashboard-cache', function () {
+    // Dùng cái này bén hơn Artisan::call nhiều, dọn sạch sành sanh Redis/File
+    \Illuminate\Support\Facades\Cache::flush();
+    return response()->json(['success' => true, 'message' => 'Cache cleared successfully']);
+});
+
 // --- PROTECTED ROUTES (JWT Authentication) ---
 Route::middleware('auth:sanctum')->group(function () {
 
