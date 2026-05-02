@@ -20,6 +20,10 @@ class DashboardController extends Controller
         // Lấy doctor ID từ user đã authenticate
         $doctorId = $request->user()?->id;
 
+        if ($request->query('all') === 'true') {
+            $doctorId = null;
+        }
+
         $data = $this->dashboardService->getDashboardData($doctorId);
 
         return response()->json([
