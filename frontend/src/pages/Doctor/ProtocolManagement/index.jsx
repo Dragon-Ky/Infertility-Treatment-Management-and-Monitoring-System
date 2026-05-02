@@ -174,101 +174,116 @@ function ProtocolManagement() {
                       .toLowerCase()
                       .includes(searchTerm.toLowerCase()),
                 )
-                .map((protocol) => (
-                  <TableRow
-                    key={protocol.id}
-                    className="group border-b border-slate-50 transition-all hover:bg-blue-50/20"
-                  >
-                    <TableCell
-                      className="cursor-pointer p-6 font-bold text-slate-400 hover:text-(--primaryCustom)"
-                      onClick={() =>
-                        navigate(`/doctor/protocols/details/${protocol.id}`)
-                      }
+                .map((protocol) => {
+                  const isCompleted = protocol.status === "completed";
+
+                  return (
+                    <TableRow
+                      key={protocol.id}
+                      className="group border-b border-slate-50 transition-all hover:bg-blue-50/20"
                     >
-                      {protocol.protocol_code || `#${protocol.id}`}
-                    </TableCell>
-                    <TableCell>
-                      <div
-                        className="flex cursor-pointer items-center gap-4"
+                      <TableCell
+                        className="cursor-pointer p-6 font-bold text-slate-400 hover:text-(--primaryCustom)"
                         onClick={() =>
                           navigate(`/doctor/protocols/details/${protocol.id}`)
                         }
                       >
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 font-black text-blue-600 italic transition-colors group-hover:bg-blue-100">
-                          {usersMap[String(protocol.treatment_id)]?.[0] || "U"}
+                        {protocol.protocol_code || `#${protocol.id}`}
+                      </TableCell>
+                      <TableCell>
+                        <div
+                          className="flex cursor-pointer items-center gap-4"
+                          onClick={() =>
+                            navigate(`/doctor/protocols/details/${protocol.id}`)
+                          }
+                        >
+                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 font-black text-blue-600 italic transition-colors group-hover:bg-blue-100">
+                            {usersMap[String(protocol.treatment_id)]?.[0] ||
+                              "U"}
+                          </div>
+                          <span className="text-sm font-black text-slate-800 uppercase hover:text-(--primaryCustom)">
+                            {usersMap[String(protocol.treatment_id)] ||
+                              `Bệnh nhân #${protocol.treatment_id}`}
+                          </span>
                         </div>
-                        <span className="text-sm font-black text-slate-800 uppercase hover:text-(--primaryCustom)">
-                          {usersMap[String(protocol.treatment_id)] ||
-                            `Bệnh nhân #${protocol.treatment_id}`}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span className="text-sm font-black text-blue-600">
-                          {protocol.protocol_name}
-                        </span>
-                        <span className="line-clamp-1 text-xs text-slate-400 italic">
-                          {protocol.diagnosis}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-[11px] font-bold text-slate-500">
-                      {formatDateDisplay(protocol.created_at)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        className={`rounded-lg border px-3 py-1 text-[10px] font-black ${protocol.is_active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
-                      >
-                        {protocol.is_active ? "ĐANG CHẠY" : "DỪNG"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="pr-6 text-right">
-                      <div className="flex items-center justify-end gap-3">
-                        <DeleteConfirm
-                          description={`phác đồ ${protocol.protocol_code || protocol.id}`}
-                          onConfirm={() => handleDelete(protocol.id)}
-                        />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-black text-blue-600">
+                            {protocol.protocol_name}
+                          </span>
+                          <span className="line-clamp-1 text-xs text-slate-400 italic">
+                            {protocol.diagnosis}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-[11px] font-bold text-slate-500">
+                        {formatDateDisplay(protocol.created_at)}
+                      </TableCell>
 
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              className="h-10 w-10 rounded-xl p-0 text-slate-400 hover:bg-slate-100"
+                      <TableCell>
+                        {isCompleted ? (
+                          <Badge className="rounded-lg border-none bg-purple-100 px-3 py-1 text-[10px] font-black text-purple-700 shadow-none">
+                            ĐÃ HOÀN THÀNH
+                          </Badge>
+                        ) : protocol.is_active ? (
+                          <Badge className="rounded-lg border-none bg-green-100 px-3 py-1 text-[10px] font-black text-green-700 shadow-none">
+                            ĐANG ĐIỀU TRỊ
+                          </Badge>
+                        ) : (
+                          <Badge className="rounded-lg border-none bg-red-100 px-3 py-1 text-[10px] font-black text-red-700 shadow-none">
+                            ĐÃ DỪNG
+                          </Badge>
+                        )}
+                      </TableCell>
+
+                      <TableCell className="pr-6 text-right">
+                        <div className="flex items-center justify-end gap-3">
+                          <DeleteConfirm
+                            description={`phác đồ ${protocol.protocol_code || protocol.id}`}
+                            onConfirm={() => handleDelete(protocol.id)}
+                          />
+
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                className="h-10 w-10 rounded-xl p-0 text-slate-400 hover:bg-slate-100"
+                              >
+                                <HiOutlineDotsVertical />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                              align="end"
+                              className="min-w-[180px] rounded-2xl border-none p-2 font-bold shadow-2xl"
                             >
-                              <HiOutlineDotsVertical />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent
-                            align="end"
-                            className="min-w-[180px] rounded-2xl border-none p-2 font-bold shadow-2xl"
-                          >
-                            <DropdownMenuItem
-                              className="cursor-pointer rounded-xl p-3 text-blue-600 focus:bg-(--primaryCustom)"
-                              onClick={() =>
-                                navigate(
-                                  `/doctor/protocols/details/${protocol.id}`,
-                                )
-                              }
-                            >
-                              Chi tiết phác đồ
-                            </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="cursor-pointer rounded-xl p-3 text-blue-600 focus:bg-(--primaryCustom)"
+                                onClick={() =>
+                                  navigate(
+                                    `/doctor/protocols/details/${protocol.id}`,
+                                  )
+                                }
+                              >
+                                Chi tiết phác đồ
+                              </DropdownMenuItem>
 
-                            <AddProtocolModal
-                              editData={protocol}
-                              onAdded={loadInitialData}
-                              triggerType="menuItem"
-                            />
+                              <AddProtocolModal
+                                editData={protocol}
+                                onAdded={loadInitialData}
+                                triggerType="menuItem"
+                              />
 
-                            <DropdownMenuItem className="focus:bg-primary cursor-pointer rounded-xl p-3">
-                              In đơn thuốc
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
+                              <DropdownMenuItem className="focus:bg-primary cursor-pointer rounded-xl p-3">
+                                In đơn thuốc
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
             )}
           </TableBody>
         </Table>

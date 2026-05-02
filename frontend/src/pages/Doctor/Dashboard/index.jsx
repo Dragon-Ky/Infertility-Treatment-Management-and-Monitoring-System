@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Table,
@@ -20,6 +20,7 @@ import {
 import { TbBabyCarriage } from "react-icons/tb";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import toast from "react-hot-toast";
+
 import { getAllProtocols } from "@/services/protocolService";
 import { getCustomers, getTreatmentDashboard } from "@/services/doctorService";
 import { getAllAppointments } from "@/services/appointmentService";
@@ -32,36 +33,37 @@ function DoctorDashboard() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const [customersRes, statsRes, protocolsRes, appsRes] =
-          await Promise.all([
-            getCustomers(),
-            getTreatmentDashboard(),
-            getAllProtocols(),
-            getAllAppointments(),
-          ]);
+  const fetchDashboardData = useCallback(async () => {
+    try {
+      const [customersRes, statsRes, protocolsRes, appsRes] = await Promise.all(
+        [
+          getCustomers(),
+          getTreatmentDashboard(),
+          getAllProtocols(),
+          getAllAppointments(),
+        ],
+      );
 
-        if (customersRes.status === "success") {
-          setPatients(customersRes.data || []);
-        }
-
-        setStats(statsRes.data || statsRes || {});
-        setProtocols(protocolsRes?.data || protocolsRes || []);
-
-        const rawApps = appsRes?.data ? appsRes.data : appsRes;
-        setAppointments(Array.isArray(rawApps) ? rawApps : []);
-      } catch (error) {
-        console.error("Lỗi tải Dashboard:", error);
-        toast.error("Không thể tải toàn bộ dữ liệu hệ thống!");
-      } finally {
-        setLoading(false);
+      if (customersRes.status === "success") {
+        setPatients(customersRes.data || []);
       }
-    };
 
-    fetchDashboardData();
+      setStats(statsRes.data || statsRes || {});
+      setProtocols(protocolsRes?.data || protocolsRes || []);
+
+      const rawApps = appsRes?.data ? appsRes.data : appsRes;
+      setAppointments(Array.isArray(rawApps) ? rawApps : []);
+    } catch (error) {
+      console.error("Lỗi tải Dashboard:", error);
+      toast.error("Không thể tải toàn bộ dữ liệu hệ thống!");
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
   const getLocalTodayString = () => {
     const today = new Date();
@@ -133,7 +135,7 @@ function DoctorDashboard() {
             Hôm nay hệ thống ghi nhận{" "}
             <span className="font-bold text-(--primaryCustom)">
               {patients.length}
-            </span>
+            </span>{" "}
             bệnh nhân đăng ký.
           </p>
         </div>
@@ -142,18 +144,14 @@ function DoctorDashboard() {
           <Button
             variant="outline"
             className="h-12 cursor-pointer rounded-2xl border-2 border-(--primaryCustom) bg-white px-6 font-black tracking-widest text-(--primaryCustom) uppercase shadow-sm transition-all hover:-translate-y-1 hover:bg-slate-50 hover:text-(--primaryCustom)"
-            onClick={() => {
-              navigate(`/doctor/protocols`);
-            }}
+            onClick={() => navigate(`/doctor/protocols`)}
           >
             <HiOutlineClipboardCheck className="mr-2 h-5 w-5" /> Quản lý Phác đồ
           </Button>
 
           <Button
             className="h-12 cursor-pointer rounded-2xl bg-(--primaryCustom) px-6 font-black tracking-widest text-white uppercase shadow-lg shadow-blue-200 transition-all hover:-translate-y-1 hover:opacity-90"
-            onClick={() => {
-              navigate(`/doctor/appointments`);
-            }}
+            onClick={() => navigate(`/doctor/appointments`)}
           >
             <HiOutlineCalendar className="mr-2 h-5 w-5" /> Quản lý Lịch hẹn
           </Button>
@@ -273,7 +271,7 @@ function DoctorDashboard() {
                     String(p.treatment_id) === String(patient.id),
                 );
                 const hasProtocol = !!patientProtocol;
-
+                const isCompleted = patientProtocol?.status === "completed";
                 const upcomingApp = getUpcomingAppointment(patient.id);
 
                 return (
@@ -281,13 +279,11 @@ function DoctorDashboard() {
                     key={patient.id}
                     className={`group cursor-pointer border-b border-slate-50 transition-colors hover:bg-slate-50`}
                     onClick={() => {
-                      if (hasProtocol) {
+                      if (hasProtocol)
                         navigate(
                           `/doctor/protocols/details/${patientProtocol.id}`,
                         );
-                      } else {
-                        navigate(`/doctor/protocols`);
-                      }
+                      else navigate(`/doctor/protocols`);
                     }}
                   >
                     <TableCell className="py-5 pl-8">
@@ -311,9 +307,15 @@ function DoctorDashboard() {
 
                     <TableCell>
                       {hasProtocol ? (
-                        <Badge className="rounded-xl border-none bg-green-100 px-3 py-1 text-[10px] font-black text-green-700">
-                          ĐANG ĐIỀU TRỊ
-                        </Badge>
+                        isCompleted ? (
+                          <Badge className="rounded-xl border-none bg-purple-100 px-3 py-1 text-[10px] font-black text-purple-700 shadow-none">
+                            ĐÃ HOÀN THÀNH
+                          </Badge>
+                        ) : (
+                          <Badge className="rounded-xl border-none bg-green-100 px-3 py-1 text-[10px] font-black text-green-700 shadow-none">
+                            ĐANG ĐIỀU TRỊ
+                          </Badge>
+                        )
                       ) : (
                         <Badge className="rounded-lg border-none bg-amber-50 px-3 py-1 text-[10px] font-black text-amber-600 uppercase shadow-none">
                           CHỜ LẬP BỆNH ÁN
@@ -352,16 +354,14 @@ function DoctorDashboard() {
                         }`}
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (hasProtocol) {
+                          if (hasProtocol)
                             navigate(
                               `/doctor/protocols/details/${patientProtocol.id}`,
                             );
-                          } else {
-                            navigate(`/doctor/protocols`);
-                          }
+                          else navigate(`/doctor/protocols`);
                         }}
                       >
-                        {hasProtocol ? "Hồ Sơ" : "Lập Bệnh Án"}
+                        {hasProtocol ? "Xem Hồ Sơ" : "Lập Bệnh Án"}
                       </Button>
                     </TableCell>
                   </TableRow>

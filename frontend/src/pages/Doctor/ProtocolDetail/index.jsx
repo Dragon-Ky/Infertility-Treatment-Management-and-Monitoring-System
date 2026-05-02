@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
-import { getProtocolDetail } from "@/services/protocolService";
+import { getProtocolDetail, updateProtocol } from "@/services/protocolService";
 import { getCustomers } from "@/services/doctorService";
 import { getEventsByProtocol, deleteEvent } from "@/services/eventService";
 import { getLabResults, deleteLabResult } from "@/services/labService";
@@ -13,7 +13,23 @@ import {
   deleteSpecimen,
 } from "@/services/specimenService";
 import { getStorageByProtocol } from "@/services/storageService";
+import { getDoctors } from "@/services/managerService";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { HiCheckCircle, HiOutlineShieldCheck } from "react-icons/hi";
 import toast from "react-hot-toast";
 import ProtocolHeader from "./ProtocolHeader";
 import PatientProfile from "./PatientProfile";
@@ -30,11 +46,14 @@ const ProtocolDetail = () => {
   const { id } = useParams();
   const [protocol, setProtocol] = useState(null);
   const [customer, setCustomer] = useState(null);
+  const [doctor, setDoctor] = useState(null);
   const [events, setEvents] = useState([]);
   const [labResults, setLabResults] = useState([]);
   const [schedules, setSchedules] = useState([]);
   const [specimens, setSpecimens] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const [isCompleting, setIsCompleting] = useState(false);
 
   const fetchFullData = useCallback(async () => {
     try {
@@ -46,6 +65,7 @@ const ProtocolDetail = () => {
         scheduleRes,
         specimenRes,
         storageRes,
+        doctorsRes,
       ] = await Promise.all([
         getProtocolDetail(id),
         getEventsByProtocol(id),
@@ -54,15 +74,14 @@ const ProtocolDetail = () => {
         getMedicationSchedules(id),
         getSpecimensByProtocol(id),
         getStorageByProtocol(id),
+        getDoctors(),
       ]);
 
       const pData = protocolRes.data;
-      setProtocol(pData);
       setEvents(eventsRes.data || []);
       setLabResults(labRes.data || []);
       setSchedules(scheduleRes.data || []);
 
-      //Tự động Join dữ liệu vào storage
       const storageData = storageRes.data || storageRes || [];
       const rawSpecimens = specimenRes.data || [];
 
@@ -79,12 +98,24 @@ const ProtocolDetail = () => {
       setSpecimens(specimensWithStorage);
 
       if (pData) {
+        const doctorsData = doctorsRes.data || doctorsRes || [];
+        const foundDoctor = doctorsData.find(
+          (d) => String(d.id) === String(pData.doctor_id),
+        );
+        setDoctor(foundDoctor);
+
+        pData.doctor_name =
+          foundDoctor?.name || `Bác sĩ ID: ${pData.doctor_id}`;
+        pData.doctor_phone = foundDoctor?.phone || "";
+
         const targetId = pData.treatment_id || pData.customer_id;
         const foundCustomer = customerRes.data.find(
           (c) => String(c.id) === String(targetId),
         );
         setCustomer(foundCustomer);
       }
+
+      setProtocol(pData);
     } catch (error) {
       console.error("Lỗi đồng bộ:", error);
       toast.error("Lỗi đồng bộ Medicen!");
@@ -118,7 +149,6 @@ const ProtocolDetail = () => {
     }
   };
 
-  // Cập nhật hàm Fetch Specimens để tự join dữ liệu
   const fetchSpecimens = async () => {
     try {
       const [specimenRes, storageRes] = await Promise.all([
@@ -140,7 +170,6 @@ const ProtocolDetail = () => {
     }
   };
 
-  //Hàm xử lí xóa
   const handleDeleteEvent = async (eventId) => {
     try {
       await deleteEvent(eventId);
@@ -185,7 +214,20 @@ const ProtocolDetail = () => {
     }
   };
 
-  //Khởi tạo dữ liệu
+  const handleMarkAsCompleted = async () => {
+    try {
+      setIsCompleting(true);
+      await updateProtocol(protocol.id, { status: "completed" });
+      toast.success("Tuyệt vời! Ca điều trị đã được ghi nhận hoàn thành.");
+      await fetchFullData();
+    } catch (error) {
+      console.error(error);
+      toast.error("Đã xảy ra lỗi khi cập nhật trạng thái!");
+    } finally {
+      setIsCompleting(false);
+    }
+  };
+
   useEffect(() => {
     const init = async () => {
       setLoading(true);
@@ -198,7 +240,7 @@ const ProtocolDetail = () => {
   if (loading)
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-50">
-        <div className="h-16 w-16 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
+        <div className="h-16 w-16 animate-spin rounded-full border-4 border-(--primaryCustom) border-t-transparent"></div>
         <p className="animate-pulse text-[10px] font-black tracking-widest text-slate-400 uppercase">
           Đang đồng bộ hồ sơ...
         </p>
@@ -216,6 +258,7 @@ const ProtocolDetail = () => {
     id,
     protocol,
     customer,
+    doctor,
     events,
     labResults,
     schedules,
@@ -231,46 +274,119 @@ const ProtocolDetail = () => {
     handleDeleteSpecimen,
   };
 
+  const isProtocolCompleted = protocol.status === "completed";
+
   return (
     <ProtocolProvider value={contextValue}>
       <div className="animate-in fade-in zoom-in-95 min-h-screen space-y-6 bg-slate-50 p-6 duration-500">
         <ProtocolHeader protocol={protocol} onUpdated={fetchFullData} />
         <PatientProfile protocol={protocol} customer={customer} />
 
+        <div className="flex flex-col items-center justify-between rounded-[24px] border border-slate-100 bg-white p-5 shadow-sm sm:flex-row">
+          <div className="flex items-center gap-4">
+            <span className="text-[11px] font-black tracking-widest text-slate-400 uppercase">
+              Trạng Thái Hồ Sơ:
+            </span>
+            {isProtocolCompleted ? (
+              <Badge className="rounded-xl border-none bg-purple-100 px-4 py-2 font-black tracking-widest text-purple-700 shadow-none">
+                <HiCheckCircle className="mr-1.5 inline h-4 w-4" /> ĐÃ HOÀN
+                THÀNH ĐIỀU TRỊ
+              </Badge>
+            ) : (
+              <Badge className="rounded-xl border-none bg-green-100 px-4 py-2 font-black tracking-widest text-green-700 shadow-none">
+                <AiOutlineLoading3Quarters className="mr-2 inline h-3 w-3 animate-spin" />{" "}
+                ĐANG TRONG LỘ TRÌNH
+              </Badge>
+            )}
+          </div>
+
+          {!isProtocolCompleted && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  disabled={isCompleting}
+                  className="mt-4 h-11 cursor-pointer rounded-xl bg-purple-600 px-6 font-black tracking-widest text-white shadow-md shadow-purple-200 transition-all hover:-translate-y-0.5 hover:bg-purple-700 sm:mt-0"
+                >
+                  {isCompleting ? (
+                    <>
+                      <AiOutlineLoading3Quarters className="mr-2 h-4 w-4 animate-spin" />{" "}
+                      ĐANG XỬ LÝ...
+                    </>
+                  ) : (
+                    <>
+                      <HiOutlineShieldCheck className="mr-2 h-5 w-5" /> CHỐT HỒ
+                      SƠ - HOÀN THÀNH
+                    </>
+                  )}
+                </Button>
+              </AlertDialogTrigger>
+
+              <AlertDialogContent className="rounded-[24px] border-none shadow-2xl">
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-xl font-black text-slate-800">
+                    Xác nhận hoàn tất điều trị?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="font-medium text-slate-500">
+                    Hành động này sẽ chốt hồ sơ và chuyển trạng thái phác đồ
+                    sang{" "}
+                    <span className="font-bold text-purple-600">
+                      "Đã hoàn thành"
+                    </span>
+                    . Bạn có chắc chắn bệnh nhân đã kết thúc lộ trình điều trị
+                    hoặc đã đậu thai thành công không?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="mt-4">
+                  <AlertDialogCancel className="rounded-xl border-slate-200 font-bold text-slate-500 hover:bg-slate-50">
+                    Hủy bỏ
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleMarkAsCompleted}
+                    className="rounded-xl bg-purple-600 font-bold text-white hover:bg-purple-700"
+                  >
+                    Xác nhận Hoàn thành
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+        </div>
+        {/* ------------------------------------------ */}
+
         <Tabs defaultValue="medical" className="space-y-6">
           <div className="flex w-full overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden">
             <TabsList className="mx-auto inline-flex h-auto min-h-[64px] w-max gap-2 rounded-[24px] bg-white p-2 shadow-sm">
               <TabsTrigger
                 value="medical"
-                className="h-12 rounded-xl px-8 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                className="h-12 rounded-xl px-8 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-(--primaryCustom) data-[state=active]:text-white"
               >
                 HỒ SƠ Y TẾ
               </TabsTrigger>
 
               <TabsTrigger
                 value="schedule"
-                className="h-12 rounded-xl px-8 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                className="h-12 rounded-xl px-8 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-(--primaryCustom) data-[state=active]:text-white"
               >
                 LỊCH THUỐC
               </TabsTrigger>
 
               <TabsTrigger
                 value="lab"
-                className="h-12 rounded-xl px-8 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                className="h-12 rounded-xl px-8 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-(--primaryCustom) data-[state=active]:text-white"
               >
                 XÉT NGHIỆM (LAB)
               </TabsTrigger>
 
               <TabsTrigger
                 value="specimens"
-                className="h-12 rounded-xl px-8 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                className="h-12 rounded-xl px-8 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-(--primaryCustom) data-[state=active]:text-white"
               >
                 MẪU PHẨM (SPECIMENS)
               </TabsTrigger>
 
               <TabsTrigger
                 value="storage"
-                className="h-12 rounded-xl px-8 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                className="h-12 rounded-xl px-8 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-(--primaryCustom) data-[state=active]:text-white"
               >
                 LƯU TRỮ (STORAGE)
               </TabsTrigger>
@@ -284,7 +400,7 @@ const ProtocolDetail = () => {
 
               <TabsTrigger
                 value="history"
-                className="h-12 rounded-xl px-8 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                className="h-12 rounded-xl px-8 text-[10px] font-black tracking-widest uppercase data-[state=active]:bg-(--primaryCustom) data-[state=active]:text-white"
               >
                 NHẬT KÝ (EVENTS)
               </TabsTrigger>
