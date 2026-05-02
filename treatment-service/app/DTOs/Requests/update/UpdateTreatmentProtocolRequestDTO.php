@@ -9,6 +9,7 @@ readonly class UpdateTreatmentProtocolRequestDTO
         public ?string $diagnosis = null,
         public ?string $prescription = null,
         public ?string $notes = null,
+        public ?string $status = null,
     ) {}
 
     public static function fromArray(array $data): self
@@ -19,6 +20,7 @@ readonly class UpdateTreatmentProtocolRequestDTO
             diagnosis: $data['diagnosis'] ?? null,
             prescription: $data['prescription'] ?? null,
             notes: $data['notes'] ?? null,
+            status: $data['status'] ?? null,
         );
     }
 }

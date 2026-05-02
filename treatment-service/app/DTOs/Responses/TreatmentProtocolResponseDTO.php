@@ -7,7 +7,7 @@ use App\Models\TreatmentProtocol;
 readonly class TreatmentProtocolResponseDTO
 {
     public function __construct(
-        public int $id,              
+        public int $id,
         public ?string $protocol_code,
         public int $treatment_id,
         public int $doctor_id,
@@ -17,6 +17,7 @@ readonly class TreatmentProtocolResponseDTO
         public ?string $notes,
         public string $created_at_formatted,
         public bool $is_active,
+        public string $status,
     ) {}
 
     public static function fromModel(TreatmentProtocol $protocol): self
@@ -32,7 +33,8 @@ readonly class TreatmentProtocolResponseDTO
             notes: $protocol->notes,
             created_at_formatted: $protocol->created_at->format('d/m/Y H:i'),
             is_active: (bool) $protocol->is_active,
-            
+            status: $protocol->status ?? 'in_progress',
+
         );
     }
 
@@ -49,6 +51,7 @@ readonly class TreatmentProtocolResponseDTO
             'notes' => $this->notes,
             'created_at' => $this->created_at_formatted,
             'is_active' => $this->is_active,
+            'status' => $this->status,
         ];
     }
 }

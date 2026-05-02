@@ -19,6 +19,7 @@ class TreatmentProtocol extends Model
         'diagnosis',
         'prescription',
         'notes',
+        'status',
         'is_active'
     ];
     protected $casts = [

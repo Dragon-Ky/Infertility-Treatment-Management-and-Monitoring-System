@@ -11,6 +11,7 @@ readonly class CreateTreatmentProtocolRequestDTO
         public ?string $diagnosis = null,
         public ?string $prescription = null,
         public ?string $notes = null,
+        public ?string $status = 'in_progress',
     ) {}
 
     public static function fromArray(array $data): self
@@ -23,6 +24,7 @@ readonly class CreateTreatmentProtocolRequestDTO
             diagnosis: $data['diagnosis'] ?? null,
             prescription: $data['prescription'] ?? null,
             notes: $data['notes'] ?? null,
+            status: $data['status'] ?? 'in_progress',
         );
     }
 }
