@@ -18,8 +18,11 @@ Route::any('/clear-dashboard-cache', function () {
     return response()->json(['success' => true, 'message' => 'Cache cleared successfully']);
 });
 
+Route::get('/reports/{id}/download', [ReportController::class, 'download']);
+
+
 // --- PROTECTED ROUTES (JWT Authentication) ---
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('role:Customer,Manager,Admin')->group(function () {
 
     // --- REPORT ROUTES ---
     Route::get('/reports/treatment-success', [ReportController::class, 'treatmentSuccess']);
@@ -29,10 +32,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/reports/monthly/{month}', [ReportController::class, 'monthly']);
     Route::get('/reports/yearly/{year}', [ReportController::class, 'yearly']);
     Route::post('/reports/generate', [ReportController::class, 'generate']);
-    Route::get('/reports/{id}/download', [ReportController::class, 'download']);
 
     // --- ADMIN ROUTES ---
-    Route::middleware('role:Admin|Manager')->group(function () {
+    Route::middleware('role:Admin,Manager')->group(function () {
         Route::get('/admin/sync-status', [AdminController::class, 'syncStatus']);
         Route::post('/admin/sync/trigger', [AdminController::class, 'triggerSync']);
     });
