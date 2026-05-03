@@ -1,11 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  HiOutlineCurrencyDollar,
-  HiOutlineUserGroup,
-  HiOutlineClipboardCheck,
-  HiOutlineTrendingUp,
-  HiOutlineDownload,
-} from "react-icons/hi";
+import { HiOutlineDownload } from "react-icons/hi";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,8 +19,6 @@ import {
   AreaChart,
   Area,
 } from "recharts";
-
-// Nhớ import đúng các hàm API ní vừa tạo nha
 import {
   getDashboardData,
   getRevenueReport,
@@ -34,7 +26,7 @@ import {
   getPatientsReport,
   getDoctorsReport,
   generateReport,
-} from "@/services/reportService"; // <- Đổi lại path cho đúng với source của ní
+} from "@/services/reportService";
 
 const COLORS = ["#2563eb", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6"];
 
@@ -57,7 +49,7 @@ function ReportDashboard() {
       setLoading(true);
       const currentMonth = new Date().toISOString().slice(0, 7); // Format: YYYY-MM
 
-      // Gọi đồng loạt cả 5 API cùng lúc cho tốc độ bàn thờ
+      // Gọi đồng loạt cả 5 API cùng lúc
       const [dashRes, revRes, treatRes, patRes, docRes] = await Promise.all([
         getDashboardData().catch(() => null),
         getRevenueReport(currentMonth).catch(() => null),
@@ -73,9 +65,10 @@ function ReportDashboard() {
         revenue: formatChartData(revRes?.data, "Doanh Thu"),
         treatment: formatChartData(treatRes?.data, "Ca"),
         patients: formatChartData(patRes?.data, "Bệnh nhân"),
-        // Mảng danh sách bác sĩ (Nếu API trả về mảng)
+        // Mảng danh sách bác sĩ
         doctors: Array.isArray(docRes?.data) ? docRes.data : [],
       });
+      // eslint-disable-next-line no-unused-vars
     } catch (error) {
       toast.error("Có lỗi xảy ra khi tải dữ liệu phân tích!");
     } finally {
@@ -83,7 +76,7 @@ function ReportDashboard() {
     }
   };
 
-  // Hàm "chế" Object thành Array để Recharts đọc được
+  // Hàm biến đổi Object thành Array để Recharts đọc được
   const formatChartData = (dataObj, valueName) => {
     if (!dataObj || typeof dataObj !== "object") return [];
     return Object.entries(dataObj)
@@ -107,6 +100,7 @@ function ReportDashboard() {
       if (res && res.success) {
         toast.success("Đã tạo lệnh xuất báo cáo!", { id: "generate" });
       }
+      // eslint-disable-next-line no-unused-vars
     } catch (error) {
       toast.error("Lỗi kết nối khi tạo báo cáo!", { id: "generate" });
     }
@@ -125,7 +119,6 @@ function ReportDashboard() {
 
   return (
     <div className="animate-in fade-in zoom-in-95 min-h-screen space-y-8 bg-slate-50/50 p-8 duration-500">
-      {/* HEADER */}
       <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
         <div>
           <h1 className="text-3xl font-black tracking-tight text-slate-900">
@@ -143,9 +136,7 @@ function ReportDashboard() {
         </Button>
       </div>
 
-      {/* TỔNG QUAN */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {/* ... (Có thể giữ lại 4 thẻ tổng quan cũ ở đây cho đẹp) ... */}
         <Card className="rounded-[24px] border-none bg-white shadow-sm">
           <CardHeader>
             <CardTitle className="text-[10px] font-black text-slate-400 uppercase">
@@ -199,9 +190,8 @@ function ReportDashboard() {
         </Card>
       </div>
 
-      {/* KHU VỰC BIỂU ĐỒ - 4 API */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* 1. API REVENUE (Doanh thu) */}
+        {/* Revenue (Doanh thu) */}
         <Card className="rounded-[32px] border-none bg-white p-6 shadow-sm">
           <h3 className="mb-6 text-lg font-black text-slate-800 uppercase">
             Cơ cấu Doanh Thu
@@ -237,7 +227,7 @@ function ReportDashboard() {
           </div>
         </Card>
 
-        {/* 2. API TREATMENT SUCCESS (Tỉ lệ IVF) */}
+        {/* Apo treatment success (Tỉ lệ IVF) */}
         <Card className="rounded-[32px] border-none bg-white p-6 shadow-sm">
           <h3 className="mb-6 text-lg font-black text-slate-800 uppercase">
             Trạng Thái Phác Đồ
@@ -269,7 +259,7 @@ function ReportDashboard() {
           </div>
         </Card>
 
-        {/* 3. API PATIENTS (Bệnh nhân) */}
+        {/* Api patients (Khách hàng) */}
         <Card className="rounded-[32px] border-none bg-white p-6 shadow-sm">
           <h3 className="mb-6 text-lg font-black text-slate-800 uppercase">
             Thống Kê Bệnh Nhân
@@ -302,7 +292,7 @@ function ReportDashboard() {
           </div>
         </Card>
 
-        {/* 4. API DOCTORS (Bác sĩ) */}
+        {/* Api doctors (Bác sĩ) */}
         <Card className="rounded-[32px] border-none bg-white p-6 shadow-sm">
           <h3 className="mb-6 text-lg font-black text-slate-800 uppercase">
             Hiệu Suất Bác Sĩ
