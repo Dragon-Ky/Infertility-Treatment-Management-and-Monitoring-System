@@ -112,19 +112,20 @@ class NiFiService
                         $doctorCases[$docId]++;
 
                         // Tính tổng tiền
+                        DB::table('synced_protocols')->updateOrInsert(
                             ['remote_id' => $p['id']],
                             [
                                 'status' => $p['status'] ?? 'in_progress',
                                 'price' => isset($p['price']) ? (int)$p['price'] : 0,
                                 'synced_at' => now(),
-                                // Nếu API Treatment có trả về created_at, dùng nó để filter theo tháng cho chuẩn. Nếu không thì dùng giờ hiện tại.
+                                // Nếu API Treatment có trả về created_at, ta dùng nó để filter theo tháng cho chuẩn. Nếu không thì dùng giờ hiện tại.
                                 'created_at' => isset($p['created_at']) ? \Carbon\Carbon::createFromFormat('d/m/Y H:i', $p['created_at'])->format('Y-m-d H:i:s') : now(),
                                 'updated_at' => now(),
                             ]
                         );
                     }
 
-                    // Chạy qua Auth lấy tên Bác sĩ
+                    //  Chạy qua Auth lấy tên Bác sĩ
                     $authResponse = Http::withToken($token)->get('http://127.0.0.1:8000/api/doctors');
                     $doctorsList = [];
                     if ($authResponse->successful()) {
@@ -135,7 +136,7 @@ class NiFiService
                         }
                     }
 
-                    // Ráp Tên và Số ca lại, lưu vào bảng synced_doctors
+                    //  Ráp Tên và Số ca lại, lưu vào bảng synced_doctors
                     foreach ($doctorCases as $docId => $cases) {
                         $docName = $doctorsList[$docId] ?? "Bác sĩ ID: {$docId}";
                         DB::table('synced_doctors')->updateOrInsert(
