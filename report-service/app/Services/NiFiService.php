@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\SyncLog;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
 
 class NiFiService
 {
@@ -58,59 +59,116 @@ class NiFiService
         }
     }
 
-    /**
+
+    /*
      * Đồng bộ DB giữa các Microservice
      */
     protected function executeRealSync(string $sourceService, string $syncType): array
     {
-        // Lấy token của Manager đang thao tác để làm vé đi qua các nhà khác
         $token = request()->bearerToken();
         $recordsCount = 0;
 
         try {
-            // Tùy theo service mà đi gọi đúng cái API của nhà đó
             switch ($sourceService) {
                 case 'auth':
-                    // Chạy qua Auth (Cổng 8000) lấy danh sách User
                     $response = Http::withToken($token)->get('http://127.0.0.1:8000/api/doctor/customers');
+                    if (!$response->successful()) {
+                        throw new \Exception("Auth API trả về lỗi: " . $response->status());
+                    }
+
+                    $data = $response->json();
+                    $customers = isset($data['data']) ? $data['data'] : (is_array($data) ? $data : []);
+
+                    foreach ($customers as $c) {
+                        DB::table('synced_patients')->updateOrInsert(
+                            ['remote_id' => $c['id'] ?? rand(1000, 9999)], 
+                            [
+                                'name' => $c['name'] ?? $c['full_name'] ?? 'Bệnh nhân ẩn danh',
+                                'gender' => $c['gender'] ?? 'N/A',
+                                'synced_at' => now(),
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ]
+                        );
+                    }
+                    $recordsCount = count($customers);
                     break;
 
                 case 'treatment':
-                    // Chạy qua Treatment (Cổng 8001) lấy danh sách Phác đồ
+                    //  Chạy qua Treatment (Cổng 8001) lấy danh sách Phác đồ
                     $response = Http::withToken($token)->get('http://127.0.0.1:8001/api/v1/treatment/protocols');
+                    if (!$response->successful()) {
+                        throw new \Exception("Treatment API trả về lỗi: " . $response->status());
+                    }
+                    $data = $response->json();
+                    $protocols = isset($data['data']) ? $data['data'] : (is_array($data) ? $data : []);
+                    $recordsCount = count($protocols);
+
+                    // đếm bác sĩ ID này đang có bao nhiêu ca
+                    $doctorCases = [];
+                    foreach ($protocols as $p) {
+                        $docId = $p['doctor_id'];
+                        if (!isset($doctorCases[$docId])) {
+                            $doctorCases[$docId] = 0;
+                        }
+                        $doctorCases[$docId]++;
+                    }
+
+                    // Chạy qua Auth (Cổng 8000) lấy danh sách tên Bác sĩ
+                    $authResponse = Http::withToken($token)->get('http://127.0.0.1:8000/api/doctors');
+                    $doctorsList = [];
+                    if ($authResponse->successful()) {
+                        $authData = $authResponse->json();
+                        $docs = isset($authData['data']) ? $authData['data'] : (is_array($authData) ? $authData : []);
+                        foreach ($docs as $d) {
+                            // Lưu vào mảng để dễ dò tìm: [3 => 'Bác sĩ chuyên khoa']
+                            $doctorsList[$d['id']] = $d['name']; 
+                        }
+                    }
+
+                    // Ráp Tên và Số ca lại, lưu vào kho
+                    foreach ($doctorCases as $docId => $cases) {
+                        // Lấy tên từ danh sách
+                        $docName = $doctorsList[$docId] ?? "Bác sĩ ID: {$docId}";
+
+                        DB::table('synced_doctors')->updateOrInsert(
+                            ['doctor_id' => $docId],
+                            [
+                                'name' => $docName,
+                                'cases_count' => $cases,
+                                'updated_at' => now()
+                            ]
+                        );
+                    }
+                    
+                    // (Tùy chọn) Xóa mấy ông bác sĩ fake hồi nãy đi cho sạch DB
+                    DB::table('synced_doctors')->whereNotIn('doctor_id', array_keys($doctorCases))->delete();
+
                     break;
 
                 case 'appointment':
-                    // Chạy qua nhà Appointment (Cổng 8002) lấy danh sách Lịch hẹn
+                    // Appointment (Cổng 8002) lấy danh sách Lịch hẹn
                     $response = Http::withToken($token)->get('http://127.0.0.1:8002/api/appointments');
+                    if (!$response->successful()) {
+                        throw new \Exception("Appointment API trả về lỗi: " . $response->status());
+                    }
+                    $data = $response->json();
+                    $appointments = isset($data['data']) ? $data['data'] : (is_array($data) ? $data : []);
+                    $recordsCount = count($appointments);
                     break;
 
                 default:
                     throw new \Exception("Nguồn dữ liệu không được hỗ trợ: {$sourceService}");
             }
 
-            // Nếu gọi thành công
-            if ($response->successful()) {
-                $data = $response->json();
-
-                // Đếm số lượng record trả về
-                if (isset($data['data']) && is_array($data['data'])) {
-                    $recordsCount = count($data['data']);
-                } else {
-                    $recordsCount = is_array($data) ? count($data) : 1;
-                }
-
-                return [
-                    'status' => 'success',
-                    'records_synced' => $recordsCount,
-                    'source_service' => $sourceService,
-                    'sync_type' => $syncType,
-                    'message' => "Hút thành công {$recordsCount} dữ liệu thực tế từ nhà {$sourceService}",
-                ];
-            }
-
-            // Nếu báo lỗi (401, 500...)
-            throw new \Exception("API của nhà {$sourceService} trả về lỗi HTTP " . $response->status());
+            // Trả về thành công ngay tại đây 
+            return [
+                'status' => 'success',
+                'records_synced' => $recordsCount,
+                'source_service' => $sourceService,
+                'sync_type' => $syncType,
+                'message' => "Hút thành công {$recordsCount} dữ liệu từ {$sourceService}",
+            ];
 
         } catch (\Exception $e) {
             return [
@@ -119,12 +177,12 @@ class NiFiService
                 'source_service' => $sourceService,
                 'sync_type' => $syncType,
                 'error_message' => $e->getMessage(),
-                'message' => 'Lỗi kết nối Microservices: ' . $e->getMessage(),
+                'message' => 'Lỗi luân chuyển: ' . $e->getMessage(),
             ];
         }
     }
 
-    /**
+    /**                                                                                                                                 
      * Get NiFi flow status.
      */
     public function getFlowStatus(): array

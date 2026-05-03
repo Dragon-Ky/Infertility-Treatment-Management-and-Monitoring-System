@@ -8,6 +8,7 @@ use App\Services\StatisticsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
@@ -63,44 +64,53 @@ class ReportController extends Controller
     }
 
     /**
-     * Get patient statistics.
+     * API Thống kê Bệnh nhân 
      */
-    public function patients(Request $request): JsonResponse
+    public function patients(Request $request)
     {
         try {
-            $period = $request->get('period', now()->format('Y-m'));
-            $data = $this->statisticsService->getPatientStats($period);
+            // Đếm số lượng bệnh nhân theo tháng từ data 
+            $patients = \DB::table('synced_patients')
+                ->selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, count(*) as total')
+                ->groupBy('month')
+                ->orderBy('month', 'asc')
+                ->get()
+                ->pluck('total', 'month');
+
+            // Nếu trống giả lập 1 data rỗng để biểu đồ không bị lỗi
+            if ($patients->isEmpty()) {
+                $patients = [ date('Y-m') => 0 ]; 
+            }
+
             return response()->json([
                 'success' => true,
-                'data' => $data,
+                'data' => $patients
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to load patient statistics',
-                'error' => $e->getMessage(),
-            ], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
     /**
-     * Get doctor performance statistics.
+     * API Hiệu suất Bác sĩ
      */
-    public function doctors(Request $request): JsonResponse
+    public function doctors(Request $request)
     {
         try {
-            $period = $request->get('period', now()->format('Y-m'));
-            $data = $this->statisticsService->getDoctorPerformance($period);
+            // Lấy thẳng danh sách bác sĩ từ data
+            $doctors = \DB::table('synced_doctors')->get()->map(function($doc) {
+                return [
+                    'name' => $doc->name,
+                    'cases' => $doc->cases_count
+                ];
+            });
+
             return response()->json([
                 'success' => true,
-                'data' => $data,
+                'data' => $doctors
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to load doctor performance',
-                'error' => $e->getMessage(),
-            ], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
