@@ -17,6 +17,7 @@ import DoctorAppointments from "@/pages/Doctor/DoctorAppointments";
 import CustomerAppointments from "@/pages/Customer/CustomerAppointments";
 import ReportDashboard from "@/pages/Manager/ReportDashboard";
 import SyncDashboard from "@/pages/Manager/SyncDashboard";
+import ManageBlog from "@/pages/Manager/ManageBlog";
 
 export const routes = [
   // --- PUBLIC ROUTES ---
@@ -79,6 +80,10 @@ export const routes = [
             path: "sync",
             element: <SyncDashboard />,
           },
+          {
+            path: "manage-blog",
+            element: <ManageBlog />,
+          },
         ],
       },
     ],
@@ -97,6 +102,10 @@ export const routes = [
           { path: "protocols", element: <ProtocolManagement /> },
           { path: "protocols/details/:id", element: <ProtocolDetail /> },
           { path: "appointments", element: <DoctorAppointments /> },
+          {
+            path: "my-blog",
+            element: <ManageBlog />,
+          },
         ],
       },
     ],

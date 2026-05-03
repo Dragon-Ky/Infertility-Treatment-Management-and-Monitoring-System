@@ -84,7 +84,7 @@ function BlogDetail() {
               tiếp với các chuyên gia của chúng tôi.
             </p>
             <Link
-              to="/doctors"
+              to="/customer/appointments"
               className="inline-block rounded-lg bg-blue-600 px-6 py-3 font-bold text-white transition-colors hover:bg-blue-700"
             >
               Đặt lịch khám ngay
