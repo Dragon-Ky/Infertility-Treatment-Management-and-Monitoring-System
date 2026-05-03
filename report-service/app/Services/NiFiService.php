@@ -81,7 +81,7 @@ class NiFiService
 
                     foreach ($customers as $c) {
                         DB::table('synced_patients')->updateOrInsert(
-                            ['remote_id' => $c['id'] ?? rand(1000, 9999)], 
+                            ['remote_id' => $c['id'] ?? rand(1000, 9999)],
                             [
                                 'name' => $c['name'] ?? $c['full_name'] ?? 'Bệnh nhân ẩn danh',
                                 'gender' => $c['gender'] ?? 'N/A',
@@ -95,7 +95,7 @@ class NiFiService
                     break;
 
                 case 'treatment':
-                    //  Chạy qua Treatment (Cổng 8001) lấy danh sách Phác đồ
+                    // Lấy phác đồ từ nhà Treatment
                     $response = Http::withToken($token)->get('http://127.0.0.1:8001/api/v1/treatment/protocols');
                     if (!$response->successful()) {
                         throw new \Exception("Treatment API trả về lỗi: " . $response->status());
@@ -104,46 +104,46 @@ class NiFiService
                     $protocols = isset($data['data']) ? $data['data'] : (is_array($data) ? $data : []);
                     $recordsCount = count($protocols);
 
-                    // đếm bác sĩ ID này đang có bao nhiêu ca
                     $doctorCases = [];
                     foreach ($protocols as $p) {
+                        // đếm bác sĩ ID này đang có bao nhiêu ca
                         $docId = $p['doctor_id'];
-                        if (!isset($doctorCases[$docId])) {
-                            $doctorCases[$docId] = 0;
-                        }
+                        if (!isset($doctorCases[$docId])) $doctorCases[$docId] = 0;
                         $doctorCases[$docId]++;
+
+                        // Tính tổng tiền
+                            ['remote_id' => $p['id']],
+                            [
+                                'status' => $p['status'] ?? 'in_progress',
+                                'price' => isset($p['price']) ? (int)$p['price'] : 0,
+                                'synced_at' => now(),
+                                // Nếu API Treatment có trả về created_at, dùng nó để filter theo tháng cho chuẩn. Nếu không thì dùng giờ hiện tại.
+                                'created_at' => isset($p['created_at']) ? \Carbon\Carbon::createFromFormat('d/m/Y H:i', $p['created_at'])->format('Y-m-d H:i:s') : now(),
+                                'updated_at' => now(),
+                            ]
+                        );
                     }
 
-                    // Chạy qua Auth (Cổng 8000) lấy danh sách tên Bác sĩ
+                    // Chạy qua Auth lấy tên Bác sĩ
                     $authResponse = Http::withToken($token)->get('http://127.0.0.1:8000/api/doctors');
                     $doctorsList = [];
                     if ($authResponse->successful()) {
                         $authData = $authResponse->json();
                         $docs = isset($authData['data']) ? $authData['data'] : (is_array($authData) ? $authData : []);
                         foreach ($docs as $d) {
-                            // Lưu vào mảng để dễ dò tìm: [3 => 'Bác sĩ chuyên khoa']
-                            $doctorsList[$d['id']] = $d['name']; 
+                            $doctorsList[$d['id']] = $d['name'];
                         }
                     }
 
-                    // Ráp Tên và Số ca lại, lưu vào kho
+                    // Ráp Tên và Số ca lại, lưu vào bảng synced_doctors
                     foreach ($doctorCases as $docId => $cases) {
-                        // Lấy tên từ danh sách
                         $docName = $doctorsList[$docId] ?? "Bác sĩ ID: {$docId}";
-
                         DB::table('synced_doctors')->updateOrInsert(
                             ['doctor_id' => $docId],
-                            [
-                                'name' => $docName,
-                                'cases_count' => $cases,
-                                'updated_at' => now()
-                            ]
+                            ['name' => $docName, 'cases_count' => $cases, 'updated_at' => now()]
                         );
                     }
-                    
-                    // (Tùy chọn) Xóa mấy ông bác sĩ fake hồi nãy đi cho sạch DB
                     DB::table('synced_doctors')->whereNotIn('doctor_id', array_keys($doctorCases))->delete();
-
                     break;
 
                 case 'appointment':
@@ -161,7 +161,7 @@ class NiFiService
                     throw new \Exception("Nguồn dữ liệu không được hỗ trợ: {$sourceService}");
             }
 
-            // Trả về thành công ngay tại đây 
+            // Trả về thành công ngay tại đây
             return [
                 'status' => 'success',
                 'records_synced' => $recordsCount,
@@ -182,7 +182,7 @@ class NiFiService
         }
     }
 
-    /**                                                                                                                                 
+    /**
      * Get NiFi flow status.
      */
     public function getFlowStatus(): array
