@@ -27,6 +27,25 @@ import { createProtocol, updateProtocol } from "@/services/protocolService";
 import { getCustomers } from "@/services/doctorService";
 import toast from "react-hot-toast";
 
+const TREATMENT_PACKAGES = [
+  { name: "Khám & Đánh giá Hiếm muộn cơ bản", price: 5000000 },
+  { name: "Phác đồ IUI (Bơm tinh trùng vào buồng tử cung)", price: 15000000 },
+  {
+    name: "Phác đồ IVF Tiêu chuẩn (Thụ tinh trong ống nghiệm)",
+    price: 80000000,
+  },
+  {
+    name: "Phác đồ IVF + ICSI (Tiêm tinh trùng vào bào tương trứng)",
+    price: 100000000,
+  },
+  {
+    name: "Phác đồ IVF Toàn diện (Kèm sàng lọc di truyền phôi PGT)",
+    price: 150000000,
+  },
+  { name: "Gói Trữ đông trứng / Trữ đông tinh trùng (1 năm)", price: 20000000 },
+  { name: "Chuyển phôi đông lạnh (FET)", price: 25000000 },
+];
+
 function AddProtocolModal({
   onAdded,
   editData = null,
@@ -36,19 +55,18 @@ function AddProtocolModal({
   const [loading, setLoading] = useState(false);
   const [customers, setCustomers] = useState([]);
 
-  // Biến kiểm tra chế độ: Nếu có editData truyền vào thì là chế độ sửa
   const isEdit = !!editData;
 
   const [formData, setFormData] = useState({
     treatment_id: "",
     protocol_name: "",
+    price: 0,
     diagnosis: "",
     prescription: "",
     notes: "",
     is_active: true,
   });
 
-  // Effect để load danh sách bệnh nhân và đổ dữ liệu cũ nếu là chế độ Sửa
   useEffect(() => {
     if (open) {
       const fetchPatients = async () => {
@@ -62,11 +80,11 @@ function AddProtocolModal({
       };
       fetchPatients();
 
-      // Nếu là Sửa, đổ data từ editData vào form
       if (isEdit) {
         setFormData({
           treatment_id: String(editData.treatment_id),
           protocol_name: editData.protocol_name || "",
+          price: editData.price || 0,
           diagnosis: editData.diagnosis || "",
           prescription: editData.prescription || "",
           notes: editData.notes || "",
@@ -76,10 +94,21 @@ function AddProtocolModal({
     }
   }, [open, isEdit, editData]);
 
+  const handleSelectPackage = (val) => {
+    const selectedPackage = TREATMENT_PACKAGES.find((pkg) => pkg.name === val);
+    if (selectedPackage) {
+      setFormData({
+        ...formData,
+        protocol_name: selectedPackage.name,
+        price: selectedPackage.price,
+      });
+    }
+  };
+
   const handleSubmit = async () => {
     if (!formData.treatment_id) return toast.error("Vui lòng chọn bệnh nhân!");
     if (!formData.protocol_name)
-      return toast.error("Vui lòng nhập tên phác đồ!");
+      return toast.error("Vui lòng chọn gói điều trị!");
 
     const userStr = localStorage.getItem("user");
     const user = userStr ? JSON.parse(userStr) : null;
@@ -98,11 +127,9 @@ function AddProtocolModal({
     setLoading(true);
     try {
       if (isEdit) {
-        // SỬ DỤNG PHƯƠNG THỨC PATCH ĐỂ CẬP NHẬT
         await updateProtocol(editData.id, dataToSend);
         toast.success("Cập nhật phác đồ thành công!");
       } else {
-        // PHƯƠNG THỨC POST ĐỂ TẠO MỚI
         await createProtocol(dataToSend);
         toast.success("Khởi tạo phác đồ thành công!");
       }
@@ -110,10 +137,10 @@ function AddProtocolModal({
       setOpen(false);
 
       if (!isEdit) {
-        // Reset form chỉ khi tạo mới
         setFormData({
           treatment_id: "",
           protocol_name: "",
+          price: 0,
           diagnosis: "",
           prescription: "",
           notes: "",
@@ -155,7 +182,7 @@ function AddProtocolModal({
         )}
       </DialogTrigger>
 
-      <DialogContent className="z-[9999] max-h-[90vh] max-w-2xl overflow-y-auto rounded-[32px] border-none p-8 shadow-2xl [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <DialogContent className="z-[9999] max-h-[90vh] w-[95vw] overflow-x-hidden overflow-y-auto rounded-[32px] border-none p-6 shadow-2xl [-ms-overflow-style:none] [scrollbar-width:none] sm:!max-w-[700px] md:p-8 [&::-webkit-scrollbar]:hidden">
         <DialogHeader>
           <div
             className={`mb-2 flex items-center gap-3 ${isEdit ? "text-amber-600" : "text-blue-600"}`}
@@ -179,10 +206,10 @@ function AddProtocolModal({
               }
               disabled={isEdit}
             >
-              <SelectTrigger className="h-14 rounded-2xl border-none bg-slate-50 font-bold focus:ring-2 focus:ring-blue-500">
+              <SelectTrigger className="h-14 w-full min-w-0 rounded-2xl border-none bg-slate-50 font-bold focus:ring-2 focus:ring-blue-500 [&>span]:truncate [&>span]:text-left">
                 <SelectValue placeholder="Chọn bệnh nhân từ Auth Service..." />
               </SelectTrigger>
-              <SelectContent className="z-[10000] rounded-xl border-none bg-white p-2 shadow-2xl">
+              <SelectContent className="z-[10000] w-full rounded-xl border-none bg-white p-2 shadow-2xl">
                 {customers.map((c) => (
                   <SelectItem
                     key={c.id}
@@ -198,16 +225,37 @@ function AddProtocolModal({
 
           <div className="space-y-2">
             <label className="ml-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-              Tên phác đồ
+              Gói điều trị (Phác đồ) <span className="text-red-500">*</span>
             </label>
-            <Input
-              placeholder="VD: Phác đồ IVF chu kỳ 1"
+            <Select
               value={formData.protocol_name}
-              onChange={(e) =>
-                setFormData({ ...formData, protocol_name: e.target.value })
-              }
-              className="h-14 rounded-2xl border-none bg-slate-50 font-bold focus-visible:ring-2 focus-visible:ring-blue-500"
-            />
+              onValueChange={handleSelectPackage}
+            >
+              <SelectTrigger className="h-14 w-full min-w-0 rounded-2xl border-none bg-slate-50 font-bold focus:ring-2 focus:ring-blue-500 [&>span]:truncate [&>span]:text-left">
+                <SelectValue placeholder="-- Chọn gói điều trị & Báo giá --" />
+              </SelectTrigger>
+              <SelectContent className="z-[10000] w-full rounded-xl border-none bg-white p-2 shadow-2xl">
+                {TREATMENT_PACKAGES.map((pkg, idx) => (
+                  <SelectItem
+                    key={idx}
+                    value={pkg.name}
+                    className="cursor-pointer rounded-lg py-3 text-left font-bold break-words whitespace-normal transition-colors focus:bg-blue-600 focus:text-white"
+                  >
+                    {pkg.name} -{" "}
+                    <span className="text-blue-600 group-hover:text-white">
+                      {new Intl.NumberFormat("vi-VN").format(pkg.price)} VNĐ
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {formData.price > 0 && (
+              <p className="mt-2 ml-2 text-[11px] font-bold text-green-600">
+                Doanh thu dự kiến:{" "}
+                {new Intl.NumberFormat("vi-VN").format(formData.price)} VNĐ
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -220,7 +268,7 @@ function AddProtocolModal({
               onChange={(e) =>
                 setFormData({ ...formData, diagnosis: e.target.value })
               }
-              className="min-h-[100px] rounded-2xl border-none bg-slate-50 font-bold focus-visible:ring-2 focus-visible:ring-blue-500"
+              className="min-h-[100px] w-full rounded-2xl border-none bg-slate-50 font-bold focus-visible:ring-2 focus-visible:ring-blue-500"
             />
           </div>
 
@@ -234,7 +282,7 @@ function AddProtocolModal({
               onChange={(e) =>
                 setFormData({ ...formData, prescription: e.target.value })
               }
-              className="h-14 rounded-2xl border-none bg-slate-50 font-black text-blue-600 uppercase italic focus-visible:ring-2 focus-visible:ring-blue-500"
+              className="h-14 w-full rounded-2xl border-none bg-slate-50 font-black text-blue-600 uppercase italic focus-visible:ring-2 focus-visible:ring-blue-500"
             />
           </div>
         </div>

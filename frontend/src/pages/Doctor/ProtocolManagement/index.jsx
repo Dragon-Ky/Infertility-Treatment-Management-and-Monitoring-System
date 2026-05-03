@@ -102,7 +102,7 @@ function ProtocolManagement() {
           </p>
         </div>
 
-        <AddProtocolModal onAdded={loadInitialData} triggerType="menuItem" />
+        <AddProtocolModal onAdded={loadInitialData} />
       </div>
 
       {/* Filter Bar */}

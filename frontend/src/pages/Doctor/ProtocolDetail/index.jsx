@@ -327,13 +327,27 @@ const ProtocolDetail = () => {
                     Xác nhận hoàn tất điều trị?
                   </AlertDialogTitle>
                   <AlertDialogDescription className="font-medium text-slate-500">
-                    Hành động này sẽ chốt hồ sơ và chuyển trạng thái phác đồ
-                    sang{" "}
-                    <span className="font-bold text-purple-600">
-                      "Đã hoàn thành"
-                    </span>
-                    . Bạn có chắc chắn bệnh nhân đã kết thúc lộ trình điều trị
-                    hoặc đã đậu thai thành công không?
+                    <div className="mb-4">
+                      Hành động này sẽ chốt hồ sơ và chuyển trạng thái phác đồ
+                      sang{" "}
+                      <span className="font-bold text-purple-600">
+                        "Đã hoàn thành"
+                      </span>
+                      . Bạn có chắc chắn bệnh nhân đã kết thúc lộ trình điều trị
+                      hoặc đã đậu thai thành công không?
+                    </div>
+
+                    <div className="mt-2 flex flex-col items-center justify-center rounded-2xl border border-purple-100 bg-purple-50 p-4">
+                      <span className="mb-1 text-[10px] font-black tracking-widest text-purple-400 uppercase">
+                        Doanh Thu Ghi Nhận Cho Ca Này
+                      </span>
+                      <span className="text-2xl font-black text-purple-700">
+                        {new Intl.NumberFormat("vi-VN").format(
+                          protocol?.price || 0,
+                        )}{" "}
+                        VNĐ
+                      </span>
+                    </div>
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter className="mt-4">
@@ -342,7 +356,7 @@ const ProtocolDetail = () => {
                   </AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handleMarkAsCompleted}
-                    className="rounded-xl bg-purple-600 font-bold text-white hover:bg-purple-700"
+                    className="rounded-xl bg-purple-600 font-bold text-white shadow-lg shadow-purple-200 transition-all hover:-translate-y-0.5 hover:bg-purple-700"
                   >
                     Xác nhận Hoàn thành
                   </AlertDialogAction>
@@ -351,7 +365,6 @@ const ProtocolDetail = () => {
             </AlertDialog>
           )}
         </div>
-        {/* ------------------------------------------ */}
 
         <Tabs defaultValue="medical" className="space-y-6">
           <div className="flex w-full overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden">
