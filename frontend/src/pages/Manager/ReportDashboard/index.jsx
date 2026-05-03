@@ -213,7 +213,11 @@ function ReportDashboard() {
                 />
                 <YAxis
                   tick={{ fontSize: 10 }}
-                  tickFormatter={(val) => `${val / 1000000}Tr`}
+                  tickFormatter={(val) =>
+                    val >= 1000000
+                      ? `${val / 1000000}Tr`
+                      : new Intl.NumberFormat("vi-VN").format(val)
+                  }
                 />
                 <Tooltip cursor={{ fill: "#f8fafc" }} />
                 <Bar
