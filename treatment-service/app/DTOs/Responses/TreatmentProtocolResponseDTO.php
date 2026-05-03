@@ -18,6 +18,7 @@ readonly class TreatmentProtocolResponseDTO
         public string $created_at_formatted,
         public bool $is_active,
         public string $status,
+        public int $price,
     ) {}
 
     public static function fromModel(TreatmentProtocol $protocol): self
@@ -34,6 +35,7 @@ readonly class TreatmentProtocolResponseDTO
             created_at_formatted: $protocol->created_at->format('d/m/Y H:i'),
             is_active: (bool) $protocol->is_active,
             status: $protocol->status ?? 'in_progress',
+            price: (int) ($protocol->price ?? 0),
 
         );
     }
@@ -52,6 +54,7 @@ readonly class TreatmentProtocolResponseDTO
             'created_at' => $this->created_at_formatted,
             'is_active' => $this->is_active,
             'status' => $this->status,
+            'price' => $this->price,
         ];
     }
 }

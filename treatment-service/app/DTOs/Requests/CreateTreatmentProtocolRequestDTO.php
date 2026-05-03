@@ -12,6 +12,7 @@ readonly class CreateTreatmentProtocolRequestDTO
         public ?string $prescription = null,
         public ?string $notes = null,
         public ?string $status = 'in_progress',
+        public ?int $price = 0,
     ) {}
 
     public static function fromArray(array $data): self
@@ -25,6 +26,7 @@ readonly class CreateTreatmentProtocolRequestDTO
             prescription: $data['prescription'] ?? null,
             notes: $data['notes'] ?? null,
             status: $data['status'] ?? 'in_progress',
+            price: isset($data['price']) ? (int) $data['price'] : 0,
         );
     }
 }

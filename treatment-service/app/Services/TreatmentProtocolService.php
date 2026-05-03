@@ -4,8 +4,9 @@ namespace App\Services;
 
 use App\DTOs\Responses\TreatmentProtocolResponseDTO;
 use App\Repositories\Contracts\TreatmentProtocolRepositoryInterface;
-
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class TreatmentProtocolService extends BaseService
 {

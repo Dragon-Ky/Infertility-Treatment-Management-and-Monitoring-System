@@ -20,7 +20,8 @@ class TreatmentProtocol extends Model
         'prescription',
         'notes',
         'status',
-        'is_active'
+        'is_active',
+        'price',
     ];
     protected $casts = [
         'is_active' => 'boolean',

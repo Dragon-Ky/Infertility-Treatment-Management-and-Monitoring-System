@@ -23,6 +23,7 @@ class TreatmentProtocolController extends BaseApiController
             'prescription'  => 'nullable|string',
             'notes'         => 'nullable|string',
             'status'        => 'nullable|string|in:in_progress,completed,cancelled,failed',
+            'price'         => 'nullable|numeric|min:0',
         ];
     }
 
@@ -35,6 +36,7 @@ class TreatmentProtocolController extends BaseApiController
             'prescription'  => 'nullable|string',
             'notes'         => 'nullable|string',
             'status'        => 'nullable|string|in:in_progress,completed,cancelled,failed',
+            'price'         => 'nullable|numeric|min:0',
         ];
     }
 
