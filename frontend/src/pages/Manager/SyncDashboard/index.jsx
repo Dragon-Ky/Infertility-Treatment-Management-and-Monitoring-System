@@ -89,6 +89,7 @@ function SyncDashboard() {
       } else {
         toast.error("Quá trình đồng bộ thất bại!", { id: "sync" });
       }
+      // eslint-disable-next-line no-unused-vars
     } catch (error) {
       toast.error("Lỗi mất kết nối với máy chủ NiFi!", { id: "sync" });
     } finally {

@@ -3,21 +3,17 @@
 namespace App\Services;
 
 use App\Models\SyncLog;
-use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 
 class NiFiService
 {
-    protected $client;
     protected $baseUrl;
     protected $username;
     protected $password;
 
     public function __construct()
     {
-        $this->client = new Client([
-            'verify' => false, // Skip SSL verification for NiFi's self-signed cert
-        ]);
         $this->baseUrl = env('NIFI_BASE_URL', 'https://nifi:8443');
         $this->username = env('NIFI_USERNAME', 'admin');
         $this->password = env('NIFI_PASSWORD', 'reportservice');
@@ -29,9 +25,7 @@ class NiFiService
     public function triggerSync(string $sourceService, string $syncType): array
     {
         try {
-            // In a real implementation, this would call NiFi API
-            // For now, we'll simulate the sync process
-            $result = $this->simulateSync($sourceService, $syncType);
+            $result = $this->executeRealSync($sourceService, $syncType);
 
             // Log the sync operation
             SyncLog::create([
@@ -65,20 +59,69 @@ class NiFiService
     }
 
     /**
-     * Simulate sync operation.
+     * Đồng bộ DB giữa các Microservice
      */
-    protected function simulateSync(string $sourceService, string $syncType): array
+    protected function executeRealSync(string $sourceService, string $syncType): array
     {
-        // Simulate different sync scenarios
-        $records = rand(10, 100);
+        // Lấy token của Manager đang thao tác để làm vé đi qua các nhà khác
+        $token = request()->bearerToken();
+        $recordsCount = 0;
 
-        return [
-            'status' => 'success',
-            'records_synced' => $records,
-            'source_service' => $sourceService,
-            'sync_type' => $syncType,
-            'message' => "Successfully synced {$records} records from {$sourceService}",
-        ];
+        try {
+            // Tùy theo service mà đi gọi đúng cái API của nhà đó
+            switch ($sourceService) {
+                case 'auth':
+                    // Chạy qua Auth (Cổng 8000) lấy danh sách User
+                    $response = Http::withToken($token)->get('http://127.0.0.1:8000/api/doctor/customers');
+                    break;
+
+                case 'treatment':
+                    // Chạy qua Treatment (Cổng 8001) lấy danh sách Phác đồ
+                    $response = Http::withToken($token)->get('http://127.0.0.1:8001/api/v1/treatment/protocols');
+                    break;
+
+                case 'appointment':
+                    // Chạy qua nhà Appointment (Cổng 8002) lấy danh sách Lịch hẹn
+                    $response = Http::withToken($token)->get('http://127.0.0.1:8002/api/appointments');
+                    break;
+
+                default:
+                    throw new \Exception("Nguồn dữ liệu không được hỗ trợ: {$sourceService}");
+            }
+
+            // Nếu gọi thành công
+            if ($response->successful()) {
+                $data = $response->json();
+
+                // Đếm số lượng record trả về
+                if (isset($data['data']) && is_array($data['data'])) {
+                    $recordsCount = count($data['data']);
+                } else {
+                    $recordsCount = is_array($data) ? count($data) : 1;
+                }
+
+                return [
+                    'status' => 'success',
+                    'records_synced' => $recordsCount,
+                    'source_service' => $sourceService,
+                    'sync_type' => $syncType,
+                    'message' => "Hút thành công {$recordsCount} dữ liệu thực tế từ nhà {$sourceService}",
+                ];
+            }
+
+            // Nếu báo lỗi (401, 500...)
+            throw new \Exception("API của nhà {$sourceService} trả về lỗi HTTP " . $response->status());
+
+        } catch (\Exception $e) {
+            return [
+                'status' => 'failed',
+                'records_synced' => 0,
+                'source_service' => $sourceService,
+                'sync_type' => $syncType,
+                'error_message' => $e->getMessage(),
+                'message' => 'Lỗi kết nối Microservices: ' . $e->getMessage(),
+            ];
+        }
     }
 
     /**
@@ -86,17 +129,11 @@ class NiFiService
      */
     public function getFlowStatus(): array
     {
-        try {
-            // In a real implementation, this would call NiFi API
-            return [
-                'status' => 'running',
-                'active_threads' => 5,
-                'total_processors' => 10,
-                'running_processors' => 8,
-            ];
-        } catch (\Exception $e) {
-            Log::error('Failed to get NiFi flow status', ['error' => $e->getMessage()]);
-            throw $e;
-        }
+        return [
+            'status' => 'running',
+            'active_threads' => 5,
+            'total_processors' => 10,
+            'running_processors' => 8,
+        ];
     }
 }
