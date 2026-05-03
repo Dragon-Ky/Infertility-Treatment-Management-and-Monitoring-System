@@ -18,177 +18,200 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  LineChart,
-  Line,
   Legend,
+  PieChart,
+  Pie,
+  Cell,
+  AreaChart,
+  Area,
 } from "recharts";
 
-import { getDashboardData } from "@/services/reportService";
+// Nhớ import đúng các hàm API ní vừa tạo nha
+import {
+  getDashboardData,
+  getRevenueReport,
+  getTreatmentSuccessReport,
+  getPatientsReport,
+  getDoctorsReport,
+  generateReport,
+} from "@/services/reportService"; // <- Đổi lại path cho đúng với source của ní
+
+const COLORS = ["#2563eb", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6"];
 
 function ReportDashboard() {
-  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [overview, setOverview] = useState({});
+  const [analytics, setAnalytics] = useState({
+    revenue: [],
+    treatment: [],
+    patients: [],
+    doctors: [],
+  });
 
   useEffect(() => {
-    fetchDashboard();
+    fetchAllData();
   }, []);
 
-  const fetchDashboard = async () => {
+  const fetchAllData = async () => {
     try {
       setLoading(true);
-      const result = await getDashboardData();
+      const currentMonth = new Date().toISOString().slice(0, 7); // Format: YYYY-MM
 
-      if (result && result.success) {
-        setData(result.data);
-      } else {
-        toast.error("Không thể lấy dữ liệu thống kê!");
-      }
+      // Gọi đồng loạt cả 5 API cùng lúc cho tốc độ bàn thờ
+      const [dashRes, revRes, treatRes, patRes, docRes] = await Promise.all([
+        getDashboardData().catch(() => null),
+        getRevenueReport(currentMonth).catch(() => null),
+        getTreatmentSuccessReport(currentMonth).catch(() => null),
+        getPatientsReport(currentMonth).catch(() => null),
+        getDoctorsReport(currentMonth).catch(() => null),
+      ]);
+
+      if (dashRes?.success) setOverview(dashRes.data.overview || {});
+
+      // Mapping dữ liệu để đưa vào biểu đồ Recharts
+      setAnalytics({
+        revenue: formatChartData(revRes?.data, "Doanh Thu"),
+        treatment: formatChartData(treatRes?.data, "Ca"),
+        patients: formatChartData(patRes?.data, "Bệnh nhân"),
+        // Mảng danh sách bác sĩ (Nếu API trả về mảng)
+        doctors: Array.isArray(docRes?.data) ? docRes.data : [],
+      });
     } catch (error) {
-      console.error("Lỗi Dashboard:", error);
+      toast.error("Có lỗi xảy ra khi tải dữ liệu phân tích!");
     } finally {
       setLoading(false);
     }
   };
 
-  const formatCurrency = (value) => {
-    if (!value) return "0 đ";
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(value);
+  // Hàm "chế" Object thành Array để Recharts đọc được
+  const formatChartData = (dataObj, valueName) => {
+    if (!dataObj || typeof dataObj !== "object") return [];
+    return Object.entries(dataObj)
+      .filter(
+        ([key, val]) => typeof val === "number" && key !== "total_revenue",
+      ) // Lọc bỏ số tổng
+      .map(([key, val]) => ({
+        name: key.replace(/_/g, " ").toUpperCase(),
+        [valueName]: val,
+      }));
   };
 
-  if (loading || !data) {
+  const handleGenerateReport = async () => {
+    try {
+      toast.loading("Đang tổng hợp dữ liệu và xuất PDF...", { id: "generate" });
+      const res = await generateReport({
+        name: "Báo cáo Tổng hợp Tháng",
+        type: "monthly",
+        parameters: { period: new Date().toISOString().slice(0, 7) },
+      });
+      if (res && res.success) {
+        toast.success("Đã tạo lệnh xuất báo cáo!", { id: "generate" });
+      }
+    } catch (error) {
+      toast.error("Lỗi kết nối khi tạo báo cáo!", { id: "generate" });
+    }
+  };
+
+  if (loading) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-50">
-        <AiOutlineLoading3Quarters className="animate-spin text-5xl text-(--primaryCustom)" />
+        <AiOutlineLoading3Quarters className="animate-spin text-5xl text-blue-600" />
         <p className="animate-pulse text-[12px] font-black tracking-widest text-slate-400 uppercase">
-          Đang truy xuất kho dữ liệu NiFi...
+          Đang vẽ biểu đồ thống kê...
         </p>
       </div>
     );
   }
 
-  const overview = data.overview || {};
-  const recentReports = Array.isArray(data.recent_reports)
-    ? data.recent_reports
-    : [];
-
-  // Chuyển Object Doanh thu thành Array vẽ LineChart
-  const rawRevenue = data.revenue_stats || {};
-  const revenueStats = [
-    {
-      name: rawRevenue.period || "Tháng này",
-      value: rawRevenue.total_revenue || 0,
-    },
-  ];
-
-  // Chuyển Object Tiến độ điều trị thành Array  để vẽ BarChart
-  const rawTreatment = data.treatment_stats || {};
-  const treatmentStats = [
-    {
-      name: rawTreatment.period || "Tháng này",
-      "Đang điều trị": rawTreatment.in_progress || 0,
-      "Hoàn thành": rawTreatment.completed || 0,
-      "Đã hủy": rawTreatment.cancelled || 0,
-    },
-  ];
-
   return (
     <div className="animate-in fade-in zoom-in-95 min-h-screen space-y-8 bg-slate-50/50 p-8 duration-500">
+      {/* HEADER */}
       <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
         <div>
           <h1 className="text-3xl font-black tracking-tight text-slate-900">
-            Trung Tâm Phân Tích & Báo Cáo
+            Phân Tích Dữ Liệu Chuyên Sâu
           </h1>
           <p className="mt-1 font-medium text-slate-500">
-            Tổng hợp dữ liệu từ các Microservices thông qua hệ thống ETL.
+            Truy xuất trực tiếp từ 4 API Core của Report Microservice
           </p>
         </div>
         <Button
-          onClick={() =>
-            toast.success("Tính năng xuất báo cáo tự động đang được cập nhật!")
-          }
-          className="h-12 cursor-pointer rounded-2xl bg-(--primaryCustom) px-6 font-black tracking-widest text-white uppercase shadow-lg shadow-blue-200 transition-all hover:-translate-y-1 hover:opacity-90"
+          onClick={handleGenerateReport}
+          className="h-12 cursor-pointer rounded-2xl bg-blue-600 px-6 font-black tracking-widest text-white uppercase shadow-lg transition-all hover:-translate-y-1"
         >
-          <HiOutlineDownload className="mr-2 h-5 w-5" /> Yêu cầu Báo Cáo
+          <HiOutlineDownload className="mr-2 h-5 w-5" /> Xuất Báo Cáo
         </Button>
       </div>
 
+      {/* TỔNG QUAN */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="rounded-[24px] border-none bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-green-100/50">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+        {/* ... (Có thể giữ lại 4 thẻ tổng quan cũ ở đây cho đẹp) ... */}
+        <Card className="rounded-[24px] border-none bg-white shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-[10px] font-black text-slate-400 uppercase">
               Tổng Doanh Thu
             </CardTitle>
-            <div className="rounded-xl bg-green-50 p-3 text-green-500">
-              <HiOutlineCurrencyDollar className="h-6 w-6" />
-            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-black text-slate-800">
-              {formatCurrency(overview.total_revenue)}
+            <div className="text-3xl font-black">
+              {new Intl.NumberFormat("vi-VN").format(
+                overview.total_revenue || 0,
+              )}{" "}
+              đ
             </div>
           </CardContent>
         </Card>
-
-        <Card className="rounded-[24px] border-none bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-100/50">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
-              Tỷ lệ thành công (IVF)
+        <Card className="rounded-[24px] border-none bg-white shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-[10px] font-black text-slate-400 uppercase">
+              Tỷ lệ IVF
             </CardTitle>
-            <div className="rounded-xl bg-blue-50 p-3 text-blue-500">
-              <HiOutlineTrendingUp className="h-6 w-6" />
-            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-black text-slate-800">
+            <div className="text-3xl font-black text-blue-600">
               {overview.success_rate || 0}%
             </div>
           </CardContent>
         </Card>
-
-        <Card className="rounded-[24px] border-none bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-100/50">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
-              Ca đang điều trị
+        <Card className="rounded-[24px] border-none bg-white shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-[10px] font-black text-slate-400 uppercase">
+              Đang điều trị
             </CardTitle>
-            <div className="rounded-xl bg-amber-50 p-3 text-amber-500">
-              <HiOutlineClipboardCheck className="h-6 w-6" />
-            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-black text-slate-800">
+            <div className="text-3xl font-black text-amber-500">
               {overview.active_treatments || 0}
             </div>
           </CardContent>
         </Card>
-
-        <Card className="rounded-[24px] border-none bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-100/50">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+        <Card className="rounded-[24px] border-none bg-white shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-[10px] font-black text-slate-400 uppercase">
               Tổng bệnh nhân
             </CardTitle>
-            <div className="rounded-xl bg-purple-50 p-3 text-purple-500">
-              <HiOutlineUserGroup className="h-6 w-6" />
-            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-black text-slate-800">
+            <div className="text-3xl font-black text-purple-600">
               {overview.total_patients || 0}
             </div>
           </CardContent>
         </Card>
       </div>
 
+      {/* KHU VỰC BIỂU ĐỒ - 4 API */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* 1. API REVENUE (Doanh thu) */}
         <Card className="rounded-[32px] border-none bg-white p-6 shadow-sm">
-          <h3 className="mb-6 text-lg font-black tracking-tight text-slate-800 uppercase">
-            Biểu Đồ Doanh Thu Tháng Này
+          <h3 className="mb-6 text-lg font-black text-slate-800 uppercase">
+            Cơ cấu Doanh Thu
           </h3>
-          <div className="flex h-72 w-full items-center justify-center rounded-2xl bg-slate-50/50">
+          <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={revenueStats} barSize={60}>
+              <BarChart
+                data={analytics.revenue}
+                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+              >
                 <CartesianGrid
                   strokeDasharray="3 3"
                   vertical={false}
@@ -196,43 +219,67 @@ function ReportDashboard() {
                 />
                 <XAxis
                   dataKey="name"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 12, fill: "#94a3b8", fontWeight: "bold" }}
-                  dy={10}
+                  tick={{ fontSize: 10, fontWeight: "bold" }}
                 />
                 <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 12, fill: "#94a3b8", fontWeight: "bold" }}
-                  tickFormatter={(value) => `${value / 1000000}Tr`}
+                  tick={{ fontSize: 10 }}
+                  tickFormatter={(val) => `${val / 1000000}Tr`}
                 />
-                <Tooltip
-                  cursor={{ fill: "#f8fafc" }}
-                  contentStyle={{
-                    borderRadius: "16px",
-                    border: "none",
-                    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                  }}
-                />
+                <Tooltip cursor={{ fill: "#f8fafc" }} />
                 <Bar
-                  dataKey="value"
-                  name="Doanh thu"
-                  fill="var(--primaryCustom)"
-                  radius={[8, 8, 0, 0]}
+                  dataKey="Doanh Thu"
+                  fill="#22c55e"
+                  radius={[6, 6, 0, 0]}
+                  barSize={40}
                 />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </Card>
 
+        {/* 2. API TREATMENT SUCCESS (Tỉ lệ IVF) */}
         <Card className="rounded-[32px] border-none bg-white p-6 shadow-sm">
-          <h3 className="mb-6 text-lg font-black tracking-tight text-slate-800 uppercase">
-            Tiến Độ Ca Điều Trị
+          <h3 className="mb-6 text-lg font-black text-slate-800 uppercase">
+            Trạng Thái Phác Đồ
           </h3>
-          <div className="flex h-72 w-full items-center justify-center rounded-2xl bg-slate-50/50">
+          <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={treatmentStats} barSize={30}>
+              <PieChart>
+                <Pie
+                  data={analytics.treatment}
+                  dataKey="Ca"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={100}
+                  label
+                >
+                  {analytics.treatment.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+
+        {/* 3. API PATIENTS (Bệnh nhân) */}
+        <Card className="rounded-[32px] border-none bg-white p-6 shadow-sm">
+          <h3 className="mb-6 text-lg font-black text-slate-800 uppercase">
+            Thống Kê Bệnh Nhân
+          </h3>
+          <div className="h-72 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                data={analytics.patients}
+                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+              >
                 <CartesianGrid
                   strokeDasharray="3 3"
                   vertical={false}
@@ -240,94 +287,58 @@ function ReportDashboard() {
                 />
                 <XAxis
                   dataKey="name"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 12, fill: "#94a3b8", fontWeight: "bold" }}
-                  dy={10}
+                  tick={{ fontSize: 10, fontWeight: "bold" }}
                 />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 12, fill: "#94a3b8", fontWeight: "bold" }}
+                <YAxis tick={{ fontSize: 10 }} />
+                <Tooltip />
+                <Area
+                  type="monotone"
+                  dataKey="Bệnh nhân"
+                  stroke="#8b5cf6"
+                  fill="#c4b5fd"
                 />
-                <Tooltip
-                  cursor={{ fill: "#f8fafc" }}
-                  contentStyle={{
-                    borderRadius: "16px",
-                    border: "none",
-                    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                  }}
-                />
-                <Legend
-                  iconType="circle"
-                  wrapperStyle={{
-                    fontSize: "12px",
-                    fontWeight: "bold",
-                    paddingTop: "20px",
-                  }}
-                />
-                <Bar
-                  dataKey="Đang điều trị"
-                  fill="#f59e0b"
-                  radius={[4, 4, 0, 0]}
-                />
-                <Bar
-                  dataKey="Hoàn thành"
-                  fill="#22c55e"
-                  radius={[4, 4, 0, 0]}
-                />
-                <Bar dataKey="Đã hủy" fill="#ef4444" radius={[4, 4, 0, 0]} />
-              </BarChart>
+              </AreaChart>
             </ResponsiveContainer>
+          </div>
+        </Card>
+
+        {/* 4. API DOCTORS (Bác sĩ) */}
+        <Card className="rounded-[32px] border-none bg-white p-6 shadow-sm">
+          <h3 className="mb-6 text-lg font-black text-slate-800 uppercase">
+            Hiệu Suất Bác Sĩ
+          </h3>
+          <div className="flex h-72 w-full items-center justify-center rounded-2xl border border-slate-100 bg-slate-50/50">
+            {analytics.doctors.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={analytics.doctors}
+                  layout="vertical"
+                  margin={{ top: 10, right: 30, left: 20, bottom: 0 }}
+                >
+                  <XAxis type="number" />
+                  <YAxis
+                    type="category"
+                    dataKey="name"
+                    tick={{ fontSize: 12, fontWeight: "bold" }}
+                  />
+                  <Tooltip />
+                  <Bar
+                    dataKey="cases"
+                    fill="#3b82f6"
+                    radius={[0, 4, 4, 0]}
+                    barSize={20}
+                    name="Số ca xử lý"
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">
+                Chưa có dữ liệu hiệu suất bác sĩ
+              </p>
+            )}
           </div>
         </Card>
       </div>
-
-      <Card className="rounded-[32px] border-none bg-white p-6 shadow-sm">
-        <h3 className="mb-4 text-lg font-black tracking-tight text-slate-800 uppercase">
-          Tài liệu báo cáo đã xử lý
-        </h3>
-        <div className="space-y-4">
-          {recentReports.length > 0 ? (
-            recentReports.map((report) => (
-              <div
-                key={report.id}
-                className="flex items-center justify-between rounded-2xl border border-slate-100 p-4 transition-colors hover:bg-slate-50"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                    <HiOutlineClipboardCheck size={20} />
-                  </div>
-                  <div>
-                    <p className="text-sm font-black text-slate-800">
-                      {report.name || "Báo cáo hệ thống"}
-                    </p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase">
-                      {new Date(report.created_at).toLocaleString("vi-VN")}
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  variant="outline"
-                  onClick={() =>
-                    window.open(
-                      `http://127.0.0.1:8006/api/reports/${report.id}/download`,
-                      "_blank",
-                    )
-                  }
-                  className="h-9 cursor-pointer rounded-xl border-blue-200 text-[10px] font-black text-blue-600 uppercase hover:bg-blue-50"
-                >
-                  <HiOutlineDownload className="mr-1" /> Tải File
-                </Button>
-              </div>
-            ))
-          ) : (
-            <div className="py-8 text-center text-xs font-bold tracking-widest text-slate-400 uppercase">
-              Hệ thống chưa tạo báo cáo nào
-            </div>
-          )}
-        </div>
-      </Card>
     </div>
   );
 }

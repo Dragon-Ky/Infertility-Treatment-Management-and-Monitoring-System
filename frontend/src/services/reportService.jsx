@@ -37,3 +37,25 @@ export const triggerSyncData = async (
   });
   return response.data;
 };
+
+export const getRevenueReport = async (period) => {
+  const response = await reportApi.get(`/reports/revenue?period=${period}`);
+  return response.data;
+};
+
+export const getTreatmentSuccessReport = async (period) => {
+  const response = await reportApi.get(
+    `/reports/treatment-success?period=${period}`,
+  );
+  return response.data;
+};
+
+export const getPatientsReport = async (period) => {
+  const response = await reportApi.get(`/reports/patients?period=${period}`);
+  return response.data;
+};
+
+export const getDoctorsReport = async (period) => {
+  const response = await reportApi.get(`/reports/doctors?period=${period}`);
+  return response.data;
+};
