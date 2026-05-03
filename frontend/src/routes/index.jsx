@@ -16,6 +16,7 @@ import ProtocolDetail from "@/pages/Doctor/ProtocolDetail";
 import DoctorAppointments from "@/pages/Doctor/DoctorAppointments";
 import CustomerAppointments from "@/pages/Customer/CustomerAppointments";
 import ReportDashboard from "@/pages/Manager/ReportDashboard";
+import SyncDashboard from "@/pages/Manager/SyncDashboard";
 
 export const routes = [
   // --- PUBLIC ROUTES ---
@@ -73,6 +74,10 @@ export const routes = [
           {
             path: "reports",
             element: <ReportDashboard />,
+          },
+          {
+            path: "sync",
+            element: <SyncDashboard />,
           },
         ],
       },
