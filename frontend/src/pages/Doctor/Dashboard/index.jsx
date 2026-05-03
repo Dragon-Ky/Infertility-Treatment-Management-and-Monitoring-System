@@ -16,6 +16,7 @@ import {
   HiOutlineClipboardCheck,
   HiOutlineCalendar,
   HiOutlineClock,
+  HiOutlineChartSquareBar,
 } from "react-icons/hi";
 import { TbBabyCarriage } from "react-icons/tb";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
@@ -154,6 +155,14 @@ function DoctorDashboard() {
             onClick={() => navigate(`/doctor/appointments`)}
           >
             <HiOutlineCalendar className="mr-2 h-5 w-5" /> Quản lý Lịch hẹn
+          </Button>
+
+          <Button
+            variant="outline"
+            className="h-12 cursor-pointer rounded-2xl border-2 border-slate-900 bg-white px-6 font-black tracking-widest text-slate-900 uppercase shadow-sm transition-all hover:-translate-y-1 hover:bg-slate-50"
+            onClick={() => navigate(`/doctor/my-blog`)}
+          >
+            <HiOutlineChartSquareBar className="mr-2 h-5 w-5" /> Blog cá nhân
           </Button>
         </div>
       </div>

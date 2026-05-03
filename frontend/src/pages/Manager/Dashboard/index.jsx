@@ -10,6 +10,7 @@ import {
   HiOutlinePhone,
   HiOutlineChevronDown,
   HiOutlineChevronUp,
+  HiOutlineBookOpen,
 } from "react-icons/hi";
 import { FiActivity } from "react-icons/fi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,9 +19,7 @@ import { Button } from "@/components/ui/button";
 function ManagerDashboard() {
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [showAllDoctors, setShowAllDoctors] = useState(false);
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -68,7 +67,7 @@ function ManagerDashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <div className="group relative cursor-pointer overflow-hidden rounded-[32px] bg-gradient-to-br from-blue-500 to-blue-700 p-8 text-white shadow-xl shadow-blue-200 transition-all hover:-translate-y-2 hover:shadow-2xl">
           <div className="relative z-10 flex flex-col items-start">
             <div className="mb-4 rounded-2xl bg-white/20 p-4 backdrop-blur-md">
@@ -118,6 +117,24 @@ function ManagerDashboard() {
             </p>
           </div>
           <HiOutlineRefresh className="absolute -right-4 -bottom-4 z-0 text-[120px] text-white opacity-10 transition-transform group-hover:scale-110" />
+        </div>
+
+        <div
+          onClick={() => navigate("/manager/manage-blog")}
+          className="group relative cursor-pointer overflow-hidden rounded-[32px] bg-gradient-to-br from-slate-700 to-slate-900 p-8 text-white shadow-xl shadow-slate-200 transition-all hover:-translate-y-2 hover:shadow-2xl"
+        >
+          <div className="relative z-10 flex flex-col items-start">
+            <div className="mb-4 rounded-2xl bg-white/20 p-4 backdrop-blur-md">
+              <HiOutlineBookOpen size={32} />
+            </div>
+            <h2 className="text-xl font-black tracking-widest uppercase">
+              Quản lý Blog
+            </h2>
+            <p className="mt-2 text-sm font-medium text-slate-300">
+              Đăng bài viết mới và quản lý nội dung kiến thức y khoa.
+            </p>
+          </div>
+          <HiOutlineBookOpen className="absolute -right-4 -bottom-4 z-0 text-[120px] text-white opacity-10 transition-transform group-hover:scale-110" />
         </div>
       </div>
 

@@ -19,6 +19,7 @@ import {
 } from "react-icons/hi";
 import BlogModal from "@/components/BlogModal";
 import toast from "react-hot-toast";
+import DeleteConfirm from "@/components/DeleteConfirm";
 
 function ManageBlog() {
   const [posts, setPosts] = useState([]);
