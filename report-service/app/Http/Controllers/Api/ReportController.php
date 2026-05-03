@@ -205,38 +205,8 @@ class ReportController extends Controller
     /**
      * Download a report.
      */
-    public function download(int $id): JsonResponse
+    public function download(int $id)
     {
-        try {
-            $report = \App\Models\Report::findOrFail($id);
-
-            if (!$report->isReady()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Report is not ready for download',
-                ], 400);
-            }
-
-            if (!Storage::exists($report->file_path)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Report file not found',
-                ], 404);
-            }
-
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'download_url' => Storage::url($report->file_path),
-                    'file_name' => basename($report->file_path),
-                ],
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to download report',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+        return $this->reportService->download($id);
     }
 }
