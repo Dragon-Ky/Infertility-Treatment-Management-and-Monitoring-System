@@ -92,13 +92,24 @@ function ReportDashboard() {
   const handleGenerateReport = async () => {
     try {
       toast.loading("Đang tổng hợp dữ liệu và xuất PDF...", { id: "generate" });
+
+      // Gửi lệnh tạo Report
       const res = await generateReport({
         name: "Báo cáo Tổng hợp Tháng",
         type: "monthly",
         parameters: { period: new Date().toISOString().slice(0, 7) },
       });
+
       if (res && res.success) {
-        toast.success("Đã tạo lệnh xuất báo cáo!", { id: "generate" });
+        toast.success("Đã đúc xong PDF! Bắt đầu tải xuống...", {
+          id: "generate",
+        });
+
+        const reportId = res.data.id;
+        const downloadUrl = `http://127.0.0.1:8006/api/reports/${reportId}/download`;
+
+        // Ép trình duyệt tải
+        window.location.href = downloadUrl;
       }
       // eslint-disable-next-line no-unused-vars
     } catch (error) {
