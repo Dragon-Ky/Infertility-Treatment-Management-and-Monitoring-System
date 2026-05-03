@@ -29,7 +29,7 @@ class DashboardService
                 ->count();
 
             // 3. Đếm số ca đậu thai mới (Trạng thái ongoing)
-            $successfulPregnancies = PregnancyTracking::where('status', 'ongoing')
+            $successfulPregnancies = PregnancyTracking::whereIn('status', ['ongoing', 'delivered'])
                                           ->where('is_active', true)
                                           ->count();
 
