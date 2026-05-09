@@ -1,273 +1,252 @@
- 🏥 Infertility Treatment Management and Monitoring System
+![PHP](https://img.shields.io/badge/PHP-8.x-777BB4)
+![React](https://img.shields.io/badge/React-18.x-61DAFB)
+![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1)
+![Redis](https://img.shields.io/badge/Redis-7.x-DC382D)
+![Docker](https://img.shields.io/badge/Docker-24.x-2496ED)
+![JWT](https://img.shields.io/badge/JWT-Authentication-000000)
+![License](https://img.shields.io/badge/License-MIT-yellow)
 
-Phần mềm quản lý và theo dõi điều trị hiếm muộn
+# 🏥 Infertility Treatment Management and Monitoring System
 
-1. 📌 Giới thiệu dự án
+**Phần mềm quản lý và theo dõi điều trị hiếm muộn**
 
-Hệ thống được xây dựng nhằm quản lý và theo dõi toàn bộ quá trình điều trị hiếm muộn tại một cơ sở y tế.
+Hệ thống hỗ trợ các cơ sở y tế quản lý toàn bộ quy trình điều trị hiếm muộn (IUI, IVF), từ đăng ký dịch vụ, theo dõi phác đồ, nhắc lịch, đến báo cáo thống kê và đánh giá chất lượng.
 
-Phần mềm hỗ trợ:
+## 🎯 Mục tiêu
 
-Quản lý dịch vụ điều trị hiếm muộn (IUI, IVF, …)
+- Quản lý dịch vụ điều trị hiếm muộn (IUI, IVF,…) và bảng giá.
+- Quản lý bác sĩ, lịch làm việc, chuyên môn.
+- Theo dõi chi tiết tiến trình điều trị cho từng bệnh nhân.
+- Ghi nhận kết quả xét nghiệm, khám bệnh, thụ thai.
+- Tự động nhắc lịch tiêm thuốc, xét nghiệm, tái khám qua Firebase.
+- Thu thập đánh giá (rating/feedback) từ bệnh nhân.
+- Cung cấp dashboard & báo cáo thống kê cho quản lý.
 
-Quản lý bác sĩ và lịch làm việc
+## 🧱 Kiến trúc hệ thống
 
-Theo dõi chi tiết tiến trình điều trị của bệnh nhân
+Hệ thống được xây dựng theo mô hình **Microservices Architecture**, giao tiếp qua API Gateway, REST, và Message Broker (RabbitMQ). Toàn bộ service được Docker hóa, sử dụng Redis cache và Apache NiFi để đồng bộ dữ liệu.
 
-Ghi nhận kết quả xét nghiệm và khám bệnh
+```
+infertility-system/
+├── auth-service/           # Xác thực, phân quyền (JWT)
+├── catalog-service/        # Quản lý dịch vụ, bác sĩ, bảng giá
+├── appointment-service/    # Đăng ký điều trị, đặt lịch khám
+├── treatment-service/      # Phác đồ, xét nghiệm, kết quả
+├── notification-service/   # Gửi thông báo (Firebase + RabbitMQ)
+├── report-service/         # Dashboard, thống kê, đồng bộ NiFi
+└──api-gateway/             # API Gateway
+```
 
-Nhắc lịch tiêm thuốc, xét nghiệm, tái khám
+## 🗺️ Service Mapping
 
-Quản lý feedback, rating
+| Service                  | Chức năng chính                                                                                                                                           | Actor liên quan                         | Tính năng đã implement                                                |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | --------------------------------------------------------------------- |
+| **Auth Service**         | - Đăng nhập/đăng xuất<br>- Phân quyền RBAC (Admin, Manager, Doctor, Customer, Guest)<br>- Quản lý tài khoản, JWT                                          | Guest, Customer, Doctor, Manager, Admin | ✅ JWT authentication<br>✅ Role-based authorization                  |
+| **Catalog Service**      | - CRUD dịch vụ (IUI/IVF)<br>- Quản lý thông tin bác sĩ (chuyên môn, bằng cấp)<br>- Bảng giá dịch vụ<br>- View profile bác sĩ                              | Customer, Doctor, Manager, Admin        | ✅ Service CRUD<br>✅ Doctor profiles<br>✅ Pricing management        |
+| **Appointment Service**  | - Đăng ký gói điều trị mới<br>- Đặt lịch khám, chọn bác sĩ<br>- Xem lịch trình điều trị                                                                   | Customer, Doctor, Admin                 | ✅ Treatment registration<br>✅ Schedule management                   |
+| **Treatment Service**    | - Quản lý phác đồ theo phương pháp (IUI/IVF)<br>- Lịch tiêm thuốc, xét nghiệm<br>- Ghi nhận kết quả xét nghiệm/thụ thai<br>- Cập nhật tiến triển điều trị | Doctor                                  | ✅ Protocol management<br>✅ Lab results entry<br>✅ Treatment events |
+| **Notification Service** | - Nhắc lịch tiêm, xét nghiệm, tái khám<br>- Gửi thông báo qua Firebase<br>- Nhận sự kiện từ RabbitMQ                                                      | Customer, Doctor                        | ✅ Reminder system<br>✅ Firebase + RabbitMQ                          |
+| **Report Service**       | - Dashboard & báo cáo thống kê<br>- Thống kê số ca, tỷ lệ thành công, doanh thu<br>- Đồng bộ dữ liệu qua Apache NiFi                                      | Manager, Admin                          | ✅ Analytics dashboard<br>✅ NiFi integration                         |
 
-Dashboard & báo cáo thống kê
+## 👥 User Roles
 
-Hệ thống được triển khai theo kiến trúc Microservices (BẮT BUỘC).
+| Role         | Mô tả                                                             |
+| ------------ | ----------------------------------------------------------------- |
+| **Guest**    | Người truy cập xem thông tin cơ sở y tế, dịch vụ, blog            |
+| **Customer** | Bệnh nhân đăng ký dịch vụ điều trị, theo dõi tiến trình, đánh giá |
+| **Doctor**   | Bác sĩ theo dõi và cập nhật tiến trình điều trị, ghi nhận kết quả |
+| **Manager**  | Quản lý cơ sở y tế, xem báo cáo, giám sát chất lượng              |
+| **Admin**    | Quản trị hệ thống, quản lý tài khoản, phân quyền                  |
 
-2. 👥 User Roles
-Role	Mô tả
-Guest	Người truy cập xem thông tin cơ sở y tế, dịch vụ
-Customer	Bệnh nhân đăng ký dịch vụ điều trị
-Doctor	Bác sĩ theo dõi và cập nhật tiến trình điều trị
-Manager	Quản lý cơ sở y tế
-Admin	Quản trị hệ thống
-3. 🧱 Kiến trúc hệ thống
-3.1 Kiến trúc tổng thể
+## 🛠️ Công nghệ sử dụng
 
-Microservices Architecture
+### ⚙️ Backend
 
-API Gateway
+- **Ngôn ngữ**: PHP (RESTful API)
+- **Xác thực**: JWT
+- **Giao tiếp**: REST, RabbitMQ (event bus)
+- **Cache**: Redis
 
-Service-to-Service Communication (REST / Message Broker)
+### 💻 Frontend
 
-Distributed System
+- ReactJS + TailwindCSS + Vite
+- Giao tiếp: HTTPS qua API Gateway
 
-3.2 Danh sách Microservices (Dự kiến)
-Service	Mô tả	Thành viên phụ trách
-Auth Service	Xác thực & phân quyền (JWT/OAuth2)	Member 1
-User Service	Quản lý hồ sơ bệnh nhân	Member 2
-Doctor Service	Quản lý bác sĩ & lịch làm việc	Member 3
-Treatment Service	Quản lý quá trình điều trị IUI, IVF	Member 4
-Appointment Service	Quản lý lịch hẹn & nhắc lịch	Member 5
-Notification Service	Gửi thông báo (Firebase)	Member 6
-Rating Service	Quản lý feedback & rating	Member 7
-Service Catalog	Quản lý dịch vụ & bảng giá	Member 8
-Reporting Service	Dashboard & báo cáo	Member 9
+### 🗄️ Database & Integration
 
-👉 Mỗi thành viên triển khai 01 Microservice độc lập
+- **Database**: MySQL
+- **Cache & session**: Redis
+- **Message queue**: RabbitMQ
+- **Push notification**: Firebase Cloud Messaging (FCM)
+- **Data flow & ETL**: Apache NiFi
 
-4. 🛠️ Công nghệ sử dụng
-Backend
+### 🐳 Deployment
 
-NodeJS / Java Spring Boot / .NET (tuỳ nhóm chọn)
+- Docker (mỗi service là một container)
+- Docker Compose
 
-RESTful API
+### 📋 Project Management
 
-JWT Authentication
+- Jira (quản lý task, sprint, backlog)
+- Confluence (tài liệu)
 
-Frontend
+## 🧱 Cấu trúc cơ sở dữ liệu
 
-ReactJS / NextJS
+Mỗi microservice có database riêng để đảm bảo độc lập và bảo mật.
 
-Database
+| Service              | Database                | Mục đích                     |
+| -------------------- | ----------------------- | ---------------------------- |
+| Auth Service         | auth_db (MySQL)         | Người dùng, role, phân quyền |
+| Catalog Service      | catalog_db (MySQL)      | Dịch vụ, bác sĩ, bảng giá    |
+| Appointment Service  | appointment_db (MySQL)  | Đăng ký điều trị, lịch khám  |
+| Treatment Service    | treatment_db (MySQL)    | Phác đồ, xét nghiệm, kết quả |
+| Notification Service | notification_db (MySQL) | Log thông báo, lịch nhắc     |
+| Report Service       | report_db (MySQL)       | Dữ liệu tổng hợp, báo cáo    |
 
-PostgreSQL / MySQL
+**Redis** được dùng để cache session và token.
 
-Redis (Memory Cache)
+## 🔄 Luồng dữ liệu (Data Flow)
 
-Caching
+1. **Guest/Customer đăng ký/đăng nhập** → Auth Service → JWT → Phân quyền
+2. **Customer đăng ký dịch vụ** → Appointment Service → Tạo treatment plan
+3. **Doctor cập nhật kết quả** → Treatment Service → Lưu xét nghiệm → Gửi event qua RabbitMQ
+4. **Notification Service** → Nhận event → Gửi thông báo Firebase (nhắc lịch, kết quả)
+5. **Manager/Admin xem báo cáo** → Report Service → Lấy dữ liệu từ NiFi (đồng bộ từ các service)
+6. **Customer gửi rating/feedback** → Catalog Service → Lưu đánh giá bác sĩ
 
-Redis Cache
+## 🚀 Triển khai hệ thống
 
-Memory Cache
+Sử dụng Docker Compose để khởi chạy toàn bộ services.
 
-Notification
+### Khởi chạy local development
 
-Firebase Cloud Messaging (FCM)
+```bash
+# Clone repository
+git clone -b integration https://github.com/Dragon-Ky/Infertility-Treatment-Management-and-Monitoring-System.git
+cd Infertility-Treatment-Management-and-Monitoring-System
 
-Data Synchronization
+# Tạo file .env (nếu cần, xem phần Environment Variables)
 
-Apache NiFi (đồng bộ dữ liệu giữa services)
-
-Containerization & Deployment
-
-Docker
-
-Docker Compose
-
-VPS / Cloud (AWS / GCP / Azure)
-
-Project Management
-
-Jira (Quản lý task, sprint, backlog)
-
-5. 📦 Chức năng hệ thống
-5.1 Trang chủ
-
-Giới thiệu cơ sở y tế
-
-Danh sách dịch vụ điều trị
-
-Blog chia sẻ kiến thức
-
-5.2 Đăng ký dịch vụ điều trị
-
-Khách hàng có thể:
-
-Đăng ký IUI (Thụ tinh trong tử cung)
-
-Đăng ký IVF (Thụ tinh trong ống nghiệm)
-
-Chọn bác sĩ điều trị
-
-Xem bảng giá
-
-5.3 Quản lý quá trình điều trị
-
-Theo từng phương pháp:
-
-IUI
-
-Lịch tiêm thuốc
-
-Ngày thực hiện thụ tinh
-
-Theo dõi kết quả
-
-IVF
-
-Kích trứng
-
-Chọc hút trứng
-
-Thụ tinh trong ống nghiệm
-
-Cấy phôi
-
-Theo dõi thai
-
-Bác sĩ có thể:
-
-Ghi nhận kết quả xét nghiệm
-
-Ghi chú tiến triển điều trị
-
-Cập nhật tình trạng bệnh nhân
-
-5.4 Nhắc lịch & thông báo
-
-Nhắc lịch tiêm thuốc
-
-Nhắc lịch xét nghiệm
-
-Nhắc lịch tái khám
-
-Thông báo qua Firebase
-
-5.5 Quản lý bác sĩ
-
-Thông tin cá nhân
-
-Bằng cấp
-
-Chuyên môn
-
-Lịch làm việc
-
-5.6 Quản lý rating & feedback
-
-Customer đánh giá bác sĩ
-
-Manager theo dõi chất lượng dịch vụ
-
-5.7 Dashboard & Reporting
-
-Thống kê số lượng bệnh nhân
-
-Tỷ lệ thành công điều trị
-
-Doanh thu theo dịch vụ
-
-Báo cáo theo tháng / quý / năm
-
-6. 🔐 Bảo mật
-
-JWT Authentication
-
-Role-based Authorization (RBAC)
-
-HTTPS
-
-Logging & Monitoring
-
-7. 🔄 Đồng bộ dữ liệu
-
-Sử dụng Apache NiFi
-
-Đồng bộ dữ liệu giữa các Microservices
-
-Hỗ trợ ETL và Data Flow Management
-
-8. 🚀 Triển khai hệ thống
-8.1 Local Development
+# Khởi chạy tất cả services
 docker-compose up --build
 
-8.2 Production
+# Xem logs
+docker-compose logs -f
 
-Deploy từng service bằng Docker
-
-Deploy trên:
-
-VPS
-
-AWS EC2
-
-GCP
-
-Azure
-
-9. 📊 Quản lý dự án
-
-Quản lý công việc bằng Jira
-
-Daily Meeting
-
-Thống nhất dữ liệu Confluence 
-
-Sprint Review
-
-10. 📁 Cấu trúc Repository (Gợi ý)
-```   
-infertility-system/
-│
-├── auth-service/
-├── user-service/
-├── doctor-service/
-├── treatment-service/
-├── appointment-service/
-├── notification-service/
-├── rating-service/
-├── reporting-service/
-├── api-gateway/
-├── docker-compose.yml
-└── README.md
+# Dừng hệ thống
+docker-compose down
 ```
-11. 📌 Yêu cầu bắt buộc
+
+### Ports
+
+| Service                  | Port  | URL                        |
+| ------------------------ | ----- | -------------------------- |
+| **API Gateway**          | 8080  | http://localhost:8080      |
+| **Auth Service**         | 8001  | http://localhost:8001      |
+| **Catalog Service**      | 8002  | http://localhost:8002      |
+| **Appointment Service**  | 8003  | http://localhost:8003      |
+| **Treatment Service**    | 8004  | http://localhost:8004      |
+| **Notification Service** | 8005  | http://localhost:8005      |
+| **Report Service**       | 8006  | http://localhost:8006      |
+| **MySQL**                | 3306  | localhost:3306             |
+| **Redis**                | 6379  | localhost:6379             |
+| **RabbitMQ Management**  | 15672 | http://localhost:15672     |
+| **NiFi**                 | 8080  | http://localhost:8080/nifi |
+
+### Environment Variables
+
+Tạo file `.env` hoặc cập nhật các biến môi trường trong `docker-compose.yml`:
+
+```env
+# Database
+MYSQL_ROOT_PASSWORD=rootpassword
+MYSQL_DATABASE=auth_db
+
+# Redis
+REDIS_HOST=redis
+REDIS_PORT=6379
+
+# JWT
+JWT_SECRET=YourSuperSecretKeyForJWT
+JWT_EXPIRATION=86400
+
+# RabbitMQ
+RABBITMQ_HOST=rabbitmq
+RABBITMQ_USER=guest
+RABBITMQ_PASS=guest
+
+# Firebase
+FIREBASE_SERVER_KEY=your_firebase_server_key
+
+# NiFi
+NIFI_WEB_HTTP_PORT=8080
 ```
-✅ Kiến trúc Microservices
-✅ Docker hóa toàn bộ hệ thống
-✅ Sử dụng Redis cache
-✅ Tích hợp Firebase Notification
-✅ Đồng bộ dữ liệu bằng Apache NiFi
-✅ Quản lý dự án bằng Jira
-✅ Mỗi thành viên đảm nhiệm 01 microservice
-```
-12. 📈 Hướng phát triển tương lai
 
-Tích hợp AI tư vấn điều trị
+## 🎯 Tính năng đã hoàn thành
 
-Mobile App (Flutter)
+### Authentication & Authorization
 
-Hệ thống phân tích dữ liệu nâng cao
+- ✅ Đăng ký, đăng nhập với JWT
+- ✅ Phân quyền theo role (Guest, Customer, Doctor, Manager, Admin)
+- ✅ Quản lý tài khoản
 
-Machine Learning dự đoán tỷ lệ thành công
+### Catalog Management
+
+- ✅ Hiển thị dịch vụ điều trị (IUI, IVF, ...)
+- ✅ Quản lý bác sĩ (thông tin, bằng cấp, chuyên môn)
+- ✅ Quản lý bảng giá
+- ✅ Hiển thị thông tin profile bác sĩ
+
+### Appointment & Treatment Registration
+
+- ✅ Đăng ký gói điều trị (IUI, IVF, ...)
+- ✅ Đặt lịch khám, chọn bác sĩ
+- ✅ Xem lịch trình điều trị
+
+### Treatment Tracking
+
+- ✅ Quản lý phác đồ theo phương pháp
+- ✅ Hiển thị lịch tiêm thuốc, xét nghiệm
+- ✅ Ghi nhận kết quả xét nghiệm, thụ thia
+- ✅ Cập nhật tiến triển điều trị
+
+### Notification
+
+- ✅ Nhắc lịch tiêm, xét nghiệm, tái khám
+- ✅ Gửi thông báo đến người dùng
+- ✅ Nhận sự kiện từ RabbitMQ
+
+### Rating & Feedback
+
+- ✅ Người dùng đánh giá dịch vụ, bác sĩ
+- ✅ Quản lý theo dõi thống kê thông tin, chất lượng dịch vụ
+
+### Dashboard & Reporting
+
+- ✅ Thống kê số bệnh nhân, tỷ lệ thành công
+- ✅ Doanh thu theo dịch vụ (tháng/quý/năm)
+- ✅ Đồng bộ dữ liệu qua Apache NiFi
+
+## 🚧 Tính năng đang phát triển
+
+- 🚧 Tích hợp AI tư vấn phác đồ điều trị
+- 🚧 Mobile app (Flutter)
+- 🚧 Hệ thống phân tích dữ liệu nâng cao
+- 🚧 Machine Learning dự đoán tỷ lệ thành công
+
+## 📝 License
+
+Dự án được phân phối dưới giấy phép MIT.
+
+## 👥 Contributors
+
+- Luu Gia Ky
+- Le Nguyen Bao Khoa
+- Bui Trieu Tin
+- Nguyen Minh Thai
+- Nguyen Truong Giang
+- Vu Nguyen Tuan Khai
+
+## 📞 Contact
+
+Với câu hỏi hoặc hỗ trợ, vui lòng liên hệ với team hỗ trợ phát triển.

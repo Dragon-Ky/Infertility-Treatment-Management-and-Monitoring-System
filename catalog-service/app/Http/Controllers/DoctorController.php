@@ -1,0 +1,122 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Doctor;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+
+class DoctorController extends Controller
+{
+    public function index()
+    {
+        $cacheKey = "doctors_all";
+
+        $doctors = Cache::remember($cacheKey, 600, function () {
+            return Doctor::with('schedules')->get();
+        });
+
+        return response()->json($doctors);
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'full_name' => 'required|string|max:255',
+            'avatar' => 'nullable|string',
+            'specialization' => 'required|string|max:255',
+            'degree' => 'nullable|string|max:255',
+            'experience_years' => 'required|integer|min:0',
+            'bio' => 'nullable|string',
+            'consultation_fee' => 'nullable|numeric|min:0',
+            'status' => 'in:active,inactive'
+        ]);
+
+        $doctor = Doctor::create($data);
+
+        Cache::forget("doctors_all");
+
+        return response()->json($doctor, 201);
+    }
+
+    public function show($id)
+    {
+        return response()->json(
+            Doctor::with('schedules')->findOrFail($id)
+        );
+    }
+
+    public function update(Request $request, $id)
+    {
+        $doctor = Doctor::findOrFail($id);
+
+        $data = $request->validate([
+            'full_name' => 'sometimes|string|max:255',
+            'avatar' => 'nullable|string',
+            'specialization' => 'sometimes|string|max:255',
+            'degree' => 'nullable|string|max:255',
+            'experience_years' => 'sometimes|integer|min:0',
+            'bio' => 'nullable|string',
+            'consultation_fee' => 'nullable|numeric|min:0',
+            'status' => 'in:active,inactive'
+        ]);
+
+        $doctor->update($data);
+
+        Cache::forget("doctors_all");
+        Cache::forget("doctor_" . $id);
+
+        return response()->json($doctor);
+    }
+
+
+    public function destroy($id)
+    {
+        $doctor = Doctor::findOrFail($id);
+        $doctor->delete();
+
+        Cache::forget("doctors_all");
+        Cache::forget("doctor_" . $id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Doctor deleted successfully'
+        ]);
+    }
+
+
+    public function restore($id)
+    {
+        $doctor = Doctor::withTrashed()->findOrFail($id);
+        $doctor->restore();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Doctor restored successfully',
+            'data'    => $doctor
+        ]);
+    }
+
+
+    public function forceDelete($id)
+    {
+        $doctor = Doctor::withTrashed()->findOrFail($id);
+        $doctor->forceDelete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Doctor permanently deleted'
+        ]);
+    }
+
+
+    public function trashed()
+    {
+        $doctors = Doctor::onlyTrashed()->get();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $doctors
+        ]);
+    }
+}
