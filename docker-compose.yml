@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   # ============================================
@@ -29,35 +28,6 @@ services:
     networks:
       - app-network
 
-  rabbitmq:
-    image: rabbitmq:3-management-alpine
-    container_name: infertility-rabbitmq
-    restart: unless-stopped
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
-    ports:
-      - "${RABBITMQ_PORT:-5672}:5672"
-      - "${RABBITMQ_UI_PORT:-15672}:15672"
-    volumes:
-      - rabbitmq-data:/var/lib/rabbitmq
-    networks:
-      - app-network
-
-  nifi:
-    image: apache/nifi:latest
-    container_name: infertility-nifi
-    restart: unless-stopped
-    ports:
-      - "${NIFI_PORT:-8443}:8443"
-    environment:
-      - SINGLE_USER_CREDENTIALS_USERNAME=${NIFI_USERNAME:-admin}
-      - SINGLE_USER_CREDENTIALS_PASSWORD=${NIFI_PASSWORD:-reportservice}
-    volumes:
-      - ./nifi-drivers:/opt/nifi/nifi-current/lib/drivers
-    networks:
-      - app-network
-
   # ============================================
   # AUTH SERVICE
   # ============================================
@@ -82,11 +52,9 @@ services:
       - DB_PASSWORD=${AUTH_DB_PASSWORD:-secret}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - RABBITMQ_HOST=rabbitmq
     depends_on:
       - mysql
       - redis
-      - rabbitmq
     networks:
       - app-network
 
@@ -172,9 +140,12 @@ services:
       - DB_PASSWORD=${APPOINTMENT_DB_PASSWORD:-secret}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
     depends_on:
       - mysql
       - redis
+      - rabbitmq
     networks:
       - app-network
 
@@ -217,6 +188,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
     depends_on:
       - mysql
       - redis
@@ -262,9 +234,13 @@ services:
       - DB_PASSWORD=${TREATMENT_DB_PASSWORD:-secret}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - REPORT_SERVICE_URL=http://report-nginx
     depends_on:
       - mysql
       - redis
+      - rabbitmq
     networks:
       - app-network
 
@@ -306,9 +282,15 @@ services:
       - DB_PASSWORD=${REPORT_DB_PASSWORD:-secret}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - AUTH_SERVICE_URL=http://auth-nginx
+      - TREATMENT_SERVICE_URL=http://treatment-nginx
+      - APPOINTMENT_SERVICE_URL=http://appointment-nginx
     depends_on:
       - mysql
       - redis
+      - rabbitmq
     networks:
       - app-network
 
@@ -326,13 +308,59 @@ services:
     networks:
       - app-network
 
+  # ============================================
+  # FRONTEND
+  # ============================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: infertility-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - app-network
+
+  # ============================================
+  # MESSAGE BROKER & DATA SYNC
+  # ============================================
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: infertility-rabbitmq
+    restart: unless-stopped
+    ports:
+      - "${RABBITMQ_PORT:-5672}:5672"
+      - "${RABBITMQ_UI_PORT:-15672}:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-guest}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD:-guest}
+    networks:
+      - app-network
+
+  nifi:
+    image: apache/nifi:latest
+    container_name: infertility-nifi
+    restart: unless-stopped
+    ports:
+      - "${NIFI_PORT:-8443}:8443"
+    environment:
+      - SINGLE_USER_CREDENTIALS_USERNAME=${NIFI_USERNAME:-admin}
+      - SINGLE_USER_CREDENTIALS_PASSWORD=${NIFI_PASSWORD:-reportservice}
+    volumes:
+      - ./nifi-drivers:/opt/nifi/nifi-current/lib/drivers
+    networks:
+      - app-network
+
 # ============================================
 # VOLUMES
 # ============================================
 volumes:
   mysql-data:
   redis-data:
-  rabbitmq-data:
 
 # ============================================
 # NETWORKS

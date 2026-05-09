@@ -2,7 +2,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 
 const appointmentApi = axios.create({
-  baseURL: "http://127.0.0.1:8002/api/",
+  baseURL: "http://127.0.0.1:8003/api/",
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",

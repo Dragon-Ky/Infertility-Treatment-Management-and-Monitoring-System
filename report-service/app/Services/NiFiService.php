@@ -71,7 +71,7 @@ class NiFiService
         try {
             switch ($sourceService) {
                 case 'auth':
-                    $response = Http::withToken($token)->get('http://127.0.0.1:8000/api/doctor/customers');
+                    $response = Http::withToken($token)->get(env('AUTH_SERVICE_URL', 'http://127.0.0.1:8001') . '/api/doctor/customers');
                     if (!$response->successful()) {
                         throw new \Exception("Auth API trả về lỗi: " . $response->status());
                     }
@@ -96,7 +96,7 @@ class NiFiService
 
                 case 'treatment':
                     // Lấy phác đồ từ nhà Treatment
-                    $response = Http::withToken($token)->get('http://127.0.0.1:8001/api/v1/treatment/protocols');
+                    $response = Http::withToken($token)->get(env('TREATMENT_SERVICE_URL', 'http://127.0.0.1:8005') . '/api/v1/treatment/protocols');
                     if (!$response->successful()) {
                         throw new \Exception("Treatment API trả về lỗi: " . $response->status());
                     }
@@ -108,7 +108,8 @@ class NiFiService
                     foreach ($protocols as $p) {
                         // đếm bác sĩ ID này đang có bao nhiêu ca
                         $docId = $p['doctor_id'];
-                        if (!isset($doctorCases[$docId])) $doctorCases[$docId] = 0;
+                        if (!isset($doctorCases[$docId]))
+                            $doctorCases[$docId] = 0;
                         $doctorCases[$docId]++;
 
                         // Tính tổng tiền
@@ -116,7 +117,7 @@ class NiFiService
                             ['remote_id' => $p['id']],
                             [
                                 'status' => $p['status'] ?? 'in_progress',
-                                'price' => isset($p['price']) ? (int)$p['price'] : 0,
+                                'price' => isset($p['price']) ? (int) $p['price'] : 0,
                                 'synced_at' => now(),
                                 // Nếu API Treatment có trả về created_at, ta dùng nó để filter theo tháng cho chuẩn. Nếu không thì dùng giờ hiện tại.
                                 'created_at' => isset($p['created_at']) ? \Carbon\Carbon::createFromFormat('d/m/Y H:i', $p['created_at'])->format('Y-m-d H:i:s') : now(),
@@ -126,7 +127,7 @@ class NiFiService
                     }
 
                     //  Chạy qua Auth lấy tên Bác sĩ
-                    $authResponse = Http::withToken($token)->get('http://127.0.0.1:8000/api/doctors');
+                    $authResponse = Http::withToken($token)->get(env('AUTH_SERVICE_URL', 'http://127.0.0.1:8001') . '/api/doctors');
                     $doctorsList = [];
                     if ($authResponse->successful()) {
                         $authData = $authResponse->json();
@@ -149,7 +150,7 @@ class NiFiService
 
                 case 'appointment':
                     // Appointment (Cổng 8002) lấy danh sách Lịch hẹn
-                    $response = Http::withToken($token)->get('http://127.0.0.1:8002/api/appointments');
+                    $response = Http::withToken($token)->get(env('APPOINTMENT_SERVICE_URL', 'http://127.0.0.1:8003') . '/api/appointments');
                     if (!$response->successful()) {
                         throw new \Exception("Appointment API trả về lỗi: " . $response->status());
                     }

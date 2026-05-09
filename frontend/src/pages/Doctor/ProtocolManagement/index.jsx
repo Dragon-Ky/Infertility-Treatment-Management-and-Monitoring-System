@@ -47,8 +47,12 @@ function ProtocolManagement() {
   const loadInitialData = async () => {
     setLoading(true);
     try {
+      const userStr = localStorage.getItem("user");
+      const currentUser = userStr ? JSON.parse(userStr) : null;
+      const doctorId = currentUser?.id;
+
       const [protocolRes, customerRes] = await Promise.all([
-        getAllProtocols(),
+        getAllProtocols({ doctor_id: doctorId }),
         getCustomers(),
       ]);
 
@@ -61,7 +65,11 @@ function ProtocolManagement() {
       setUsersMap(mappedUsers);
 
       if (protocolRes && protocolRes.data) {
-        setProtocols(protocolRes.data);
+        // Lọc thêm ở frontend để chắc chắn (nếu backend chưa hỗ trợ lọc query)
+        const filteredProtocols = protocolRes.data.filter(
+          (p) => String(p.doctor_id) === String(doctorId),
+        );
+        setProtocols(filteredProtocols);
       }
       // eslint-disable-next-line no-unused-vars
     } catch (error) {

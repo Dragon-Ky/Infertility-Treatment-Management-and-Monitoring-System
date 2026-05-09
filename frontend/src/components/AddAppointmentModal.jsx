@@ -44,7 +44,7 @@ const formSchema = z.object({
   notes: z.string().optional(),
 });
 
-const AddAppointmentModal = ({ isOpen, onOpenChange, onAdded }) => {
+const AddAppointmentModal = ({ isOpen, onOpenChange, onAdded, initialDoctorId, initialDoctorName }) => {
   const [loading, setLoading] = useState(false);
 
   const [doctors, setDoctors] = useState([]);
@@ -55,9 +55,48 @@ const AddAppointmentModal = ({ isOpen, onOpenChange, onAdded }) => {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      doctor_id: initialDoctorId?.toString() || "",
       notes: "",
     },
   });
+
+  // Cập nhật giá trị bác sĩ khi initialDoctorId hoặc initialDoctorName thay đổi
+  useEffect(() => {
+    if (!isOpen || !doctors.length) return;
+
+    console.log("--- DEBUG ĐẶT LỊCH ---");
+    console.log("ID truyền vào:", initialDoctorId);
+    console.log("Tên truyền vào:", initialDoctorName);
+    console.log("Danh sách BS hiện có:", doctors.map(d => ({id: d.id, name: d.name})));
+
+    if (initialDoctorId) {
+      // 1. Thử tìm theo ID trước, nhưng phải khớp cả Tên (nếu có tên truyền vào)
+      const docById = doctors.find(d => d.id.toString() === initialDoctorId.toString());
+      
+      const isNameMatch = !initialDoctorName || 
+        (docById?.name?.trim().toLowerCase().includes(initialDoctorName.trim().toLowerCase()));
+
+      if (docById && isNameMatch) {
+        console.log("Khớp hoàn toàn theo ID:", docById.name);
+        form.setValue("doctor_id", docById.id.toString());
+      } else if (initialDoctorName) {
+        // 2. Nếu ID không khớp hoặc Tên của ID đó không đúng, tìm theo Tên trên toàn danh sách
+        console.log("ID không khớp thực tế, đang tìm theo tên:", initialDoctorName);
+        const targetName = initialDoctorName.trim().toLowerCase();
+        const docByName = doctors.find(d => 
+          d.name?.trim().toLowerCase() === targetName || 
+          d.name?.trim().toLowerCase().includes(targetName)
+        );
+        
+        if (docByName) {
+          console.log("Đã tìm thấy bác sĩ chuẩn theo Tên:", docByName.name, "ID chuẩn:", docByName.id);
+          form.setValue("doctor_id", docByName.id.toString());
+        } else {
+          console.warn("Không tìm thấy bác sĩ nào khớp tên trên hệ thống Auth:", targetName);
+        }
+      }
+    }
+  }, [initialDoctorId, initialDoctorName, isOpen, form, doctors]);
 
   //Gọi api lấy Bs
   useEffect(() => {
@@ -129,7 +168,8 @@ const AddAppointmentModal = ({ isOpen, onOpenChange, onAdded }) => {
                     </FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      value={field.value}
+                      disabled={!!initialDoctorId}
                     >
                       <FormControl>
                         <SelectTrigger className="h-12 w-full rounded-xl border-none bg-slate-50 px-3 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-(--primaryCustom)">

@@ -11,20 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-    Schema::create('services', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('service_category_id')->constrained();
-        $table->decimal('price', 10, 2);
-        $table->text('description')->nullable();
-        $table->timestamps();
-    });
-}
+        Schema::table('doctors', function (Blueprint $table) {
+            $table->longText('avatar')->nullable()->change();
+        });
+    }
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('services');
+        Schema::table('doctors', function (Blueprint $table) {
+            $table->string('avatar', 255)->nullable()->change();
+        });
     }
 };

@@ -1,11 +1,51 @@
 import AddEventModal from "@/components/AddEventModal";
 import DeleteConfirm from "@/components/DeleteConfirm";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+
 import { useProtocolData } from "@/contexts/ProtocolContext";
-import { HiOutlineClock, HiOutlineCalendar } from "react-icons/hi";
+import { HiOutlineClock, HiOutlineCalendar, HiOutlineBell } from "react-icons/hi";
+import { sendEmailNotification } from "@/services/notificationService";
+import toast from "react-hot-toast";
+
 
 function HistoryTab() {
-  const { id, events, fetchEvents, handleDeleteEvent } = useProtocolData();
+  const { id, customer, events, fetchEvents, handleDeleteEvent } = useProtocolData();
+
+  const handleSendEmail = async (event) => {
+    try {
+      if (!customer || !customer.email) {
+        toast.error("Không tìm thấy email của bệnh nhân!");
+        return;
+      }
+
+      const doctorStr = localStorage.getItem("user");
+      const currentDoctor = doctorStr ? JSON.parse(doctorStr) : null;
+
+      const emailData = {
+        user_id: customer.id,
+        email: customer.email,
+        user_name: customer.name,
+        appointment_type: event.event_type || "Sự kiện điều trị",
+        appointment_date: new Date(event.event_date).toLocaleDateString("vi-VN"),
+        appointment_time: new Date(event.event_date).toLocaleTimeString("vi-VN", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        doctor_name: currentDoctor?.name || "Bác sĩ phụ trách",
+        notes: event.description || "",
+      };
+
+      await toast.promise(sendEmailNotification(emailData), {
+        loading: "Đang gửi email thông báo...",
+        success: "Đã gửi email thành công!",
+        error: "Gửi email thất bại. Vui lòng kiểm tra cấu hình!",
+      });
+    } catch (error) {
+      console.error("Lỗi gửi email:", error);
+    }
+  };
+
 
   return (
     <>
@@ -41,6 +81,16 @@ function HistoryTab() {
                     <Badge className="rounded-xl border-none bg-slate-900 px-3 text-[9px] font-black text-white uppercase">
                       {event.event_type}
                     </Badge>
+
+                    <Button
+                      onClick={() => handleSendEmail(event)}
+                      variant="ghost"
+                      className="h-8 w-8 cursor-pointer rounded-full p-0 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
+                      title="Gửi email thông báo"
+                    >
+                      <HiOutlineBell size={18} />
+                    </Button>
+
 
                     <AddEventModal
                       protocolId={id}

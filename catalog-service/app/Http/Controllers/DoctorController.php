@@ -4,20 +4,26 @@ namespace App\Http\Controllers;
 
 use App\Models\Doctor;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class DoctorController extends Controller
 {
     public function index()
     {
-        return response()->json(
-            Doctor::with('schedules')->get()
-        );
+        $cacheKey = "doctors_all";
+
+        $doctors = Cache::remember($cacheKey, 600, function () {
+            return Doctor::with('schedules')->get();
+        });
+
+        return response()->json($doctors);
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
             'full_name' => 'required|string|max:255',
+            'avatar' => 'nullable|string',
             'specialization' => 'required|string|max:255',
             'degree' => 'nullable|string|max:255',
             'experience_years' => 'required|integer|min:0',
@@ -27,6 +33,8 @@ class DoctorController extends Controller
         ]);
 
         $doctor = Doctor::create($data);
+
+        Cache::forget("doctors_all");
 
         return response()->json($doctor, 201);
     }
@@ -44,6 +52,7 @@ class DoctorController extends Controller
 
         $data = $request->validate([
             'full_name' => 'sometimes|string|max:255',
+            'avatar' => 'nullable|string',
             'specialization' => 'sometimes|string|max:255',
             'degree' => 'nullable|string|max:255',
             'experience_years' => 'sometimes|integer|min:0',
@@ -54,6 +63,9 @@ class DoctorController extends Controller
 
         $doctor->update($data);
 
+        Cache::forget("doctors_all");
+        Cache::forget("doctor_" . $id);
+
         return response()->json($doctor);
     }
 
@@ -62,6 +74,9 @@ class DoctorController extends Controller
     {
         $doctor = Doctor::findOrFail($id);
         $doctor->delete();
+
+        Cache::forget("doctors_all");
+        Cache::forget("doctor_" . $id);
 
         return response()->json([
             'success' => true,

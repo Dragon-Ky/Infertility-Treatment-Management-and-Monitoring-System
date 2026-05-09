@@ -28,7 +28,8 @@ class RatingController extends Controller
         return response()->json([
             'success' => true,
             'data'    => [
-                'doctor_id'    => (int) $doctorId,
+                'doctor_id'    => (int) $doctor->id,
+                'full_name'    => $doctor->full_name,
                 'rating_avg'   => round($doctor->rating_avg, 1),
                 'rating_count' => $doctor->rating_count,
                 'ratings'      => $ratings,
@@ -40,12 +41,36 @@ class RatingController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'doctor_id'      => 'required|exists:doctors,id',
+            'doctor_id'      => 'required|integer',
+            'doctor_name'    => 'nullable|string', // Nhận thêm tên để đồng bộ nếu cần
             'user_id'        => 'required|integer',
             'appointment_id' => 'required|integer|unique:ratings,appointment_id',
             'rating'         => 'required|integer|min:1|max:5',
             'feedback'       => 'nullable|string',
         ]);
+
+        // Đảm bảo bác sĩ có tồn tại
+        $doctor = Doctor::find($request->doctor_id);
+        
+        if (!$doctor && $request->doctor_name) {
+            // Tìm bác sĩ theo tên để lấy thông tin liên kết
+            $existingDoc = Doctor::where('full_name', $request->doctor_name)->first();
+            
+            if ($existingDoc) {
+                // Cập nhật user_id (FK) để liên kết với Auth service thay vì đổi ID chính (PK)
+                $existingDoc->update(['user_id' => $request->doctor_id]);
+                $doctor = $existingDoc;
+            } else {
+                // Tạo mới bác sĩ nếu chưa tồn tại
+                $doctor = Doctor::create([
+                    'user_id' => $request->doctor_id,
+                    'full_name' => $request->doctor_name,
+                    'specialization' => 'Chuyên khoa Hỗ trợ sinh sản',
+                    'rating_avg' => 0,
+                    'rating_count' => 0,
+                ]);
+            }
+        }
 
         $rating = Rating::create([
             'doctor_id'      => $request->doctor_id,
@@ -129,6 +154,15 @@ class RatingController extends Controller
         Doctor::where('id', $doctorId)->update([
             'rating_avg'   => $avg,
             'rating_count' => $count,
+        ]);
+    }
+    public function getByUser($userId)
+    {
+        $ratings = Rating::where('user_id', $userId)->get();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $ratings
         ]);
     }
 }

@@ -1,36 +1,36 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { getAllDoctors } from "@/services/catalogService";
 
 function Home_S3() {
-  const infoDoctorHome = [
-    {
-      id: 1,
-      avatar:
-        "https://www.fvhospital.com/wp-content/uploads/2018/09/drminhhien.jpg",
-      name: "ThS.BS Nguyễn Thanh Thảo",
-      role: "Trưởng khoa Hỗ trợ sinh sản (IVF)",
-    },
-    {
-      id: 2,
-      avatar:
-        "https://img.freepik.com/free-photo/doctor-hospital_1098-19685.jpg",
-      name: "TS. BS Trần Văn Nam",
-      role: "Chuyên gia Phẫu thuật Nội soi & Hiếm muộn",
-    },
-    {
-      id: 3,
-      avatar:
-        "https://img.freepik.com/free-photo/portrait-woman-working-healthcare-system-as-pediatrician_23-2151686712.jpg?semt=ais_rp_50_assets&w=740&q=80",
-      name: "ThS.BS Lê Thị Phương Anh",
-      role: "Bác sĩ chuyên khoa Phụ sản & Vô sinh nam",
-    },
-    {
-      id: 4,
-      avatar:
-        "https://www.fvhospital.com/wp-content/uploads/2020/10/Dr-Tran-Xuan-Tiem-5028.jpg",
-      name: "BS. CKII. Phạm Minh Hoàng",
-      role: "Chuyên gia Di truyền học & Sàng lọc phôi",
-    },
-  ];
+  const [doctors, setDoctors] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const data = await getAllDoctors();
+        // Backend trả về data trong object nếu dùng apiResource (tùy version Laravel)
+        // Nhưng catalog controller đang trả trực tiếp mảng hoặc object
+        const doctorsData = Array.isArray(data) ? data : (data.data || []);
+        setDoctors(doctorsData);
+      } catch (error) {
+        console.error("Failed to fetch doctors:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDoctors();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="bg-(--bg-section) py-20 text-center">
+        Đang tải danh sách bác sĩ...
+      </div>
+    );
+  }
 
   return (
     <div className="bg-(--bg-section) py-20">
@@ -40,23 +40,33 @@ function Home_S3() {
           Tận tâm vì giấc mơ làm cha mẹ
         </div>
 
-        <div className="grid grid-cols-4 gap-4">
-          {infoDoctorHome.map((info) => (
-            <div className="" key={info.id}>
-              <img
-                className="mb-4 h-[55vh] w-[20vw] rounded-lg object-cover"
-                src={info.avatar}
-                alt="Image Doctor"
-              />
-              <p className="mb-2 text-center font-bold">{info.name}</p>
-              <p className="min-h-[8vh] text-center">{info.role}</p>
-              <Link to="/customer/appointments">
-                <button className="hv-transition mx-auto flex cursor-pointer rounded-lg border bg-(--primary-bold) px-[1vw] py-[0.8vh] font-semibold text-white hover:border-(--primary-bold) hover:bg-transparent hover:text-(--primary-bold)">
-                  Đặt lịch khám
-                </button>
-              </Link>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {doctors.length > 0 ? (
+            doctors.slice(0, 4).map((info) => (
+              <div className="bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow" key={info.id}>
+                <img
+                  className="mb-4 h-[40vh] w-full rounded-lg object-cover"
+                  src={info.avatar || "https://via.placeholder.com/300x400?text=No+Avatar"}
+                  alt={info.full_name}
+                />
+                <p className="mb-2 text-center font-bold text-lg text-slate-800">
+                  {info.degree} {info.full_name}
+                </p>
+                <p className="min-h-[6vh] text-center text-slate-500 text-sm mb-4">
+                  {info.specialization}
+                </p>
+                <Link to="/customer/appointments">
+                  <button className="hv-transition mx-auto flex cursor-pointer rounded-lg border bg-(--primary-bold) px-[1.5vw] py-[1vh] font-semibold text-white hover:border-(--primary-bold) hover:bg-transparent hover:text-(--primary-bold) w-full justify-center">
+                    Đặt lịch khám
+                  </button>
+                </Link>
+              </div>
+            ))
+          ) : (
+            <div className="col-span-4 text-center text-slate-400 italic">
+              Hiện chưa có thông tin bác sĩ.
             </div>
-          ))}
+          )}
         </div>
       </div>
     </div>

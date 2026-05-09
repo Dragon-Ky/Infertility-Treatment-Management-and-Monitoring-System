@@ -12,17 +12,28 @@ class RabbitMQService
 
     public function __construct()
     {
-        $this->connection = new AMQPStreamConnection(
-            env('RABBITMQ_HOST', 'localhost'),
-            env('RABBITMQ_PORT', 5672),
-            env('RABBITMQ_USER', 'guest'),
-            env('RABBITMQ_PASS', 'guest')
-        );
-        $this->channel = $this->connection->channel();
+        try {
+            $this->connection = new AMQPStreamConnection(
+                env('RABBITMQ_HOST', 'localhost'),
+                env('RABBITMQ_PORT', 5672),
+                env('RABBITMQ_USER', 'guest'),
+                env('RABBITMQ_PASSWORD', 'guest')
+            );
+            $this->channel = $this->connection->channel();
+        } catch (\Exception $e) {
+            \Log::error("RabbitMQ Connection Error: " . $e->getMessage());
+            $this->connection = null;
+            $this->channel = null;
+        }
     }
 
     public function publish($routingKey, $data)
     {
+        if (!$this->channel) {
+            \Log::warning("RabbitMQ channel not available for publishing.");
+            return false;
+        }
+
         $this->channel->queue_declare($routingKey, false, true, false, false);
 
         $msg = new AMQPMessage(
@@ -37,12 +48,18 @@ class RabbitMQService
 
     public function close()
     {
-        $this->channel->close();
-        $this->connection->close();
+        if ($this->channel) {
+            $this->channel->close();
+        }
+        if ($this->connection) {
+            $this->connection->close();
+        }
     }
 
     public function __destruct()
     {
-        $this->close();
+        if ($this->channel || $this->connection) {
+            $this->close();
+        }
     }
 }

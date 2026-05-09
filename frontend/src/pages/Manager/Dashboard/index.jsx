@@ -68,7 +68,10 @@ function ManagerDashboard() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <div className="group relative cursor-pointer overflow-hidden rounded-[32px] bg-gradient-to-br from-blue-500 to-blue-700 p-8 text-white shadow-xl shadow-blue-200 transition-all hover:-translate-y-2 hover:shadow-2xl">
+        <div
+          onClick={() => navigate("/manager/manage-doctors")}
+          className="group relative cursor-pointer overflow-hidden rounded-[32px] bg-gradient-to-br from-blue-500 to-blue-700 p-8 text-white shadow-xl shadow-blue-200 transition-all hover:-translate-y-2 hover:shadow-2xl"
+        >
           <div className="relative z-10 flex flex-col items-start">
             <div className="mb-4 rounded-2xl bg-white/20 p-4 backdrop-blur-md">
               <HiOutlineUserGroup size={32} />
@@ -135,6 +138,24 @@ function ManagerDashboard() {
             </p>
           </div>
           <HiOutlineBookOpen className="absolute -right-4 -bottom-4 z-0 text-[120px] text-white opacity-10 transition-transform group-hover:scale-110" />
+        </div>
+
+        <div
+          onClick={() => navigate("/manager/manage-services")}
+          className="group relative cursor-pointer overflow-hidden rounded-[32px] bg-gradient-to-br from-orange-500 to-red-600 p-8 text-white shadow-xl shadow-orange-200 transition-all hover:-translate-y-2 hover:shadow-2xl"
+        >
+          <div className="relative z-10 flex flex-col items-start">
+            <div className="mb-4 rounded-2xl bg-white/20 p-4 backdrop-blur-md">
+              <FiActivity size={32} />
+            </div>
+            <h2 className="text-xl font-black tracking-widest uppercase">
+              Quản lý Dịch Vụ
+            </h2>
+            <p className="mt-2 text-sm font-medium text-orange-100">
+              Thiết lập danh mục dịch vụ điều trị và đơn giá.
+            </p>
+          </div>
+          <FiActivity className="absolute -right-4 -bottom-4 z-0 text-[120px] text-white opacity-10 transition-transform group-hover:scale-110" />
         </div>
       </div>
 

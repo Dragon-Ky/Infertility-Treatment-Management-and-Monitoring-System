@@ -24,4 +24,5 @@ Route::prefix('appointments')->group(function () {
     Route::get('/all', [AppointmentController::class, 'allAppointments'])->name('appointments.all');
     Route::post('/{id}/cancel', [AppointmentController::class, 'cancel'])->name('appointments.cancel');
     Route::post('/{id}/confirm', [AppointmentController::class, 'confirm'])->name('appointments.confirm');
+    Route::post('/{id}/complete', [AppointmentController::class, 'complete'])->name('appointments.complete');
 });

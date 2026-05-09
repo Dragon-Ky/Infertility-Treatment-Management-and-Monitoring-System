@@ -12,12 +12,12 @@ export const menuHeader = [
   {
     id: 3,
     name: "Dịch vụ",
-    path: "/",
+    path: "/services",
   },
   {
     id: 4,
     name: "Bác sĩ",
-    path: "/",
+    path: "/doctors",
   },
   {
     id: 5,

@@ -20,7 +20,7 @@ return new class extends Migration {
             'lab_results',
             'medication_schedules',
             'medication_records',
-            'pregnancy_trackings',
+
             'storage_records'
         ];
 
@@ -47,7 +47,7 @@ return new class extends Migration {
             'lab_results',
             'medication_schedules',
             'medication_records',
-            'pregnancy_trackings',
+
             'storage_records'
         ];
 

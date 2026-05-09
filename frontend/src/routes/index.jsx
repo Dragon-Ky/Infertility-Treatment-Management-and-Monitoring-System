@@ -11,6 +11,9 @@ import DoctorDashboard from "@/pages/Doctor/Dashboard";
 import ManagerDashboard from "@/pages/Manager/Dashboard";
 import Error404 from "@/pages/Error404";
 import BlogList from "@/pages/BlogList";
+import ServiceList from "@/pages/ServiceList";
+import DoctorList from "@/pages/DoctorList";
+import DoctorDetail from "@/pages/DoctorDetail";
 import ProtocolManagement from "@/pages/Doctor/ProtocolManagement";
 import ProtocolDetail from "@/pages/Doctor/ProtocolDetail";
 import DoctorAppointments from "@/pages/Doctor/DoctorAppointments";
@@ -18,6 +21,8 @@ import CustomerAppointments from "@/pages/Customer/CustomerAppointments";
 import ReportDashboard from "@/pages/Manager/ReportDashboard";
 import SyncDashboard from "@/pages/Manager/SyncDashboard";
 import ManageBlog from "@/pages/Manager/ManageBlog";
+import ManageServices from "@/pages/Manager/ManageServices";
+import ManageDoctors from "@/pages/Manager/ManageDoctors";
 
 export const routes = [
   // --- PUBLIC ROUTES ---
@@ -28,6 +33,9 @@ export const routes = [
       { path: "/", element: <Home /> },
       { path: "/blog", element: <BlogList /> },
       { path: "/blog/:id", element: <BlogDetail /> },
+      { path: "/services", element: <ServiceList /> },
+      { path: "/doctors", element: <DoctorList /> },
+      { path: "/doctors/:id", element: <DoctorDetail /> },
       { path: "/403", element: <Error403 /> },
     ],
   },
@@ -70,7 +78,11 @@ export const routes = [
           },
           {
             path: "manage-doctors",
-            element: <div>Trang Manager quản lý Doctor</div>,
+            element: <ManageDoctors />,
+          },
+          {
+            path: "manage-services",
+            element: <ManageServices />,
           },
           {
             path: "reports",

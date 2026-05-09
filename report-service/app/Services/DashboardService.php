@@ -37,10 +37,10 @@ class DashboardService
                     ->limit(5)
                     ->get(),
             ];
-        }, 15); 
+        }, 15);
     }
 
-   public function getSystemOverview(): array
+    public function getSystemOverview(): array
     {
         $cacheKey = 'system_overview';
 
@@ -79,7 +79,7 @@ class DashboardService
     {
         try {
             $token = request()->bearerToken();
-            $url = env('TREATMENT_SERVICE_URL', 'http://127.0.0.1:8001') . '/api/v1/treatment/protocols?all=true';
+            $url = env('TREATMENT_SERVICE_URL', 'http://127.0.0.1:8005') . '/api/v1/treatment/protocols?all=true';
 
             $response = Http::withToken($token)->acceptJson()->timeout(5)->get($url);
             $data = $response->json();
@@ -105,7 +105,7 @@ class DashboardService
     {
         try {
             $token = request()->bearerToken();
-            $url = env('AUTH_SERVICE_URL', 'http://127.0.0.1:8000') . '/api/doctor/customers';
+            $url = env('AUTH_SERVICE_URL', 'http://127.0.0.1:8001') . '/api/doctor/customers';
 
             $response = Http::withToken($token)->acceptJson()->timeout(5)->get($url);
             $data = $response->json();
@@ -125,11 +125,11 @@ class DashboardService
     /**
      * GỌI QUA AUTH SERVICE LẤY SỐ BÁC SĨ
      */
-   protected function getTotalDoctors(): int
+    protected function getTotalDoctors(): int
     {
         try {
             $token = request()->bearerToken();
-            $url = env('AUTH_SERVICE_URL', 'http://127.0.0.1:8000') . '/api/doctors';
+            $url = env('AUTH_SERVICE_URL', 'http://127.0.0.1:8001') . '/api/doctors';
 
             $response = Http::withToken($token)->acceptJson()->timeout(5)->get($url);
             $data = $response->json();
@@ -154,13 +154,13 @@ class DashboardService
 
     /*
      * GỌI QUA TREATMENT SERVICE ĐỂ LẤY THỐNG KÊ ĐIỀU TRỊ
-    */
+     */
     protected function getTreatmentSummaryFromService(): array
     {
         try {
             $token = request()->bearerToken();
 
-            $url = env('TREATMENT_SERVICE_URL', 'http://127.0.0.1:8001') . '/api/v1/treatment/dashboard/summary?all=true';
+            $url = env('TREATMENT_SERVICE_URL', 'http://127.0.0.1:8005') . '/api/v1/treatment/dashboard/summary?all=true';
 
             $response = Http::withToken($token)->acceptJson()->timeout(5)->get($url);
             $data = $response->json();

@@ -11,10 +11,16 @@ class FirebaseService
 
     public function __construct()
     {
-        $factory = (new Factory)
-            ->withServiceAccount(config('firebase.credentials'));
+        $credentialsPath = config('firebase.credentials');
         
-        $this->messaging = $factory->createMessaging();
+        if (file_exists($credentialsPath)) {
+            $factory = (new Factory)
+                ->withServiceAccount($credentialsPath);
+            $this->messaging = $factory->createMessaging();
+        } else {
+            \Log::warning("Firebase credentials file not found at: {$credentialsPath}. Push notifications will be disabled.");
+            $this->messaging = null;
+        }
     }
 
     public function sendToDevice(string $token, array $message): array
@@ -25,6 +31,10 @@ class FirebaseService
                 'body'  => $message['body']
             ])
             ->withData($message['data'] ?? []);
+
+        if (!$this->messaging) {
+            return ['status' => 'failed', 'error' => 'Firebase not initialized'];
+        }
 
         return $this->messaging->send($cloudMessage);
     }
@@ -37,6 +47,10 @@ class FirebaseService
                 'body'  => $message['body']
             ])
             ->withData($message['data'] ?? []);
+
+        if (!$this->messaging) {
+            return ['status' => 'failed', 'error' => 'Firebase not initialized'];
+        }
 
         return $this->messaging->sendEachForMulticast($cloudMessage, $tokens);
     }

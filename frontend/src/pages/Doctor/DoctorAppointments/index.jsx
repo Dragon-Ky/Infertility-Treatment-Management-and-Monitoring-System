@@ -7,7 +7,10 @@ import {
   HiCheck,
   HiX,
   HiOutlineShieldCheck,
+  HiDotsVertical,
+  HiOutlineBell,
 } from "react-icons/hi";
+
 import { FaUser, FaStethoscope, FaCheckCircle } from "react-icons/fa";
 import toast from "react-hot-toast";
 
@@ -29,14 +32,24 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   getAllAppointments,
   confirmAppointment,
   cancelAppointment,
+  completeAppointment,
 } from "@/services/appointmentService";
 import { getCustomers } from "@/services/doctorService";
 import { getDoctors } from "@/services/managerService";
 import { getAllProtocols } from "@/services/protocolService";
 import { getEventsByProtocol } from "@/services/eventService";
+import { sendEmailNotification } from "@/services/notificationService";
+import AddProtocolModal from "@/components/AddProtocolModal";
+
 
 function DoctorAppointments() {
   const navigate = useNavigate();
@@ -56,8 +69,12 @@ function DoctorAppointments() {
     try {
       setIsLoading(true);
 
+      const userStr = localStorage.getItem("user");
+      const currentUser = userStr ? JSON.parse(userStr) : null;
+      const doctorId = currentUser?.id;
+
       const [appRes, docRes, cusRes, protocolsRes] = await Promise.all([
-        getAllAppointments(),
+        getAllAppointments({ doctor_id: doctorId }),
         getDoctors(),
         getCustomers(),
         getAllProtocols(),
@@ -185,6 +202,51 @@ function DoctorAppointments() {
     return doc ? doc.name : `Bác sĩ ID: ${doctorId}`;
   };
 
+  const handleComplete = async (id) => {
+    try {
+      const res = await completeAppointment(id);
+      if (res.status === "success" || res.success) {
+        toast.success("Đã hoàn thành ca khám!");
+        fetchData();
+      }
+    } catch (error) {
+      toast.error("Không thể cập nhật trạng thái!");
+    }
+  };
+  
+  const handleSendEmail = async (item) => {
+    try {
+      const customer = customers.find((c) => String(c.id) === String(item.userId));
+      if (!customer || !customer.email) {
+        toast.error("Không tìm thấy email của bệnh nhân!");
+        return;
+      }
+
+      const doctorStr = localStorage.getItem("user");
+      const currentDoctor = doctorStr ? JSON.parse(doctorStr) : null;
+
+      const emailData = {
+        user_id: item.userId,
+        email: customer.email,
+        user_name: customer.name,
+        appointment_type: getTypeLabel(item.type),
+        appointment_date: formatToDDMMYYYY(item.date),
+        appointment_time: item.time,
+        doctor_name: currentDoctor?.name || getDoctorName(item.doctorId),
+        notes: item.notes || "",
+      };
+
+      await toast.promise(sendEmailNotification(emailData), {
+        loading: "Đang gửi email thông báo...",
+        success: "Đã gửi email thành công!",
+        error: "Gửi email thất bại. Vui lòng kiểm tra cấu hình!",
+      });
+    } catch (error) {
+      console.error("Lỗi gửi email:", error);
+    }
+  };
+
+
   const getCustomerName = (userId) => {
     if (!customers || customers.length === 0 || !userId)
       return `Mã KH: ${userId || "?"}`;
@@ -266,6 +328,13 @@ function DoctorAppointments() {
       (isTreatmentEvent && item.status !== "completed");
     const isCompleted = item.status === "completed";
 
+    const patientProtocol = protocols.find(
+      (p) =>
+        String(p.user_id) === String(item.userId) ||
+        String(p.treatment_id) === String(item.userId) ||
+        String(p.customer_id) === String(item.userId),
+    );
+
     return (
       <Card
         key={item.id}
@@ -284,6 +353,68 @@ function DoctorAppointments() {
             LỘ TRÌNH ĐIỀU TRỊ
           </div>
         )}
+
+        {isConfirmed && !isTreatmentEvent && (
+          <div className="absolute top-4 right-4 z-20">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="h-8 w-8 cursor-pointer rounded-full p-0 hover:bg-slate-100"
+                >
+                  <HiDotsVertical size={18} className="text-slate-400" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="z-[100] w-56 rounded-2xl border-none p-2 shadow-2xl"
+              >
+                {!patientProtocol ? (
+                  <AddProtocolModal
+                    triggerType="menuItem"
+                    patientId={item.userId}
+                    onAdded={fetchData}
+                  />
+                ) : (
+                  <DropdownMenuItem
+                    onClick={() =>
+                      navigate(
+                        `/doctor/protocols/details/${patientProtocol.id}`,
+                      )
+                    }
+                    className="cursor-pointer rounded-xl p-3 font-bold text-blue-600 focus:bg-blue-600 focus:text-white"
+                  >
+                    Xem phác đồ hiện tại
+                  </DropdownMenuItem>
+                )}
+
+                {isConfirmed && (
+                  <DropdownMenuItem
+                    onClick={() => handleComplete(item.originalId)}
+                    className="cursor-pointer rounded-xl p-3 font-bold text-green-600 focus:bg-green-600 focus:text-white"
+                  >
+                    Hoàn thành ca khám
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
+
+        {/* Nút gửi Email Thông báo (Bell Icon) */}
+        {!isCompleted && item.status !== "cancelled" && (
+          <div className="absolute top-4 right-14 z-20">
+            <Button
+              onClick={() => handleSendEmail(item)}
+              variant="ghost"
+              className="h-8 w-8 cursor-pointer rounded-full p-0 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
+              title="Gửi email thông báo"
+            >
+              <HiOutlineBell size={20} />
+            </Button>
+          </div>
+        )}
+
 
         <CardContent className="flex flex-1 flex-col p-6">
           <div className="mb-6 flex items-start justify-between">
@@ -371,14 +502,6 @@ function DoctorAppointments() {
                 </div>
                 <Button
                   onClick={() => {
-                    // Dùng logic xịn từ Dashboard để dò đúng phác đồ
-                    const patientProtocol = protocols.find(
-                      (p) =>
-                        String(p.user_id) === String(item.userId) ||
-                        String(p.treatment_id) === String(item.userId) ||
-                        String(p.customer_id) === String(item.userId),
-                    );
-
                     if (patientProtocol) {
                       navigate(
                         `/doctor/protocols/details/${patientProtocol.id}`,

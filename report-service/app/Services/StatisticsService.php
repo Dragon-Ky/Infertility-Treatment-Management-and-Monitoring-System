@@ -21,7 +21,7 @@ class StatisticsService
         try {
             $token = request()->bearerToken();
             // Móc thẳng vào danh sách Phác đồ để đếm
-            $url = env('TREATMENT_SERVICE_URL', 'http://127.0.0.1:8001') . '/api/v1/treatment/protocols?all=true';
+            $url = env('TREATMENT_SERVICE_URL', 'http://127.0.0.1:8005') . '/api/v1/treatment/protocols?all=true';
 
             $response = Http::withToken($token)->acceptJson()->timeout(5)->get($url);
             $data = $response->json();
@@ -72,14 +72,14 @@ class StatisticsService
 
         try {
             $token = request()->bearerToken();
-            $url = env('APPOINTMENT_SERVICE_URL', 'http://127.0.0.1:8002') . '/api/v1/invoices?all=true';
+            $url = env('APPOINTMENT_SERVICE_URL', 'http://127.0.0.1:8003') . '/api/v1/invoices?all=true';
 
             $response = Http::withToken($token)->acceptJson()->timeout(3)->get($url);
 
             if ($response->successful() && isset($response->json()['data'])) {
                 $invoices = $response->json()['data'];
                 foreach ($invoices as $invoice) {
-                    $totalRevenue += (float)($invoice['total_amount'] ?? 0);
+                    $totalRevenue += (float) ($invoice['total_amount'] ?? 0);
                 }
                 $totalTreatments = count($invoices);
             } else {
@@ -105,6 +105,12 @@ class StatisticsService
         ];
     }
 
-    public function getPatientStats(string $period): array { return []; }
-    public function getDoctorPerformance(string $period): array { return []; }
+    public function getPatientStats(string $period): array
+    {
+        return [];
+    }
+    public function getDoctorPerformance(string $period): array
+    {
+        return [];
+    }
 }

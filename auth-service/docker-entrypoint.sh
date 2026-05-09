@@ -1,24 +1,38 @@
 #!/bin/bash
 
-# Wait for database to be ready using PHP (since it's already installed)
-echo "Waiting for database..."
+set -e
+
+# Wait for database to be ready
+echo "Waiting for database ($DB_HOST:$DB_PORT)..."
 php -r "
     \$host = getenv('DB_HOST');
     \$port = getenv('DB_PORT') ?: 3306;
+    \$user = getenv('DB_USERNAME');
+    \$pass = getenv('DB_PASSWORD');
     while (true) {
         try {
-            \$pdo = new PDO(\"mysql:host=\$host;port=\$port\", getenv('DB_USERNAME'), getenv('DB_PASSWORD'));
+            \$pdo = new PDO(\"mysql:host=\$host;port=\$port\", \$user, \$pass);
             exit(0);
         } catch (Exception \$e) {
-            sleep(1);
+            echo \"Database not ready yet... \" . \$e->getMessage() . \"\n\";
+            sleep(2);
         }
     }
 "
 echo "Database is up!"
 
-# Run migrations
-echo "Running migrations..."
-php artisan migrate --force
+# Ensure vendor directory exists
+if [ ! -d "vendor" ]; then
+    echo "Vendor directory not found. Please run composer install."
+    # Optional: composer install --no-interaction --optimize-autoloader
+fi
+
+# Run migrations and seeders
+echo "Running migrations and seeders for $DB_DATABASE..."
+# Use migrate:fresh if you want to wipe the database and start over
+# php artisan migrate:fresh --seed --force
+php artisan migrate --seed --force
 
 # Execute the CMD
+echo "Starting application..."
 exec "$@"

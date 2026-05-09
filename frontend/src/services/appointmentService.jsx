@@ -1,7 +1,7 @@
 import appointmentApi from "@/utils/appointment-service/appointmentApi";
 
-export const getAllAppointments = async () => {
-  const response = await appointmentApi.get("/appointments");
+export const getAllAppointments = async (params = {}) => {
+  const response = await appointmentApi.get("/appointments", { params });
   return response.data;
 };
 
@@ -12,6 +12,11 @@ export const createAppointment = async (data) => {
 
 export const cancelAppointment = async (id) => {
   const response = await appointmentApi.post(`/appointments/${id}/cancel`);
+  return response.data;
+};
+
+export const completeAppointment = async (id) => {
+  const response = await appointmentApi.post(`/appointments/${id}/complete`);
   return response.data;
 };
 

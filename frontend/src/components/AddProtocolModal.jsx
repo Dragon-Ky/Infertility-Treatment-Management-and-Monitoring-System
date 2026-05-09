@@ -50,6 +50,7 @@ function AddProtocolModal({
   onAdded,
   editData = null,
   triggerType = "button",
+  patientId = null,
 }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -58,7 +59,7 @@ function AddProtocolModal({
   const isEdit = !!editData;
 
   const [formData, setFormData] = useState({
-    treatment_id: "",
+    treatment_id: patientId ? String(patientId) : "",
     protocol_name: "",
     price: 0,
     diagnosis: "",
@@ -90,9 +91,14 @@ function AddProtocolModal({
           notes: editData.notes || "",
           is_active: editData.is_active,
         });
+      } else if (patientId) {
+        setFormData((prev) => ({
+          ...prev,
+          treatment_id: String(patientId),
+        }));
       }
     }
-  }, [open, isEdit, editData]);
+  }, [open, isEdit, editData, patientId]);
 
   const handleSelectPackage = (val) => {
     const selectedPackage = TREATMENT_PACKAGES.find((pkg) => pkg.name === val);
@@ -160,20 +166,22 @@ function AddProtocolModal({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {isEdit ? (
-          triggerType === "menuItem" ? (
-            <DropdownMenuItem
-              onSelect={(e) => e.preventDefault()}
-              className="cursor-pointer rounded-xl p-3 font-bold text-amber-600 focus:bg-amber-600 focus:text-white"
-            >
-              Chỉnh sửa phác đồ
-            </DropdownMenuItem>
-          ) : (
-            <Button className="flex h-12 cursor-pointer items-center gap-2 rounded-2xl bg-amber-500 px-6 text-[10px] font-black tracking-widest text-white shadow-lg shadow-amber-100 transition-all hover:bg-amber-600 active:scale-95">
-              <HiOutlinePencilAlt size={18} />
-              Chỉnh sửa hồ sơ
-            </Button>
-          )
+        {triggerType === "menuItem" ? (
+          <DropdownMenuItem
+            onSelect={(e) => e.preventDefault()}
+            className={`cursor-pointer rounded-xl p-3 font-bold ${
+              isEdit
+                ? "text-amber-600 focus:bg-amber-600 focus:text-white"
+                : "text-blue-600 focus:bg-blue-600 focus:text-white"
+            }`}
+          >
+            {isEdit ? "Chỉnh sửa phác đồ" : "Tạo phác đồ điều trị"}
+          </DropdownMenuItem>
+        ) : isEdit ? (
+          <Button className="flex h-12 cursor-pointer items-center gap-2 rounded-2xl bg-amber-500 px-6 text-[10px] font-black tracking-widest text-white shadow-lg shadow-amber-100 transition-all hover:bg-amber-600 active:scale-95">
+            <HiOutlinePencilAlt size={18} />
+            Chỉnh sửa hồ sơ
+          </Button>
         ) : (
           <Button className="h-14 cursor-pointer rounded-2xl bg-slate-900 px-8 font-black text-white shadow-xl transition-all hover:bg-slate-800 active:scale-95">
             <HiOutlinePlus size={20} className="mr-2" />

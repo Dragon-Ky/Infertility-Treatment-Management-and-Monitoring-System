@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-    Schema::create('service_categories', function (Blueprint $table) {
-    $table->id();
-    $table->string('name'); 
-    $table->text('description')->nullable();
-    $table->timestamps();
-});
+        Schema::table('services', function (Blueprint $table) {
+            if (!Schema::hasColumn('services', 'icon')) {
+                $table->string('icon')->nullable()->after('name');
+            }
+        });
     }
 
     /**
@@ -24,6 +23,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('service_categories');
+        Schema::table('services', function (Blueprint $table) {
+            $table->dropColumn('icon');
+        });
     }
 };

@@ -1,18 +1,12 @@
 <?php
 
+// config/cors.php
 return [
+    'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Cross-Origin Resource Sharing (CORS) Configuration
-    |--------------------------------------------------------------------------
-    */
+    'allowed_methods' => ['*'], // Cho phép GET, POST, PUT, DELETE...
 
-    'paths' => ['api/*'],
-
-    'allowed_methods' => ['*'],
-
-    'allowed_origins' => ['http://localhost:5173'],
+    'allowed_origins' => ['*'], // Sửa chỗ này thành dấu * (Hoặc cụ thể là ['http://localhost:5174'])
 
     'allowed_origins_patterns' => [],
 
@@ -22,6 +16,5 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => false,
-
+    'supports_credentials' => false, // Chú ý: Nếu dùng cookie/session thì đổi thành true, và allowed_origins không được để *
 ];

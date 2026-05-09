@@ -12,13 +12,17 @@ function ProtocolHeader({ protocol }) {
     return dateString.substring(0, 10);
   };
 
+  const handleExportPDF = () => {
+    window.print();
+  };
+
   return (
     <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
       <div className="flex items-center gap-4">
         <Button
           variant="outline"
           onClick={() => navigate("/doctor/protocols")}
-          className="h-12 w-12 rounded-2xl border-none bg-white p-0 shadow-sm transition-all hover:bg-blue-600 hover:text-white"
+          className="h-12 w-12 rounded-2xl border-none bg-white p-0 shadow-sm transition-all hover:bg-blue-600 hover:text-white no-print"
         >
           <HiOutlineChevronLeft size={24} />
         </Button>
@@ -37,7 +41,8 @@ function ProtocolHeader({ protocol }) {
       <div className="flex w-full gap-3 md:w-auto">
         <Button
           variant="outline"
-          className="h-12 flex-1 rounded-2xl border-slate-200 text-xs font-black tracking-widest uppercase shadow-sm md:flex-none"
+          onClick={handleExportPDF}
+          className="h-12 flex-1 rounded-2xl border-slate-200 text-xs font-black tracking-widest uppercase shadow-sm md:flex-none no-print"
         >
           Xuất PDF
         </Button>

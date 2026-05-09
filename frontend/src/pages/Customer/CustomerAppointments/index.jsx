@@ -26,6 +26,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import AddAppointmentModal from "@/components/AddAppointmentModal";
+import RatingModal from "@/components/RatingModal";
 
 // IMPORT API TỪ 2 MICROSERVICES KHÁC NHAU
 import {
@@ -35,6 +36,7 @@ import {
 import { getDoctors } from "@/services/managerService";
 import { getAllProtocols } from "@/services/protocolService";
 import { getEventsByProtocol } from "@/services/eventService";
+import { getUserRatings } from "@/services/catalogService";
 
 function CustomerAppointments() {
   const [combinedSchedules, setCombinedSchedules] = useState([]);
@@ -42,6 +44,9 @@ function CustomerAppointments() {
   const [isLoading, setIsLoading] = useState(true);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [viewMode, setViewMode] = useState("grid");
+  const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [userRatings, setUserRatings] = useState([]);
 
   useEffect(() => {
     fetchData();
@@ -56,11 +61,14 @@ function CustomerAppointments() {
       if (!currentUser) return;
 
       // 1. GỌI API LẤY LỊCH TỪ APPOINTMENT SERVICE (Lịch khách tự đặt)
-      const [appRes, docRes, protocolsRes] = await Promise.all([
+      const [appRes, docRes, protocolsRes, ratingsRes] = await Promise.all([
         getAllAppointments(),
         getDoctors(),
         getAllProtocols(), // Lấy phác đồ để tìm Events
+        getUserRatings(currentUser.id),
       ]);
+
+      setUserRatings(ratingsRes.data || ratingsRes || []);
 
       const rawDoctors = docRes?.data ? docRes.data : docRes;
       setDoctors(Array.isArray(rawDoctors) ? rawDoctors : []);
@@ -113,8 +121,8 @@ function CustomerAppointments() {
             type: ev.event_type,
             date: evDate,
             time: evTime,
-            status: "confirmed", // Event bác sĩ tạo mặc định Đã xác nhận
-            doctorId: protocol.doctor_id, // Lấy Bác sĩ của phác đồ
+            status: ev.result ? "completed" : "confirmed", // Nếu có kết quả thì coi như hoàn thành
+            doctorId: protocol.doctor_id,
             notes: ev.description,
             protocolId: protocol.id,
           };
@@ -136,6 +144,22 @@ function CustomerAppointments() {
       setIsLoading(false);
     }
   };
+
+  const isRated = (appointmentId) => {
+    return userRatings.some(
+      (r) => Number(r.appointment_id) === Number(appointmentId),
+    );
+  };
+
+  const handleRate = (item) => {
+    setSelectedAppointment({
+      ...item,
+      doctorName: getDoctorName(item.doctorId),
+    });
+    setIsRatingModalOpen(true);
+  };
+
+
 
   const handleCancelAppointment = async (id) => {
     toast.promise(cancelAppointment(id), {
@@ -180,7 +204,7 @@ function CustomerAppointments() {
 
   // ĐỒNG BỘ TEXT BADGE
   const renderStatusBadge = (item) => {
-    if (item.source === "treatment_event") {
+    if (item.source === "treatment_event" && item.status !== "completed") {
       return (
         <Badge className="rounded-xl border-none bg-blue-100 px-3 py-1 text-[9px] font-black tracking-widest text-blue-700 uppercase shadow-none">
           <HiOutlineShieldCheck className="mr-1" size={12} /> Bác sĩ Chỉ định
@@ -326,6 +350,23 @@ function CustomerAppointments() {
         )}
 
         <div className="mt-auto pt-2">
+          {/* NÚT ĐÁNH GIÁ - Chỉ hiện nếu ĐÃ HOÀN THÀNH và CHƯA ĐÁNH GIÁ */}
+          {item.status === "completed" && !isRated(item.originalId) && (
+            <Button
+              onClick={() => handleRate(item)}
+              className="mb-2 h-10 w-full cursor-pointer rounded-xl bg-amber-500 text-[10px] font-black tracking-widest text-white uppercase shadow-md shadow-amber-100 transition-all hover:bg-amber-600 active:scale-95"
+            >
+              Đánh giá trải nghiệm
+            </Button>
+          )}
+
+          {item.status === "completed" && isRated(item.originalId) && (
+            <div className="mb-2 flex items-center justify-center gap-2 rounded-xl bg-slate-100 p-2.5 text-[9px] font-black tracking-widest text-slate-400 uppercase">
+              <HiOutlineShieldCheck size={14} className="text-green-500" />
+              Đã gửi đánh giá
+            </div>
+          )}
+
           {/* Chỉ cho phép HỦY nếu là LỊCH TỰ ĐẶT */}
           {!isDoctorPrescribed &&
             (!item.status || item.status === "scheduled") && (
@@ -413,6 +454,13 @@ function CustomerAppointments() {
         isOpen={isOpenModal}
         onOpenChange={setIsOpenModal}
         onAdded={fetchData}
+      />
+
+      <RatingModal
+        isOpen={isRatingModalOpen}
+        onOpenChange={setIsRatingModalOpen}
+        appointment={selectedAppointment}
+        onRated={fetchData}
       />
 
       <Card className="overflow-hidden rounded-[32px] border-none border-slate-100 bg-transparent shadow-[0px_3px_8px_rgba(0,0,0,0.05)] shadow-sm">

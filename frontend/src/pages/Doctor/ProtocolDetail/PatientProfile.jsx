@@ -6,7 +6,12 @@ import {
   HiOutlineHashtag,
   HiOutlineFingerPrint,
   HiOutlineClipboardList,
+  HiOutlineBell,
 } from "react-icons/hi";
+import { Button } from "@/components/ui/button";
+import { sendEmailNotification } from "@/services/notificationService";
+import toast from "react-hot-toast";
+
 
 function PatientProfile({ protocol, customer }) {
   const userStr = localStorage.getItem("user");
@@ -60,6 +65,41 @@ function PatientProfile({ protocol, customer }) {
   const treatmentDays = calculateTreatmentDays(protocol.created_at);
   const isActive = protocol.is_active === 1 || protocol.is_active === true;
 
+  const handleSendQuickEmail = async () => {
+    try {
+      if (!customer || !customer.email) {
+        toast.error("Bệnh nhân chưa cập nhật email!");
+        return;
+      }
+
+      const doctorStr = localStorage.getItem("user");
+      const currentDoctor = doctorStr ? JSON.parse(doctorStr) : null;
+
+      const emailData = {
+        user_id: customer.id,
+        email: customer.email,
+        user_name: customer.name,
+        appointment_type: "Thông báo từ bác sĩ",
+        appointment_date: new Date().toLocaleDateString("vi-VN"),
+        appointment_time: new Date().toLocaleTimeString("vi-VN", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        doctor_name: currentDoctor?.name || doctorName,
+        notes: "Bác sĩ đang theo dõi tiến trình điều trị của bạn. Vui lòng kiểm tra lịch hẹn mới nhất trên hệ thống.",
+      };
+
+      await toast.promise(sendEmailNotification(emailData), {
+        loading: "Đang gửi email...",
+        success: "Đã gửi thông báo đến bệnh nhân!",
+        error: "Gửi email thất bại!",
+      });
+    } catch (error) {
+      console.error("Lỗi gửi email:", error);
+    }
+  };
+
+
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
       {/* Thẻ Profile */}
@@ -90,10 +130,23 @@ function PatientProfile({ protocol, customer }) {
                 {isActive ? "ĐANG ĐIỀU TRỊ" : "ĐÃ KẾT THÚC"}
               </Badge>
             </div>
-            <p className="text-sm font-bold text-slate-400">
-              {customer?.email || "Chưa cập nhật email"} -{" "}
-              {customer?.phone || "Chưa cập nhật SĐT"}
-            </p>
+            <div className="flex items-center justify-center gap-2 md:justify-start">
+              <p className="text-sm font-bold text-slate-400">
+                {customer?.email || "Chưa cập nhật email"} -{" "}
+                {customer?.phone || "Chưa cập nhật SĐT"}
+              </p>
+              {customer?.email && (
+                <Button
+                  onClick={handleSendQuickEmail}
+                  variant="ghost"
+                  className="h-6 w-6 cursor-pointer rounded-full p-0 text-blue-500 hover:bg-blue-50"
+                  title="Gửi thông báo nhanh"
+                >
+                  <HiOutlineBell size={14} />
+                </Button>
+              )}
+            </div>
+
             <div className="flex items-center gap-2 pt-2">
               <div className="flex items-center gap-1.5 rounded-full bg-slate-50 px-3 py-1 text-[10px] font-black text-(--primaryCustom) uppercase">
                 <HiOutlineHashtag size={14} /> ID:{" "}

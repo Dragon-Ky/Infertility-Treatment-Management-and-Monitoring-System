@@ -2,7 +2,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 
 const treatmentApi = axios.create({
-  baseURL: "http://127.0.0.1:8001/api/v1/treatment/",
+  baseURL: "http://127.0.0.1:8005/api/v1/treatment/",
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",

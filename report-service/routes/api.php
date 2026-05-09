@@ -5,15 +5,12 @@ use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\AdminController;
 use Illuminate\Support\Facades\Route;
 
-// API Routes
-
 // --- PUBLIC DASHBOARD ROUTES ---
 Route::get('/dashboard', [DashboardController::class, 'index']);
 Route::get('/dashboard/overview', [DashboardController::class, 'overview']);
 
-// Route nội bộ để các Service khác gọi qua yêu cầu xóa Cache
+// Route nội bộ
 Route::any('/clear-dashboard-cache', function () {
-    // Dùng cái này bén hơn Artisan::call nhiều, dọn sạch sành sanh Redis/File
     \Illuminate\Support\Facades\Cache::flush();
     return response()->json(['success' => true, 'message' => 'Cache cleared successfully']);
 });
@@ -21,10 +18,8 @@ Route::any('/clear-dashboard-cache', function () {
 Route::get('/reports/{id}/download', [ReportController::class, 'download']);
 
 
-// --- PROTECTED ROUTES (JWT Authentication) ---
+// --- PROTECTED ROUTES ---
 Route::middleware('role:Customer,Manager,Admin')->group(function () {
-
-    // --- REPORT ROUTES ---
     Route::get('/reports/treatment-success', [ReportController::class, 'treatmentSuccess']);
     Route::get('/reports/revenue', [ReportController::class, 'revenue']);
     Route::get('/reports/patients', [ReportController::class, 'patients']);
@@ -33,7 +28,7 @@ Route::middleware('role:Customer,Manager,Admin')->group(function () {
     Route::get('/reports/yearly/{year}', [ReportController::class, 'yearly']);
     Route::post('/reports/generate', [ReportController::class, 'generate']);
 
-    // --- ADMIN ROUTES ---
+    // Admin Sync Routes (Also registered in web.php for redundancy)
     Route::middleware('role:Admin,Manager')->group(function () {
         Route::get('/admin/sync-status', [AdminController::class, 'syncStatus']);
         Route::post('/admin/sync/trigger', [AdminController::class, 'triggerSync']);

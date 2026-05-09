@@ -1,6 +1,6 @@
 import treatmentApi from "@/utils/treatment-service/treatmentApi";
 
-export const getAllProtocols = async (params) => {
+export const getAllProtocols = async (params = {}) => {
   const response = await treatmentApi.get("/protocols", { params });
   return response.data;
 };

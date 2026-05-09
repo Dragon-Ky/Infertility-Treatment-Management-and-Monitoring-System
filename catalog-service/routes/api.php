@@ -68,6 +68,7 @@ Route::delete('/pricings/{id}', [ServicePricingController::class, 'destroy']);
 //  RATINGS
 // =========================
 Route::get('/doctors/{doctorId}/ratings', [RatingController::class, 'getByDoctor']);
+Route::get('/users/{userId}/ratings', [RatingController::class, 'getByUser']);
 Route::post('/ratings', [RatingController::class, 'store']);
 Route::put('/ratings/{id}', [RatingController::class, 'update']);
 Route::delete('/ratings/{id}', [RatingController::class, 'destroy']);

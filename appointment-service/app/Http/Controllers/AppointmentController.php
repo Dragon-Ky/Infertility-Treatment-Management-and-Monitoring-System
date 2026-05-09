@@ -125,6 +125,18 @@ class AppointmentController extends Controller
         return response()->json(['message' => 'Confirmed successfully', 'data' => $appointment]);
     }
 
+    public function complete($id)
+    {
+        $appointment = Appointment::find($id);
+        if (!$appointment) return response()->json(['message' => 'Not found'], 404);
+
+        $appointment->update(['status' => 'completed']);
+        $this->clearAppointmentCache($appointment->user_id, $appointment->doctor_id);
+        $this->rabbitmq->publish('appointment.completed', $appointment->toArray());
+
+        return response()->json(['message' => 'Completed successfully', 'data' => $appointment]);
+    }
+
     public function destroy($id)
     {
         $appointment = Appointment::find($id);

@@ -11,13 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-    Schema::create('doctors', function (Blueprint $table) {
-    $table->id();
-    $table->string('name');
-    $table->string('specialization');
-    $table->integer('experience');
-    $table->timestamps();
-});
+        Schema::table('doctors', function (Blueprint $table) {
+            if (!Schema::hasColumn('doctors', 'user_id')) {
+                $table->unsignedBigInteger('user_id')->nullable()->after('id');
+            }
+        });
     }
 
     /**
@@ -25,6 +23,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('doctors');
+        Schema::table('doctors', function (Blueprint $table) {
+            $table->dropColumn('user_id');
+        });
     }
 };
